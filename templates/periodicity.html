@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block body %}
+<script src="{{ url_for('static', filename='javascript/periodicity.js') }}"></script>
+<div class="row col-sm-12" id="plots" data-plots="{{ plot_names }}">
+    <div id="left" class="col-sm-12">
+        {% for plot_name in plot_names %}
+            <div id="1_{{ plot_name }}" data-plot-series="{{ series1[plot_name] }}"></div>
+            <div id="2_{{ plot_name }}" data-plot-series="{{ series2[plot_name] }}"></div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

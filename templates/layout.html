@@ -2,41 +2,37 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CRISPR analysis</title>
+    <title>B250 Lab Monitor</title>
 </head>
 <body>
-    {# custom style #}
-    <script src="{{ url_for('static', filename='libraries/jquery-3.3.1.min.js') }}"
-                crossorigin="anonymous">
-        </script>
     {# requirements for bootstrap #}
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='libraries/bootstrap.min.css') }}">
-        <script src="{{ url_for('static', filename='libraries/bootstrap.min.js') }}"
-                integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-                crossorigin="anonymous">
+        <script src="{{ url_for('static', filename='libraries/jquery-3.3.1.min.js') }}">
+        <script src="{{ url_for('static', filename='libraries/bootstrap.min.js') }}">
         </script>
     {# end of requirements for bootstrap #}
+    {# highcharts - common #}
+        <script src="{{ url_for('static', filename='libraries/highcharts.js') }}"></script>
+        <script src="{{ url_for('static', filename='libraries/exporting.js') }}"></script>
+        <script src="{{ url_for('static', filename='libraries/offline-exporting.js') }}"></script>
+    {# end of highcharts #}
 
     <div id="page" class="mx-4">
       <nav class="navbar navbar-light bg-light justify-content-center">
         <ul class="nav">
           <li class="nav-item">
-            <a class="nav-link" href="/">Reads per position</a>
+            <a class="nav-link" href="/reads_per_position/{{ dataset_id }}">Reads per position</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/periodicity/{{ dataset_id }}">Periodicity</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/periodicity_heatmap/{{ dataset_id }}">Periodicity Heatmap</a>
           </li>
         </ul>
       </nav>
         {% block body %}
-        <script src="{{ url_for('static', filename='libraries/highcharts.js') }}"></script>
-        <script src="{{ url_for('static', filename='libraries/exporting.js') }}"></script>
-        <script src="{{ url_for('static', filename='libraries/offline-exporting.js') }}"></script>
-        <script src="{{ url_for('static', filename='javascript/main.js') }}"></script>
-        <div id="plots" data-plots="{{ plot_names }}">
-            {% for plot_name in plot_names %}
-                <div id="{{ plot_name }}" class="col-sm-12" data-plot-series="{{ plot_series[plot_name] }}"
-                     data-categories="{{ categories[plot_name] }}"></div>
-            {% endfor %}
-        </div>
-      {% endblock %}
+        {% endblock %}
     </div>
 </body>
 </html>

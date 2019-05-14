@@ -8,10 +8,8 @@ $(document).ready(function() {
     for (i=0; i<plots.length; i++) {
         plot_name = plots[i];
         var plot_series = $('#'+plot_name).attr('data-plot-series').replace(/'/g, '"'); //");
-        console.log(plot_series);
         plot_series = JSON.parse(plot_series);
-        var categories = $('#'+plot_name).attr('data-categories').replace(/'/g, '"'); //");
-        categories = JSON.parse(categories);
+        $('#'+plot_name).removeAttr('data-plot-series')
         var chart = Highcharts.chart(plot_name, {
             chart: {
                 type: 'column',
@@ -22,7 +20,6 @@ $(document).ready(function() {
             },
             xAxis: {
                 title: {text: 'Position'},
-                categories: categories[plot_name],
             },
             yAxis: {
                 title: {
@@ -34,6 +31,7 @@ $(document).ready(function() {
                     lineWidth: 1,
                     turboThreshold: 10000,
                 },
+                    pointStart: 0,
             },
             tooltip: {
                 headerFormat: '<b>' + plot_name + '</b><br>',

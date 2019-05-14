@@ -1,0 +1,9 @@
+{% extends "layout.html" %}
+{% block body %}
+<script src="{{ url_for('static', filename='javascript/reads_per_position.js') }}"></script>
+<div id="plots" data-plots="{{ plot_names }}">
+    {% for plot_name in plot_names %}
+        <div id="{{ plot_name }}" class="col-sm-12" data-plot-series="{{ plot_series[plot_name] }}"></div>
+    {% endfor %}
+</div>
+{% endblock %}
