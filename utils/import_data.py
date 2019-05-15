@@ -14,7 +14,6 @@ def cli():
     pass
 
 BASE_DIR = "/Users/b250-admin/analysis/"
-rrna_positions_dir = "rrna_positions"
 
 @cli.command()
 @click.argument('project_id')
@@ -29,8 +28,7 @@ def reads_per_position(project_id):
     # to change, use redis.StrictRedis(host=HOST, port=PORT)
     # but we are not going to change this
 
-    # mongo_client = pymongo.MongoClient()
-    # projects = mongo_client.projects
+    rrna_positions_dir = "data_files/rrna_positions"
 
     rdb = redis.StrictRedis()
     projects = rdb.smembers('projects')
@@ -68,7 +66,7 @@ def periodicity(project_id):
     projects = rdb.smembers('projects')
     if project_id not in projects:
         rdb.sadd('projects', project_id)
-    path = os.path.join(BASE_DIR, project_id, 'periodicity/*_heatmap.txt')
+    path = os.path.join(BASE_DIR, project_id, 'data_files/periodicity/*_heatmap.txt')
     input_files = glob.glob(path)
     if not input_files:
         print("No input files found: {}".format(path))
@@ -87,7 +85,6 @@ def periodicity(project_id):
     if rdb.exists(key):
         rdb.delete(key)
     rdb.set(key, full_df.to_msgpack())
-
 
 
 if __name__ == '__main__':

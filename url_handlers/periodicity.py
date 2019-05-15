@@ -26,8 +26,8 @@ def get_periodicity(dataset_id):
         lengths = full_df['length'].unique()
         region1 = "Distance from start (nt)"
         region2 = "Distance from stop (nt)"
-        region1_df = full_df.loc[full_df['region'] == region1]
-        region2_df = full_df.loc[full_df['region'] == region2]
+        region1_df = full_df.loc[(full_df['sample'] == sample) & (full_df['region'] == region1)]
+        region2_df = full_df.loc[(full_df['sample'] == sample) & (full_df['region'] == region2)]
         for end in ends:
             series1 = []
             series2 = []
@@ -42,7 +42,7 @@ def get_periodicity(dataset_id):
                 })
                 df2 = region2_df.loc[(region2_df['length'] == length) & (region2_df['end'] == end)]
                 df2.columns = ['length', 'x', 'y', 'region', 'end', 'sample']
-                df2 = df2.sort_values(by=['length', 'x'])
+                df2 = df2.sort_values(by=['end', 'length', 'x'])
                 series2.append({
                     'name': 'Length: {} nt'.format(length),
                     'data': df2.to_dict('records')
