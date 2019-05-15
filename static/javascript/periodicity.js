@@ -1,19 +1,23 @@
 $(document).ready(function() {
 
     // initializing constants and removing attributes from html elements
-    var plots = $('#plots').attr('data-plots').replace(/'/g, '"'); //");
+    var plots = $('#plots').attr('data-plots');
+    plots = plots.replace(/'/g, '"'); //");
+
     if (plots.length != 0) {
         plots = JSON.parse(plots);
     }
     $('#plots').removeAttr('data-plots');
     for (i=0; i<plots.length; i++) {
         plot_name = plots[i];
-        var plot_series1 = $('#1_'+plot_name).attr('data-plot-series').replace(/'/g, '"').replace(/3"/g, "3'").replace(/5"/g, "5'");
-        var plot_series2 = $('#2_'+plot_name).attr('data-plot-series').replace(/'/g, '"').replace(/3"/g, "3'").replace(/5"/g, "5'");
+        var plot_series1 = $('#1_'+plot_name).attr('data-plot-series');
+        var plot_series2 = $('#2_'+plot_name).attr('data-plot-series');
+
+        plot_series1 = plot_series1.replace(/'/g, '"').replace(/3"/g, "3'").replace(/5"/g, "5'"); //');
+        plot_series2 = plot_series2.replace(/'/g, '"').replace(/3"/g, "3'").replace(/5"/g, "5'"); // ');
 
         $('#1_'+plot_name).removeAttr('data-plot-series');
         $('#2_'+plot_name).removeAttr('data-plot-series');
-        // ));
 
         plot_series1 = JSON.parse(plot_series1);
         plot_series2 = JSON.parse(plot_series2);
@@ -49,6 +53,7 @@ $(document).ready(function() {
             },
             series: plot_series1
         });
+
         chart2 = Highcharts.chart("2_"+plot_name, {
             chart: {
                 zoomType: 'xy'

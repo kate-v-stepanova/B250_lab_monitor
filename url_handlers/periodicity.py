@@ -9,18 +9,19 @@ periodicity = Blueprint('periodicity', __name__)
 @periodicity.route('/periodicity/<dataset_id>')
 def get_periodicity(dataset_id):
     from main import get_db
-    BASE_DIR = "/Users/b250-admin/analysis/"
-    path = os.path.join(BASE_DIR, dataset_id, 'periodicity/*_heatmap.txt')
-    input_files = glob.glob(path)
+    rdb = get_db()
+
+    result = rdb.get('{}_periodicity_heatmap'.format(dataset_id))
+    if not result:
+        return "No data for dataset {} found".format(dataset_id)
+
+    full_df = pd.read_msgpack(result)
+    samples = full_df['sample'].unique()
+
     plots1 = {}
     plots2 = {}
-    samples = []
-    categories = list(range(-25, 41))
-    for input_file in input_files:
-        filename = os.path.basename(input_file)
-        sample = filename.replace('_heatmap.txt', '').replace('.', '__')
-        samples.append(sample)
-        full_df = pd.read_csv(input_file, sep="\t")
+
+    for sample in samples:
         ends = full_df['end'].unique()
         lengths = full_df['length'].unique()
         region1 = "Distance from start (nt)"
@@ -33,15 +34,15 @@ def get_periodicity(dataset_id):
             for length in lengths:
                 df1 = region1_df.loc[(region1_df['length'] == length) & (region1_df['end'] == end)]
                 # x = distance, y = count
-                df1.columns = ['length', 'x', 'y', 'region', 'end']
-                df1['sample'] = sample
+                df1.columns = ['length', 'x', 'y', 'region', 'end', 'sample']
+                df1 = df1.sort_values(by=['end', 'length', 'x'])
                 series1.append({
                     'name': 'Length: {} nt'.format(length),
                     'data': df1.to_dict('records')
                 })
                 df2 = region2_df.loc[(region2_df['length'] == length) & (region2_df['end'] == end)]
-                df2.columns = ['length', 'x', 'y', 'region', 'end']
-                df2['sample'] = sample
+                df2.columns = ['length', 'x', 'y', 'region', 'end', 'sample']
+                df2 = df2.sort_values(by=['length', 'x'])
                 series2.append({
                     'name': 'Length: {} nt'.format(length),
                     'data': df2.to_dict('records')

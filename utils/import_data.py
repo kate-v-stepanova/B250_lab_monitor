@@ -61,5 +61,34 @@ def reads_per_position(project_id):
     rdb.set(key, full_df.to_msgpack())
 
 
+@cli.command()
+@click.argument('project_id')
+def periodicity(project_id):
+    rdb = redis.StrictRedis()
+    projects = rdb.smembers('projects')
+    if project_id not in projects:
+        rdb.sadd('projects', project_id)
+    path = os.path.join(BASE_DIR, project_id, 'periodicity/*_heatmap.txt')
+    input_files = glob.glob(path)
+    if not input_files:
+        print("No input files found: {}".format(path))
+        exit(0)
+    full_df = None
+    for input_file in input_files:
+        df = pd.read_csv(input_file, sep='\t')
+        samplename = os.path.basename(input_file).replace('_heatmap.txt', '').replace('.', '_')
+        df['sample'] = samplename
+        if full_df is None:
+            full_df = df
+        else:
+            full_df = full_df.append(df, ignore_index=True)
+    key = "{}_periodicity_heatmap".format(project_id)
+
+    if rdb.exists(key):
+        rdb.delete(key)
+    rdb.set(key, full_df.to_msgpack())
+
+
+
 if __name__ == '__main__':
     cli()
