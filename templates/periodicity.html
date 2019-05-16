@@ -3,8 +3,17 @@
 <script src="{{ url_for('static', filename='javascript/periodicity.js') }}"></script>
 <div id="plots" data-plots="{{ plot_names }}">
     {% for plot_name in plot_names %}
-        <div id="1_{{ plot_name }}" data-plot-series="{{ series1[plot_name] }}"></div>
-        <div id="2_{{ plot_name }}" data-plot-series="{{ series2[plot_name] }}"></div>
+    <p class="h4 text-center mt-4">{{ plot_name }}</p>
+    <div class="row">
+        <p class="h7 text-center col-sm-6">Distance from start (nt)</p>
+        <p class="h7 text-center col-sm-6">Distance from stop (nt)</p>
+        <div id="1_{{ plot_name }}" data-plot-series="{{ start_5p_plots[plot_name] }}" class="col-sm-6"></div>
+        <div id="2_{{ plot_name }}" data-plot-series="{{ stop_5p_plots[plot_name] }}" class="col-sm-6"></div>
+    </div>
+    <div class="row">
+        <div id="3_{{ plot_name }}" data-plot-series="{{ start_3p_plots[plot_name] }}" class="col-sm-6"></div>
+        <div id="4_{{ plot_name }}" data-plot-series="{{ stop_3p_plots[plot_name] }}" class="col-sm-6"></div>
+    </div>
     {% endfor %}
 </div>
 {% endblock %}

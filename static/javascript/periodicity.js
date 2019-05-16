@@ -9,35 +9,48 @@ $(document).ready(function() {
     }
     $('#plots').removeAttr('data-plots');
     for (i=0; i<plots.length; i++) {
-        plot_name = plots[i];
-        var plot_series1 = $('#1_'+plot_name).attr('data-plot-series');
-        var plot_series2 = $('#2_'+plot_name).attr('data-plot-series');
+        sample = plots[i];
+        var plot_series1 = $('#1_'+sample).attr('data-plot-series');
+        var plot_series2 = $('#2_'+sample).attr('data-plot-series');
+        var plot_series3 = $('#3_'+sample).attr('data-plot-series');
+        var plot_series4 = $('#4_'+sample).attr('data-plot-series');
 
         plot_series1 = plot_series1.replace(/'/g, '"').replace(/3"/g, "3'").replace(/5"/g, "5'"); //');
         plot_series2 = plot_series2.replace(/'/g, '"').replace(/3"/g, "3'").replace(/5"/g, "5'"); // ');
-
-        $('#1_'+plot_name).removeAttr('data-plot-series');
-        $('#2_'+plot_name).removeAttr('data-plot-series');
+        plot_series3 = plot_series3.replace(/'/g, '"').replace(/3"/g, "3'").replace(/5"/g, "5'"); // ');
+        plot_series4 = plot_series4.replace(/'/g, '"').replace(/3"/g, "3'").replace(/5"/g, "5'"); // ');
 
         plot_series1 = JSON.parse(plot_series1);
         plot_series2 = JSON.parse(plot_series2);
+        plot_series3 = JSON.parse(plot_series3);
+        plot_series4 = JSON.parse(plot_series4);
 
-        chart1 = Highcharts.chart("1_"+plot_name, {
+        $('#1_'+sample).removeAttr('data-plot-series');
+        $('#2_'+sample).removeAttr('data-plot-series');
+        $('#3_'+sample).removeAttr('data-plot-series');
+        $('#4_'+sample).removeAttr('data-plot-series');
+
+        chart1 = Highcharts.chart("1_"+sample, {
             chart: {
                 zoomType: 'xy'
             },
             title: {
-                text: plot_name + ". Distance from start (nt)",
+                text: "", //sample + ". Distance from start (nt)",
             },
-            yAxis: {
+            yAxis: [{
                 title: {
                     text: 'P-site'
                 }
-            },
+            }, {
+                className: "h5",
+                title: {
+                    text: "5' end",
+                }
+            }],
             legend: {
-                layout: 'vertical',
-                align: 'right',
-                verticalAlign: 'middle'
+                layout: 'horizontal',
+                align: 'center',
+                verticalAlign: 'bottom'
             },
             plotOptions: {
                 series: {
@@ -54,22 +67,61 @@ $(document).ready(function() {
             series: plot_series1
         });
 
-        chart2 = Highcharts.chart("2_"+plot_name, {
+        chart2 = Highcharts.chart("2_"+sample, {
             chart: {
                 zoomType: 'xy'
             },
             title: {
-                text: plot_name + ". Distance from stop (nt)",
+                text: "", //sample + ". Distance from stop (nt)",
             },
             yAxis: {
                 title: {
                     text: 'P-site'
                 }
             },
+
             legend: {
-                layout: 'vertical',
-                align: 'right',
-                verticalAlign: 'middle'
+                layout: 'horizontal',
+                align: 'center',
+                verticalAlign: 'bottom'
+            },
+            plotOptions: {
+                series: {
+                    label: {
+                        connectorAllowed: false
+                    },
+                    pointStart: -25,
+                },
+            },
+            tooltip: {
+                headerFormat: '<b>Sample: {point.sample}</b><br>',
+                pointFormat: 'Length: {point.length}<br>Distance: {point.x}<br>Count: {point.y}<br>Region: {point.region}<br>End: {point.end}',
+            },
+            series: plot_series2
+        });
+
+        chart3 = Highcharts.chart("3_"+sample, {
+            chart: {
+                zoomType: 'xy'
+            },
+            title: {
+                text: "", //sample + ". Distance from stop (nt)",
+            },
+
+            yAxis: [{
+                title: {
+                    text: 'P-site'
+                }
+            }, {
+                className: "h5",
+                title: {
+                    text: "3' end",
+                }
+            }],
+            legend: {
+                layout: 'horizontal',
+                align: 'center',
+                verticalAlign: 'bottom'
             },
 
             plotOptions: {
@@ -84,7 +136,41 @@ $(document).ready(function() {
                 headerFormat: '<b>Sample: {point.sample}</b><br>',
                 pointFormat: 'Length: {point.length}<br>Distance: {point.x}<br>Count: {point.y}<br>Region: {point.region}<br>End: {point.end}',
             },
-            series: plot_series2
+            series: plot_series3
+        });
+
+        chart2 = Highcharts.chart("4_"+sample, {
+            chart: {
+                zoomType: 'xy'
+            },
+            title: {
+                text: "", //sample + ". Distance from stop (nt)",
+            },
+            yAxis: {
+                title: {
+                    text: 'P-site'
+                }
+            },
+
+            legend: {
+                layout: 'horizontal',
+                align: 'center',
+                verticalAlign: 'bottom'
+            },
+
+            plotOptions: {
+                series: {
+                    label: {
+                        connectorAllowed: false
+                    },
+                    pointStart: -25,
+                },
+            },
+            tooltip: {
+                headerFormat: '<b>Sample: {point.sample}</b><br>',
+                pointFormat: 'Length: {point.length}<br>Distance: {point.x}<br>Count: {point.y}<br>Region: {point.region}<br>End: {point.end}',
+            },
+            series: plot_series4
         });
     }
 });

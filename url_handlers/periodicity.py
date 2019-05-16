@@ -1,6 +1,3 @@
-import os
-import glob
-
 import pandas as pd
 from flask import Blueprint, render_template
 
@@ -16,38 +13,59 @@ def get_periodicity(dataset_id):
         return "No data for dataset {} found".format(dataset_id)
 
     full_df = pd.read_msgpack(result)
-    samples = full_df['sample'].unique()
+    full_df = full_df.sort_values(by=['end', 'length', 'dist'])
+    full_df = full_df.replace({'sample': '.'}, '_') # javascript doesn't like dots
 
-    plots1 = {}
-    plots2 = {}
+    samples = list(full_df['sample'].unique())
+    lengths = list(full_df['length'].unique())
 
+    start_5p_plots = {}
+    start_3p_plots = {}
+    stop_5p_plots = {}
+    stop_3p_plots = {}
     for sample in samples:
-        ends = full_df['end'].unique()
-        lengths = full_df['length'].unique()
-        region1 = "Distance from start (nt)"
-        region2 = "Distance from stop (nt)"
-        region1_df = full_df.loc[(full_df['sample'] == sample) & (full_df['region'] == region1)]
-        region2_df = full_df.loc[(full_df['sample'] == sample) & (full_df['region'] == region2)]
-        for end in ends:
-            series1 = []
-            series2 = []
-            for length in lengths:
-                df1 = region1_df.loc[(region1_df['length'] == length) & (region1_df['end'] == end)]
-                # x = distance, y = count
-                df1.columns = ['length', 'x', 'y', 'region', 'end', 'sample']
-                df1 = df1.sort_values(by=['end', 'length', 'x'])
-                series1.append({
-                    'name': 'Length: {} nt'.format(length),
-                    'data': df1.to_dict('records')
-                })
-                df2 = region2_df.loc[(region2_df['length'] == length) & (region2_df['end'] == end)]
-                df2.columns = ['length', 'x', 'y', 'region', 'end', 'sample']
-                df2 = df2.sort_values(by=['end', 'length', 'x'])
-                series2.append({
-                    'name': 'Length: {} nt'.format(length),
-                    'data': df2.to_dict('records')
-                })
-            key = "{}_{}".format(sample, end.replace("' ", '_'))
-            plots1[key] = series1
-            plots2[key] = series2
-    return render_template("periodicity.html", plot_names=list(plots1.keys()), series1=plots1, series2=plots2, dataset_id=dataset_id)
+        # make 4 plots
+        start_5p_df = full_df.loc[(full_df['region'] == "Distance from start (nt)") &
+                                  (full_df['end'] == "5' end") &
+                                  (full_df['sample'] == sample)]
+        stop_5p_df = full_df.loc[(full_df['region'] == "Distance from stop (nt)") &
+                                  (full_df['end'] == "5' end") &
+                                  (full_df['sample'] == sample)]
+        start_3p_df = full_df.loc[(full_df['region'] == "Distance from start (nt)") &
+                                  (full_df['end'] == "3' end") &
+                                  (full_df['sample'] == sample)]
+        stop_3p_df = full_df.loc[(full_df['region'] == "Distance from stop (nt)") &
+                                  (full_df['end'] == "3' end") &
+                                  (full_df['sample'] == sample)]
+        # columns
+        start_5p_df.columns = ['length', 'x', 'y', 'region', 'end', 'sample']
+        stop_5p_df.columns = ['length', 'x', 'y', 'region', 'end', 'sample']
+        start_3p_df.columns = ['length', 'x', 'y', 'region', 'end', 'sample']
+        stop_3p_df.columns = ['length', 'x', 'y', 'region', 'end', 'sample']
+
+        # series per length
+        for length in lengths:
+            if sample not in start_5p_plots:
+                start_5p_plots[sample] = []
+                stop_5p_plots[sample] = []
+                start_3p_plots[sample] = []
+                stop_3p_plots[sample] = []
+            start_5p_plots[sample].append({
+                'name': "Length: {} nt".format(length),
+                'data': start_5p_df.loc[start_5p_df['length'] == length].to_dict('records')
+            })
+            stop_5p_plots[sample].append({
+                'name': "Length: {} nt".format(length),
+                'data': stop_5p_df.loc[stop_5p_df['length'] == length].to_dict('records')
+            })
+            start_3p_plots[sample].append({
+                'name': "Length: {} nt".format(length),
+                'data': start_3p_df.loc[start_3p_df['length'] == length].to_dict('records')
+            })
+            stop_3p_plots[sample].append({
+                'name': "Length: {} nt".format(length),
+                'data': stop_3p_df.loc[stop_3p_df['length'] == length].to_dict('records')
+            })
+
+    return render_template("periodicity.html", plot_names=samples, start_5p_plots=start_5p_plots,
+                           start_3p_plots=start_3p_plots, stop_5p_plots=stop_5p_plots, stop_3p_plots=stop_3p_plots)
