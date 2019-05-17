@@ -3,11 +3,13 @@ from flask_redis import FlaskRedis
 
 from url_handlers.reads_per_position import reads_per_position
 from url_handlers.periodicity import periodicity
+from url_handlers.periodicity_heatmap import periodicity_heatmap
 
 app = Flask(__name__)
 
 app.register_blueprint(reads_per_position)
 app.register_blueprint(periodicity)
+app.register_blueprint(periodicity_heatmap)
 
 
 # Database stuff

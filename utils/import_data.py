@@ -2,7 +2,6 @@ import os
 import glob
 
 import click
-import pymongo
 import redis
 import pandas as pd
 
@@ -17,7 +16,8 @@ BASE_DIR = "/Users/b250-admin/analysis/"
 
 @cli.command()
 @click.argument('project_id')
-def reads_per_position(project_id):
+@click.option('--remote-host')
+def reads_per_position(project_id, remote_host):
     """
     Reads the data from *_reads_per_position.txt files,
     aggregates all samples into one DataFrame,
@@ -28,14 +28,17 @@ def reads_per_position(project_id):
     # to change, use redis.StrictRedis(host=HOST, port=PORT)
     # but we are not going to change this
 
-    rrna_positions_dir = "data_files/rrna_positions"
+    if remote_host:
+        rdb = redis.StrictRedis(host="172.22.54.5")
+    else:
+        rdb = redis.StrictRedis()
 
-    rdb = redis.StrictRedis()
     projects = rdb.smembers('projects')
 
     if project_id not in projects:
         rdb.sadd('projects', project_id)
 
+    rrna_positions_dir = "data_files/rrna_positions"
     path = os.path.join(BASE_DIR, project_id, rrna_positions_dir, '*_reads_per_position.txt')
     input_files = glob.glob(path)
     if not input_files:
@@ -61,8 +64,12 @@ def reads_per_position(project_id):
 
 @cli.command()
 @click.argument('project_id')
-def periodicity(project_id):
-    rdb = redis.StrictRedis()
+@click.option('--remote-host')
+def periodicity(project_id, remote_host):
+    if remote_host:
+        rdb = redis.StrictRedis(host="172.22.54.5")
+    else:
+        rdb = redis.StrictRedis()
     projects = rdb.smembers('projects')
     if project_id not in projects:
         rdb.sadd('projects', project_id)

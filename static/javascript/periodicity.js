@@ -35,11 +35,11 @@ $(document).ready(function() {
                 zoomType: 'xy'
             },
             title: {
-                text: "", //sample + ". Distance from start (nt)",
+                text: "",
             },
             yAxis: [{
                 title: {
-                    text: 'P-site'
+                    text: 'Read Length'
                 }
             }, {
                 className: "h5",
@@ -72,11 +72,11 @@ $(document).ready(function() {
                 zoomType: 'xy'
             },
             title: {
-                text: "", //sample + ". Distance from stop (nt)",
+                text: "",
             },
             yAxis: {
                 title: {
-                    text: 'P-site'
+                    text: 'Read Length'
                 }
             },
 
@@ -105,12 +105,12 @@ $(document).ready(function() {
                 zoomType: 'xy'
             },
             title: {
-                text: "", //sample + ". Distance from stop (nt)",
+                text: "",
             },
 
             yAxis: [{
                 title: {
-                    text: 'P-site'
+                    text: 'Read Length'
                 }
             }, {
                 className: "h5",
@@ -144,11 +144,11 @@ $(document).ready(function() {
                 zoomType: 'xy'
             },
             title: {
-                text: "", //sample + ". Distance from stop (nt)",
+                text: "",
             },
             yAxis: {
                 title: {
-                    text: 'P-site'
+                    text: 'Read Length'
                 }
             },
 

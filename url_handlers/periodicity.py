@@ -67,5 +67,5 @@ def get_periodicity(dataset_id):
                 'data': stop_3p_df.loc[stop_3p_df['length'] == length].to_dict('records')
             })
 
-    return render_template("periodicity.html", plot_names=samples, start_5p_plots=start_5p_plots,
+    return render_template("periodicity.html", dataset_id=dataset_id, plot_names=samples, start_5p_plots=start_5p_plots,
                            start_3p_plots=start_3p_plots, stop_5p_plots=stop_5p_plots, stop_3p_plots=stop_3p_plots)
