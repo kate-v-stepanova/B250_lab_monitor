@@ -48,7 +48,10 @@ $(document).ready(function() {
                     text: "5' end",
                 }
             }],
-
+            tooltip: {
+                headerFormat: '',
+                pointFormat: '<b>{point.sample}</b><br>Length: {point.y}<br>Distance: {point.x}<br>Count: {point.value}<br>Region: {point.region}<br>End: {point.end}',
+            },
             colorAxis: {
                 stops: [
                     [0, 'white'],
@@ -86,7 +89,10 @@ $(document).ready(function() {
                 min: 22,
                 max: 31,
             },
-
+            tooltip: {
+                headerFormat: '',
+                pointFormat: '<b>{point.sample}</b><br>Length: {point.y}<br>Distance: {point.x}<br>Count: {point.value}<br>Region: {point.region}<br>End: {point.end}',
+            },
             colorAxis: {
                 stops: [
                     [0, 'white'],
@@ -132,7 +138,10 @@ $(document).ready(function() {
                     text: "3' end",
                 }
             }],
-
+            tooltip: {
+                headerFormat: '',
+                pointFormat: '<b>{point.sample}</b><br>Length: {point.y}<br>Distance: {point.x}<br>Count: {point.value}<br>Region: {point.region}<br>End: {point.end}',
+            },
             colorAxis: {
                 stops: [
                     [0, 'white'],
@@ -171,7 +180,10 @@ $(document).ready(function() {
                 max: 31,
                 reversed: true
             },
-
+            tooltip: {
+                headerFormat: '',
+                pointFormat: '<b>{point.sample}</b><br>Length: {point.y}<br>Distance: {point.x}<br>Count: {point.value}<br>Region: {point.region}<br>End: {point.end}',
+            },
             colorAxis: {
                 stops: [
                     [0, 'white'],

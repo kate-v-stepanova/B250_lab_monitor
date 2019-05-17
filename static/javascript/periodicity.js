@@ -61,8 +61,8 @@ $(document).ready(function() {
                 },
             },
             tooltip: {
-                headerFormat: '<b>Sample: {point.sample}</b><br>',
-                pointFormat: 'Length: {point.length}<br>Distance: {point.x}<br>Count: {point.y}<br>Region: {point.region}<br>End: {point.end}',
+                headerFormat: '',
+                pointFormat: '<b>{point.sample}</b><br>Length: {point.length}<br>Distance: {point.x}<br>Count: {point.y}<br>Region: {point.region}<br>End: {point.end}',
             },
             series: plot_series1
         });
@@ -94,8 +94,8 @@ $(document).ready(function() {
                 },
             },
             tooltip: {
-                headerFormat: '<b>Sample: {point.sample}</b><br>',
-                pointFormat: 'Length: {point.length}<br>Distance: {point.x}<br>Count: {point.y}<br>Region: {point.region}<br>End: {point.end}',
+                headerFormat: '',
+                pointFormat: '<b>{point.sample}</b><br>Length: {point.length}<br>Distance: {point.x}<br>Count: {point.y}<br>Region: {point.region}<br>End: {point.end}',
             },
             series: plot_series2
         });
@@ -133,8 +133,8 @@ $(document).ready(function() {
                 },
             },
             tooltip: {
-                headerFormat: '<b>Sample: {point.sample}</b><br>',
-                pointFormat: 'Length: {point.length}<br>Distance: {point.x}<br>Count: {point.y}<br>Region: {point.region}<br>End: {point.end}',
+                headerFormat: '',
+                pointFormat: '<b>{point.sample}</b><br>Length: {point.length}<br>Distance: {point.x}<br>Count: {point.y}<br>Region: {point.region}<br>End: {point.end}',
             },
             series: plot_series3
         });
@@ -167,8 +167,8 @@ $(document).ready(function() {
                 },
             },
             tooltip: {
-                headerFormat: '<b>Sample: {point.sample}</b><br>',
-                pointFormat: 'Length: {point.length}<br>Distance: {point.x}<br>Count: {point.y}<br>Region: {point.region}<br>End: {point.end}',
+                headerFormat: '',
+                pointFormat: '<b>{point.sample}</b><br>Length: {point.length}<br>Distance: {point.x}<br>Count: {point.y}<br>Region: {point.region}<br>End: {point.end}',
             },
             series: plot_series4
         });
