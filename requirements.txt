@@ -1,5 +1,7 @@
 flask
 pandas
-# pymongo
 Flask-Redis
 click
+flask_login
+passlib
+flask_session

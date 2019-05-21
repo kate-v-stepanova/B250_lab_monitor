@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+{% block navigation %}
+    {# Do not show navigation here #}
+{% endblock %}
+
+{% block body %}
+<script src="{{ url_for('static', filename='javascript/login.js') }}"></script>
+<div class="mt-5 align-middle">
+  <div class="row justify-content-center">
+    <div class="col col-md-offset-4 col-md-4">
+      {% if error %}
+      <div class="alert alert-danger" role="alert" id="error">
+        {{ error }}
+        <span class="close" aria-label="Close"> &times;</span>
+      </div>
+      {% endif %}
+      <form method="POST" enctype="multipart/form-data" action="{{ url_for('login_page.login') }}">
+        <h2 class="text-center">B250 Lab Website</h2>
+        <div class="form-group mt-3">
+          <label for="email">Email address</label>
+          <input type="email" class="form-control" id="email" name="email" placeholder="email@example.com">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+        </div>
+
+        <div class="form-group d-none" id="repeat_password">
+          <label for="repeat_password">Repeat password</label>
+          <input type="password" class="form-control" name="repeat_password" placeholder="Password">
+        </div>
+
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" id="remember_me">
+          <label class="form-check-label" for="remember_me">
+            Remember me
+          </label>
+        </div>
+          <button type="submit" class="btn btn-primary mt-3" id="login_btn"
+            data-toggle="tooltip" data-placement="bottom" title="Don't have an account? You know whom to contact">Login</button>
+        </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

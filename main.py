@@ -1,16 +1,36 @@
 from flask import Flask, g
 from flask_redis import FlaskRedis
+from flask_login import LoginManager
+from flask_session import Session
+
+from url_handlers.login import User
 
 from url_handlers.reads_per_position import reads_per_position
 from url_handlers.periodicity import periodicity
 from url_handlers.periodicity_heatmap import periodicity_heatmap
+from url_handlers.login import login_page
 
 app = Flask(__name__)
 
 app.register_blueprint(reads_per_position)
 app.register_blueprint(periodicity)
 app.register_blueprint(periodicity_heatmap)
+app.register_blueprint(login_page)
 
+app.secret_key = 'super secret key'
+app.config['SESSION_TYPE'] = 'filesystem'
+
+sess = Session(app)
+
+# login manager
+login_manager = LoginManager()
+login_manager.login_view = 'login_page.login'
+login_manager.init_app(app)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.get_by_id(user_id)
 
 # Database stuff
 def connect_db():

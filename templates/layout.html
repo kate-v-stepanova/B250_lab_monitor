@@ -7,7 +7,10 @@
 <body>
     {# requirements for bootstrap #}
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='libraries/bootstrap.min.css') }}">
+        <script src="{{ url_for('static', filename='libraries/popper.min.js') }}"></script> {# tooltip #}
         <script src="{{ url_for('static', filename='libraries/jquery-3.3.1.min.js') }}">
+        {# really, it is not enough to include it just once?? #}
+        <script src="{{ url_for('static', filename='libraries/popper.min.js') }}"></script>
         <script src="{{ url_for('static', filename='libraries/bootstrap.min.js') }}">
         </script>
     {# end of requirements for bootstrap #}
@@ -17,7 +20,9 @@
         <script src="{{ url_for('static', filename='libraries/offline-exporting.js') }}"></script>
     {# end of highcharts #}
 
+
     <div id="page" class="mx-4">
+    {% block navigation %}
       <nav class="navbar navbar-light bg-light justify-content-center">
         <ul class="nav">
           <li class="nav-item">
@@ -31,8 +36,9 @@
           </li>
         </ul>
       </nav>
-        {% block body %}
-        {% endblock %}
+    {% endblock %}
+    {% block body %}
+    {% endblock %}
     </div>
 </body>
 </html>
