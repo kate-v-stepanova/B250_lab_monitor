@@ -1,0 +1,57 @@
+{% extends 'layout.html' %}
+{% block body %}
+<link href="{{ url_for('static', filename='libraries/bootstrap-editable.css') }}" rel="stylesheet"/>
+<script src="{{ url_for('static', filename='libraries/fontawesome.js') }}"></script>
+<script src="{{ url_for('static', filename='libraries/bootstrap-editable.min.js') }}"></script>
+<script src="{{ url_for('static', filename='javascript/project_info.js') }}"></script>
+<div class="align-middle">
+    <div class="row justify-content-center">
+        <h3 class="text-center mt-2">Project Info</h3>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col col-sm-6">
+
+        <form>
+            <h5>Project details
+                {# <a href="#" id="edit_project" class="align-text-right">
+                    <i class="far fa-edit"></i>
+                </a> #}
+            </h5>
+            <table class="table table-bordered">
+                <tbody>
+                <tr><td class="w-25">ILSe ID</td><td class="w-50">{{ project_id }}</td></tr>
+                <tr><td>Project Name</td><td id="project_name">{{ project_info.get('project_name', '') }}</td></tr>
+                <tr><td>Project Description</td><td id="description">{{ project_info.get('description', '') }}Project of collaborators from Netherlands, prepared with the new protocol, to be demultiplexed and analysed with diricore. The aim is to see if there’s an overabundance of codons of specific amino acids in the A-site, which would suggest ribosome stalling to occur in these cells</td></tr>
+                <tr><td>Prepared by</td><td id="prepared_by">{{ project_info.get('prepared_by', '') }}</td></tr>
+                <tr><td>Protocol</td><td id="protocol">{{ project_info.get('protocol', '') }}</td></tr>
+                </tbody>
+            </table>
+            <button id="save_project" class="btn btn-primary btn-sm">Save Changes</button>
+        </form>
+        </div>
+        <div class="col col-sm-3">
+            <h5>Samples:</h5>
+            <ul class="list-group">
+            {% for sample in samples %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ sample.get('sample_id') }}
+                    <span class="badge badge-primary badge-pill">{{ sample.get('reads') }}</span>
+                </li>
+            {% endfor %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Noco
+                    <span class="badge badge-primary badge-pill">35M reads</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Roca
+                    <span class="badge badge-primary badge-pill">23M reads</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Control
+                    <span class="badge badge-primary badge-pill">31M reads</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

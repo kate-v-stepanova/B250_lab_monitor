@@ -1,0 +1,29 @@
+{% extends 'layout.html' %}
+{% block navigation %}
+<nav class="navbar navbar-light bg-light justify-content-center">
+    <ul class="nav">
+      <li class="nav-item">
+        <a class="nav-link" href="/">Home page</a>
+      </li>
+    </ul>
+</nav>
+{% endblock %}
+{% block body %}
+<div class="align-middle">
+  <div class="row justify-content-center">
+    <div class="col col-sm-6 list-group">
+    <h3 class="text-center">Current projects:</h3>
+    {% for project in projects %}
+      <a href="/project_info/{{ project }}" class="list-group-item list-group-item-action">
+        <div class="d-flex w-100 justify-content-between">
+          <h5 class="mb-1">{{ project }}</h5>
+          <small>Updated: 3 days ago</small>
+        </div>
+        <p class="mb-1">Here will be a description of the project</p>
+        <small>Prepared by Ali</small>
+      </a>
+    {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
