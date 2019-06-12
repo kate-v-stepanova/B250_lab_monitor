@@ -1,16 +1,18 @@
 import pandas as pd
 from flask import Blueprint, render_template
+from flask_login import login_required
 
 periodicity = Blueprint('periodicity', __name__)
 
-@periodicity.route('/periodicity/<dataset_id>')
-def get_periodicity(dataset_id):
+@periodicity.route('/periodicity/<project_id>')
+@login_required
+def get_periodicity(project_id):
     from main import get_db
     rdb = get_db()
 
-    result = rdb.get('{}_periodicity_heatmap'.format(dataset_id))
+    result = rdb.get('{}_periodicity_heatmap'.format(project_id))
     if not result:
-        return "No data for dataset {} found".format(dataset_id)
+        return "No data for dataset {} found".format(project_id)
 
     full_df = pd.read_msgpack(result)
     full_df = full_df.sort_values(by=['end', 'length', 'dist'])
@@ -67,5 +69,5 @@ def get_periodicity(dataset_id):
                 'data': stop_3p_df.loc[stop_3p_df['length'] == length].to_dict('records')
             })
 
-    return render_template("periodicity.html", dataset_id=dataset_id, plot_names=samples, start_5p_plots=start_5p_plots,
+    return render_template("periodicity.html", project_id=project_id, plot_names=samples, start_5p_plots=start_5p_plots,
                            start_3p_plots=start_3p_plots, stop_5p_plots=stop_5p_plots, stop_3p_plots=stop_3p_plots)

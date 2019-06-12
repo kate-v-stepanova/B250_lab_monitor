@@ -1,16 +1,18 @@
 import pandas as pd
 from flask import Blueprint, render_template
+from flask_login import login_required
 
 periodicity_heatmap = Blueprint('periodicity_heatmap', __name__)
 
-@periodicity_heatmap.route('/periodicity_heatmap/<dataset_id>')
-def get_periodicity_heatmap(dataset_id):
+@periodicity_heatmap.route('/periodicity_heatmap/<project_id>')
+@login_required
+def get_periodicity_heatmap(project_id):
     from main import get_db
     rdb = get_db()
 
-    result = rdb.get('{}_periodicity_heatmap'.format(dataset_id))
+    result = rdb.get('{}_periodicity_heatmap'.format(project_id))
     if not result:
-        return "No data for dataset {} found".format(dataset_id)
+        return "No data for dataset {} found".format(project_id)
 
     full_df = pd.read_msgpack(result)
     # columns: ['length', 'dist', 'count', 'region', 'end', 'sample']
@@ -46,5 +48,5 @@ def get_periodicity_heatmap(dataset_id):
         stop_5p_plots[sample] = stop_5p_df.to_dict('records')
         stop_3p_plots[sample] = stop_3p_df.to_dict('records')
 
-    return render_template("periodicity_heatmap.html", dataset_id=dataset_id, start_5p_plots=start_5p_plots,
+    return render_template("periodicity_heatmap.html", project_id=project_id, start_5p_plots=start_5p_plots,
                            stop_5p_plots=stop_5p_plots, start_3p_plots=start_3p_plots, stop_3p_plots=stop_3p_plots, samples=samples)

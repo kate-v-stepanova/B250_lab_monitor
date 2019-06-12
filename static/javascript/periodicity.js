@@ -139,7 +139,7 @@ $(document).ready(function() {
             series: plot_series3
         });
 
-        chart2 = Highcharts.chart("4_"+sample, {
+        chart4 = Highcharts.chart("4_"+sample, {
             chart: {
                 zoomType: 'xy'
             },

@@ -1,18 +1,20 @@
 from flask import Blueprint, render_template
+from flask_login import login_required
 import pandas as pd
 
 reads_per_position = Blueprint('reads_per_position', __name__)
 
-@reads_per_position.route('/reads_per_position/<dataset_id>')
-def get_reads_per_position(dataset_id):
+@reads_per_position.route('/reads_per_position/<project_id>')
+@login_required
+def get_reads_per_position(project_id):
     # this import has to be here
     from main import get_db
     rdb = get_db()
 
-    key = "{}_reads_per_position".format(dataset_id)
+    key = "{}_reads_per_position".format(project_id)
     binary_data = rdb.get(key)
     if binary_data is None:
-        return "NO DATA for project {}".format(dataset_id)
+        return "NO DATA for project {}".format(project_id)
     df = pd.read_msgpack(binary_data)
 
     plot_names = []
@@ -22,7 +24,6 @@ def get_reads_per_position(dataset_id):
         'RNA18S5': 1869,
         'RNA28S5': 5070,
         'RNA5-8S5': 153,
-#        'RNA5-8S5-2': 153,
     }
 
     genes = gene_lengths.keys()
@@ -53,4 +54,5 @@ def get_reads_per_position(dataset_id):
                 'name': plot_name,
                 'data': series_df.to_dict('records')
             }
-    return render_template("reads_per_position.html", plot_names=plot_names, plot_series=plot_series, categories=categories, dataset_id=dataset_id)
+    return render_template("reads_per_position.html", plot_names=plot_names, plot_series=plot_series,
+                           categories=categories, project_id=project_id)

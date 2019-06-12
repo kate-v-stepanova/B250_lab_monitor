@@ -9,6 +9,8 @@ from url_handlers.reads_per_position import reads_per_position
 from url_handlers.periodicity import periodicity
 from url_handlers.periodicity_heatmap import periodicity_heatmap
 from url_handlers.login import login_page
+from url_handlers.projects import projects_page
+from url_handlers.project_info import project_page
 
 app = Flask(__name__)
 
@@ -16,6 +18,8 @@ app.register_blueprint(reads_per_position)
 app.register_blueprint(periodicity)
 app.register_blueprint(periodicity_heatmap)
 app.register_blueprint(login_page)
+app.register_blueprint(projects_page)
+app.register_blueprint(project_page)
 
 app.secret_key = 'super secret key'
 app.config['SESSION_TYPE'] = 'filesystem'

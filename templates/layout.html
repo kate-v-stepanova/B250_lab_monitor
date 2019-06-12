@@ -8,9 +8,7 @@
     {# requirements for bootstrap #}
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='libraries/bootstrap.min.css') }}">
         <script src="{{ url_for('static', filename='libraries/popper.min.js') }}"></script> {# tooltip #}
-        <script src="{{ url_for('static', filename='libraries/jquery-3.3.1.min.js') }}">
-        {# really, it is not enough to include it just once?? #}
-        <script src="{{ url_for('static', filename='libraries/popper.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='libraries/jquery-3.3.1.min.js') }}"></script>
         <script src="{{ url_for('static', filename='libraries/bootstrap.min.js') }}">
         </script>
     {# end of requirements for bootstrap #}
@@ -26,13 +24,16 @@
       <nav class="navbar navbar-light bg-light justify-content-center">
         <ul class="nav">
           <li class="nav-item">
-            <a class="nav-link" href="/reads_per_position/{{ dataset_id }}">Reads per position</a>
+            <a class="nav-link" href="/">Home</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/periodicity/{{ dataset_id }}">Periodicity</a>
+            <a class="nav-link" href="/reads_per_position/{{ project_id }}">Reads per position</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/periodicity_heatmap/{{ dataset_id }}">Periodicity Heatmap</a>
+            <a class="nav-link" href="/periodicity/{{ project_id }}">Periodicity</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/periodicity_heatmap/{{ project_id }}">Periodicity Heatmap</a>
           </li>
         </ul>
       </nav>

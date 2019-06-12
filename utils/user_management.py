@@ -3,7 +3,7 @@ from passlib.hash import sha256_crypt
 import redis
 
 @click.group()
-@click.option('--host', default='172.22.54.5')
+@click.option('--host', default="localhost") #default='172.22.54.5')
 @click.option('--port', default='6379')
 @click.pass_context
 def cli(ctx, host, port):
@@ -15,7 +15,6 @@ def cli(ctx, host, port):
 @click.pass_context
 @click.argument('username')
 def delete_user(ctx, username):
-    print('delete user')
     host = ctx.obj.get('host')
     port = ctx.obj.get('port')
     rdb = redis.StrictRedis(host=host, port=port)

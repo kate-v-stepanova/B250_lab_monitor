@@ -17,7 +17,8 @@ class User(UserMixin):
     def get_user(self, email, password):
         from main import get_db
         rdb = get_db()
-        encrypted_password = rdb.hget('users', email) or ''
+        encrypted_password = rdb.hget('users', email) or b''
+        encrypted_password = encrypted_password.decode('utf-8')
         if encrypted_password == '':
             return None
         if sha256_crypt.verify(password, encrypted_password):
@@ -42,16 +43,19 @@ def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
+        print(email, password)
         user = User.get_user(email, password)
         if user is not None:
             login_user(user)
-            return render_template('login.html', error="Login successful")
+            return redirect('/')
         else:
             error = "Incorrect username or password"
-    return render_template('login.html', error=error)
+    return render_template('login.html',
+                           error=error)
 
 
 @login_page.route('/logout', methods=['GET', 'POST'])
 def logout():
     logout_user()
     return redirect('/login')
+
