@@ -32,5 +32,91 @@ $(document).ready(function() {
         }
     });
 
-    $('#description').parent().find('div.editable-input').parent().addClass('w-100');
+    $('#bc_split_stats').on('click', function() {
+        var stats = $(this).text();
+        var project_id = $(location).attr("href").split('/').pop();
+        var url = "/" + stats + "/" + project_id;
+        $.post(url, function(data) {
+            if (data.length != 0) {
+                Highcharts.chart('plot_div', {
+                    chart: {
+                        type: 'column',
+                    },
+                    title: {
+                        text: 'Reads per sample',
+                    },
+                    tooltip: {
+                        headerFormat: '',
+                        pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
+                    },
+                    plotOptions: {
+                        column: {
+                            stacking: 'normal',
+                            pointWidth: 60
+                        }
+                    },
+                    legend: {
+                        layout: 'vertical',
+                        align: 'right',
+                        verticalAlign: 'middle',
+                        itemMarginBottom: 5,
+                    },
+                    exporting: {
+                        filename: project_id + '_bc_split_stats'
+                    },
+                    series: JSON.parse(data)
+                });
+                $('#plot_div').removeClass('d-none');
+                $('#hide_plot').removeClass('d-none');
+            }
+        });
+    });
+
+    $('#cutadapt_stats').on('click', function() {
+        var stats = $(this).text();
+        var project_id = $(location).attr("href").split('/').pop();
+        var url = "/" + stats + "/" + project_id;
+        $.post(url, function(data) {
+            if (data.length != 0) {
+                Highcharts.chart('plot_div', {
+                    chart: {
+                        type: 'column'
+                    },
+                    title: {
+                        text: 'Cutadapt stats'
+                    },
+
+                    tooltip: {
+                        shared: true,
+                        headerFormat: ''
+                    },
+                    legend: {
+                        layout: 'vertical',
+                        align: 'right',
+                        verticalAlign: 'middle',
+                        itemMarginBottom: 15,
+                    },
+                    plotOptions: {
+                        column: {
+                            stacking: 'normal',
+                            pointWidth: 60,
+                        }
+                    },
+                    exporting: {
+                        filename: project_id + '_cutadapt_stats'
+                    },
+                    series: JSON.parse(data)
+                });
+                $('#plot_div').removeClass('d-none');
+                $('#hide_plot').removeClass('d-none');
+            }
+        });
+    });
+
+
+
+    $('#hide_plot').on('click', function() {
+        $(this).addClass('d-none');
+        $('#plot_div').addClass('d-none');
+    });
 });

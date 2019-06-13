@@ -12,14 +12,27 @@ def get_project_info(project_id):
     rdb = get_db()
     if request.method == "GET":
         rdb_data = rdb.get("project_info_{}".format(project_id))
+        project_info = {}
         if rdb_data is not None:
-            project_info = json.loads(rdb_data)
-            rdb_data = rdb.get("samples_info_{}".format(project_id))
-            if rdb_data is not None:
-                samples_df = pd.read_msgpack(rdb_data)
-                return render_template("project_info.html", project_id=project_id, project_info=project_info,
-                                       samples=samples_df.to_dict())
-            return render_template("project_info.html", project_id=project_id, project_info=project_info)
+            project_info = json.loads(rdb_data.decode('utf-8'))
+        samples_info = {}
+        rdb_data = rdb.get("sample_info_{}".format(project_id))
+        if rdb_data is not None:
+            samples_info = json.loads(rdb_data.decode('utf-8'))
+
+        available_stats = []
+        bc_split_stats = rdb.get('bc_split_{}'.format(project_id))
+        if bc_split_stats is not None:
+            available_stats.append('bc_split_stats')
+        cutadapt_stats = rdb.get('cutadapt_stats_{}'.format(project_id))
+        if cutadapt_stats is not None:
+            available_stats.append('cutadapt_stats')
+        diricore_stats = rdb.get('diricore_stats_{}'.format(project_id))
+        if diricore_stats is not None:
+            available_stats.append('diricore_stats')
+
+        return render_template("project_info.html", project_id=project_id, project_info=project_info,
+                                   samples=samples_info, available_stats=available_stats)
 
     else: # if request.method == "POST":
         rdb_data = rdb.get('project_info_{}'.format(project_id))
@@ -33,4 +46,38 @@ def get_project_info(project_id):
         rdb.set('project_info_{}'.format(project_id), json.dumps(project_info))
         return json.dumps(project_info)
 
-    return render_template("project_info.html", project_id=project_id)
+
+
+@project_page.route("/bc_split_stats/<project_id>", methods=["POST"])
+def get_bc_stats(project_id):
+    from main import get_db
+    rdb = get_db()
+    data = rdb.get('bc_split_{}'.format(project_id))
+    if data is not None:
+        df = pd.read_msgpack(data)
+        df = df[['Barcode', 'Count']][:-1]
+        series = []
+        for i, row in df.iterrows():
+            series.append({
+                'name': row['Barcode'],
+                'data': [row['Count']]
+            })
+        return json.dumps(series)
+
+    return ""
+
+@project_page.route("/cutadapt_stats/<project_id>", methods=["POST"])
+def get_cutadapt_stats(project_id):
+    from main import get_db
+    rdb = get_db()
+    data = rdb.get('cutadapt_stats_{}'.format(project_id))
+    if data is not None:
+        data = json.loads(data.decode('utf-8'))
+        data = data[1]
+        series = [
+            {'name': 'No adapter', 'data': [data['total'] - data['with_adapter']], 'color': '#ff6666'},
+            {'name': 'Passed', 'data': [data['passed']], 'color': '#53c68c'},
+            {'name': 'Too short', 'data': [data['too_short']], 'color': '#ff9966'}
+        ]
+        return json.dumps(series)
+    return ""
