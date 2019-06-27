@@ -38,6 +38,10 @@ $(document).ready(function() {
         var url = "/" + stats + "/" + project_id;
         $.post(url, function(data) {
             if (data.length != 0) {
+                data = JSON.parse(data);
+                console.log(data);
+                samples = data['samples'];
+                console.log(samples);
                 Highcharts.chart('plot_div', {
                     chart: {
                         type: 'column',
@@ -45,13 +49,16 @@ $(document).ready(function() {
                     title: {
                         text: 'Reads per sample',
                     },
+                    xAxis: {
+                        categories: samples,
+                    },
                     tooltip: {
                         headerFormat: '',
                         pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
                     },
                     plotOptions: {
                         column: {
-                            stacking: 'normal',
+                            stacking: 'percent',
                             pointWidth: 60
                         }
                     },
@@ -64,7 +71,7 @@ $(document).ready(function() {
                     exporting: {
                         filename: project_id + '_bc_split_stats'
                     },
-                    series: JSON.parse(data)
+                    series: data['series']
                 });
                 $('#plot_div').removeClass('d-none');
                 $('#hide_plot').removeClass('d-none');
@@ -113,7 +120,99 @@ $(document).ready(function() {
         });
     });
 
+    $('#transcript_regions').on('click', function() {
+        var project_id = $(location).attr('href').split('/').pop();
+        var url = "/transcript_regions/" + project_id;
+        $.post(url, function(data) {
+            if (data.length != 0) {
+                data = JSON.parse(data);
+                series = data["series"];
+                samples = data["samples"];
+                Highcharts.chart('plot_div', {
+                    chart: {
+                        type: "column",
+                    },
+                    colors: ["#b3d9ff", "#538cc6", "#0077b3", "#204060"],
+                    title: {
+                        text: 'Distribution of reads in transcript regions'
+                    },
 
+                    xAxis: {
+                        categories: samples
+                    },
+                    plotOptions: {
+                        column: {
+                            stacking: 'percent',
+                            pointWidth: 40,
+                        },
+                    },
+                    tooltip: {
+                        shared: true,
+                        headerFormat: '<b>{point.key}</b><br>'
+                    },
+                    exporting: {
+                        filename: project_id + "_transcript_regions"
+                    },
+                    series: series,
+                });
+
+                $('#plot_div').removeClass('d-none');
+                $('#hide_plot').removeClass('d-none');
+            }
+        });
+    });
+
+
+    $('#diricore_stats').on('click', function() {
+        var project_id = $(location).attr('href').split('/').pop();
+        var url = "/diricore_stats/" + project_id;
+        $.post(url, function(data) {
+            if (data.length != 0) {
+                console.log(data);
+                data = JSON.parse(data);
+                console.log(data)
+                series = data["series"];
+                samples = data["samples"];
+                console.log(series);
+                Highcharts.chart('plot_div', {
+                    chart: {
+                        type: "bar",
+                    },
+                    title: {
+                        text: 'Diricore stats'
+                    },
+
+                    xAxis: {
+                        categories: samples
+                    },
+//                    plotOptions: {
+//                        column: {
+//                            stacking: 'normal',
+//                            pointWidth: 40,
+//                        },
+//                    },
+//
+                    plotOptions: {
+                        series: {
+                            stacking: 'normal'
+                        }
+                    },
+                    tooltip: {
+                        shared: true,
+                        headerFormat: '<b>{point.key}</b><br>Total: {point.total}<br>',
+
+                    },
+                    exporting: {
+                        filename: project_id + "_diricore_stats"
+                    },
+                    series: series,
+                });
+
+                $('#plot_div').removeClass('d-none');
+                $('#hide_plot').removeClass('d-none');
+            }
+        })
+    });
 
     $('#hide_plot').on('click', function() {
         $(this).addClass('d-none');
