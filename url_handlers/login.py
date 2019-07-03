@@ -43,7 +43,6 @@ def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-        print(email, password)
         user = User.get_user(email, password)
         if user is not None:
             login_user(user)
