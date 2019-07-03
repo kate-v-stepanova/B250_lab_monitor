@@ -16,11 +16,13 @@
     {% for project in projects %}
       <a href="/project_info/{{ project }}" class="list-group-item list-group-item-action">
         <div class="d-flex w-100 justify-content-between">
-          <h5 class="mb-1">{{ project }}</h5>
-          <small>Updated: 3 days ago</small>
+          <h5 class="mb-1">{{ project_info.get(project, {}).get('project_name', "No name") }}</h5>
+          <small>Prepared by {{ project_info.get(project, {}).get('prepared_by') }}</small>
         </div>
-        <p class="mb-1">Here will be a description of the project</p>
-        <small>Prepared by Ali</small>
+        <div class="d-flex w-100">
+          <h6>{{ project }}</h6>
+        </div>
+        <p class="mb-1">{{ project_info.get(project, {}).get('description', "Empty description") }}</p>
       </a>
     {% endfor %}
     </div>

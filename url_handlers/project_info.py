@@ -5,6 +5,7 @@ import json
 
 project_page = Blueprint('project_page', __name__)
 
+
 @project_page.route('/project_info/<project_id>', methods=['GET', 'POST'])
 @login_required
 def get_project_info(project_id):
@@ -56,13 +57,10 @@ def get_bc_stats(project_id):
     from main import get_db
     rdb = get_db()
     data = rdb.get('bc_split_{}'.format(project_id))
-    print(data)
     if data is not None:
         df = pd.read_msgpack(data)
         df = df[['Barcode', 'Count']][:-1]
-        print(df)
         samples = sorted(list(df['Barcode'].unique()))
-        print(samples)
         result = {
             'samples': samples
         }
@@ -72,7 +70,6 @@ def get_bc_stats(project_id):
                 'name': row['Barcode'],
                 'data': [row['Count']]
             })
-        print(series)
         result['series'] = series
         return json.dumps(result)
 
@@ -141,11 +138,7 @@ def get_diricore_stats(project_id):
         result = {
             'samples': samples,
         }
-        stats = ["Unique_HQ", "HQ_with_duplicates", "No_HQ", "tRNA_reads", "rRNA_reads"]
         stats = ["rRNA_reads", "tRNA_reads", "No_HQ", "HQ_with_duplicates", "Unique_HQ"]
-        # stats = list(full_df.columns)
-        # stats.remove('sample')
-        # stats.remove('Initial_reads')
         series = []
         for stat in stats:
             data = []
