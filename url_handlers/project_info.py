@@ -35,8 +35,11 @@ def get_project_info(project_id):
         if transcript_regions is not None:
             available_stats.append('transcript_regions')
 
+        ucsc_link = rdb.get('ucsc_link_{}'.format(project_id))
+        ucsc_link = ucsc_link.decode('utf-8') if ucsc_link else None
+
         return render_template("project_info.html", project_id=project_id, project_info=project_info,
-                                   samples=samples_info, available_stats=available_stats)
+                                   samples=samples_info, available_stats=available_stats, ucsc_link=ucsc_link)
 
     else: # if request.method == "POST":
         rdb_data = rdb.get('project_info_{}'.format(project_id))
