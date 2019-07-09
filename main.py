@@ -11,6 +11,7 @@ from url_handlers.periodicity_heatmap import periodicity_heatmap
 from url_handlers.login import login_page
 from url_handlers.projects import projects_page
 from url_handlers.project_info import project_page
+from url_handlers.ma_plot import ma_plot
 
 app = Flask(__name__)
 
@@ -20,6 +21,7 @@ app.register_blueprint(periodicity_heatmap)
 app.register_blueprint(login_page)
 app.register_blueprint(projects_page)
 app.register_blueprint(project_page)
+app.register_blueprint(ma_plot)
 
 app.secret_key = 'super secret key'
 app.config['SESSION_TYPE'] = 'filesystem'

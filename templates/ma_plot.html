@@ -1,0 +1,55 @@
+{% extends 'layout.html' %}
+{% block body %}
+<script src="{{ url_for('static', filename='javascript/ma_plot.js') }}"></script>
+
+{# ERROR MESSAGE #}
+{% if error %}
+<div class="alert alert-danger mt-2" role="alert" id="error_div">
+  <div class="row">
+    <div class="col col-xs-10" id="error_messages">{{ error }}</div>
+    <div class="col col-sm-2"><span class="close" aria-label="Close"> &times;</span></div>
+  </div>
+</div>
+{% endif %}
+
+{% if not no_data %}
+<form action="" method="POST">
+  <label for="contrast">Select contrasts:</label>
+  <select name="contrast" class="custom-select" id="contrast">
+    <option value="select_contrast" {% if not selected_contrast %}selected{% endif %}>
+        Select contrast..</option>
+    {% for contrast in contrasts %}
+      <option value="{{ contrast }}" {% if contrast==selected_contrast %}selected{% endif %}>{{ contrast }}</option>
+    {% endfor %}
+  </select>
+
+    {# P VALUE #}
+    <div class="row mt-2">
+        <div class="col-sm-2">
+            <label for="pval">P value:</label>
+        </div>
+        <div class="col-sm-2">
+            <input class="form-control" type="number" name="pval" min="0.0" step="0.01" id="pval"
+                value="{% if pval %}{{ pval }}{% else %}0.05{% endif %}">
+        </div>
+    </div>
+
+    {# FOLD CHANGE #}
+    <div class="row mt-2">
+        <div class="col-sm-2">
+            <label for="fc">Fold Change:</label>
+        </div>
+        <div class="col-sm-2">
+            <input class="form-control" type="number" name="fc" min="0" step="0.1" id="fc"
+                value="{% if fc %}{{ fc }}{% else %}4{% endif %}">
+        </div>
+    </div>
+
+  <button class="btn btn-outline-primary mt-4" type="submit" id="plot_button">Plot data</button>
+  {% if plot_series %}
+    <div class="ma_plot" data-contrast="{{ selected_contrast }}" data-series="{{ plot_series }}" id="ma_plot">
+    </div>
+  {% endif %}
+</form>
+{% endif %}
+{% endblock %}
