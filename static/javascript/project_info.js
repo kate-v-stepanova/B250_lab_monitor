@@ -39,9 +39,7 @@ $(document).ready(function() {
         $.post(url, function(data) {
             if (data.length != 0) {
                 data = JSON.parse(data);
-                console.log(data);
                 samples = data['samples'];
-                console.log(samples);
                 Highcharts.chart('plot_div', {
                     chart: {
                         type: 'column',
@@ -185,13 +183,6 @@ $(document).ready(function() {
                     xAxis: {
                         categories: samples
                     },
-//                    plotOptions: {
-//                        column: {
-//                            stacking: 'normal',
-//                            pointWidth: 40,
-//                        },
-//                    },
-//
                     plotOptions: {
                         series: {
                             stacking: 'normal'
