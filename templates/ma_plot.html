@@ -23,31 +23,68 @@
     {% endfor %}
   </select>
 
-    {# P VALUE #}
-    <div class="row mt-2">
-        <div class="col-sm-2">
-            <label for="pval">P value:</label>
-        </div>
-        <div class="col-sm-2">
-            <input class="form-control" type="number" name="pval" min="0.0" step="0.01" id="pval"
-                value="{% if pval %}{{ pval }}{% else %}0.05{% endif %}">
-        </div>
+    {# APPLY FILTERS #}
+    <div class="form-check mt-4">
+        <input class="form-check-input" type="checkbox" value="true" id="apply_filters" name="apply_filters"
+           {% if apply_filters %}checked{% endif %}>
+        <label class="form-check-label" for="apply_filters">Apply filters</label>
     </div>
 
-    {# FOLD CHANGE #}
-    <div class="row mt-2">
-        <div class="col-sm-2">
-            <label for="fc">Fold Change:</label>
-        </div>
-        <div class="col-sm-2">
-            <input class="form-control" type="number" name="fc" min="0" step="0.1" id="fc"
-                value="{% if fc %}{{ fc }}{% else %}4{% endif %}">
+    {# FILTERS #}
+    <div class="list-group mt-2 {% if not apply_filters %}d-none{% endif %}" id="data_filters">
+        <div class="list-group-item">
+            {# P VALUE #}
+            <div class="row mt-2">
+                <div class="col-sm-2">
+                    <label for="pval"data-toggle="tooltip" data-placement="bottom" title="Leave empty to ignore this filter">
+                        P value:</label>
+                </div>
+                <div class="col-sm-2">
+                    <input class="form-control" type="number" name="pval" min="0.0" step="0.01" id="pval"
+                        value="{% if filters %}{{ filters.get('pval') }}{% else %}0.05{% endif %}"
+                        data-toggle="tooltip" data-placement="bottom" title="Leave empty to ignore this filter">
+                </div>
+            </div>
+            {# FOLD CHANGE #}
+            <div class="row mt-2">
+                <div class="col-sm-2">
+                    <label for="fc"data-toggle="tooltip" data-placement="bottom" title="Leave empty to ignore this filter">
+                        Fold Change:</label>
+                </div>
+                <div class="col-sm-2">
+                    <input class="form-control" type="number" name="fc" min="0" step="0.1" id="fc"
+                        value="{% if filters %}{{ filters.get('fc') }}{% else %}4{% endif %}"
+                        data-toggle="tooltip" data-placement="bottom" title="Leave empty to ignore this filter">
+                </div>
+            </div>
+            {# Min counts #}
+            <div class="row mt-2">
+                <div class="col-sm-2">
+                    <label for="min_counts">Min counts:</label>
+                </div>
+                <div class="col-sm-2">
+                    <input class="form-control" type="number" name="min_counts" min="0" step="1" id="min_counts"
+                        value="{% if filters %}{{ filters.get('min_counts') }}{% else %}0{% endif %}">
+                </div>
+            </div>
+            {# Max counts #}
+            <div class="row mt-2">
+                <div class="col-sm-2">
+                    <label for="max_counts"data-toggle="tooltip" data-placement="bottom" title="Leave empty to ignore this filter">
+                        Max counts:</label>
+                </div>
+                <div class="col-sm-2">
+                    <input class="form-control" type="number" name="max_counts" min="0" step="1"
+                    id="max_counts" value="{% if filters %}{{ filters.get('max_counts') }}{% endif %}"
+                    data-toggle="tooltip" data-placement="bottom" title="Leave empty to ignore this filter">
+                </div>
+            </div>
         </div>
     </div>
-
   <button class="btn btn-outline-primary mt-4" type="submit" id="plot_button">Plot data</button>
   {% if plot_series %}
-    <div class="ma_plot" data-contrast="{{ selected_contrast }}" data-series="{{ plot_series }}" id="ma_plot">
+    <div data-contrast="{{ selected_contrast }}" data-series="{{ plot_series }}" data-genes="{{ genes }}" id="ma_plot"
+            data-ymax="{{ filters.get('fc') }}" data-xmax="{{ filters.get('max_counts') }}" data-filters="{{ apply_filters }}">
     </div>
   {% endif %}
 </form>
