@@ -41,7 +41,7 @@ def get_ma_plot(project_id):
     if apply_filters:
         if pval:
             pval = float(pval)
-            df = df.loc[df["pvalue"] >= pval]
+            df = df.loc[df["pvalue"] <= pval]
         if fc:
             fc = float(fc)
             df = df.loc[(df["y"] <= fc) & (df["y"] >= -1 * fc)]
