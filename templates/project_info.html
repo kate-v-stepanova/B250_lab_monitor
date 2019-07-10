@@ -30,7 +30,7 @@
                 <tr><td>Other analysis</td>
                     <td>
                         {% for analysis in analysis_list %}
-                         <a href="{{ analysis.get('link') }}" target="_blank">{{ analysis.get('name') }}</a>
+                         <a class="mr-3" href="{{ analysis.get('link') }}" target="_blank">{{ analysis.get('name') }}</a>
                         {% endfor %}
                     </td>
                 </tr>
