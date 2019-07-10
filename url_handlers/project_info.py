@@ -43,29 +43,30 @@ def get_project_info(project_id):
         if periodicity:
             analysis_list.append({
                 'name': 'Periodicity',
-                'link': "{}/periodicity/{}".format(request.base_url, project_id)
+                'link': "{}periodicity/{}".format(request.url_root, project_id)
             })
             analysis_list.append({
                 'name': 'Periodicity Heatmap',
-                'link': "{}/periodicity_heatmap/{}".format(request.base_url, project_id)
+                'link': "{}periodicity_heatmap/{}".format(request.url_root, project_id)
             })
 
         reads_per_position = rdb.get("{}_reads_per_position".format(project_id))
         if reads_per_position:
             analysis_list.append({
                 'name': 'Reads per position',
-                'link': "{}/reads_per_position/{}".format(request.base_url, project_id)
+                'link': "{}reads_per_position/{}".format(request.url_root, project_id)
             })
 
         ma_plot = rdb.smembers("contrasts_{}".format(project_id))
+
         if ma_plot:
             analysis_list.append({
                 'name': "MA plot",
-                'link': "{}/ma_plot/{}".format(request.base_url, project_id)
+                'link': "{}ma_plot/{}".format(request.url_root, project_id)
             })
 
         return render_template("project_info.html", project_id=project_id, project_info=project_info,
-                                   samples=samples_info, available_stats=available_stats, ucsc_link=ucsc_link,
+                                samples=samples_info, available_stats=available_stats, ucsc_link=ucsc_link,
                                analysis_list=analysis_list)
 
     else: # if request.method == "POST":
