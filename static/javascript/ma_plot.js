@@ -42,9 +42,15 @@ $(document).ready(function() {
             }
         }
         if (filters == "True") {
-            x_axis["max"] = parseInt(xmax);
-            y_axis["min"] = parseFloat(ymin);
-            y_axis["max"] = parseFloat(ymax);
+            if (xmax != "") {
+                x_axis["max"] = parseInt(xmax);
+            }
+            if (ymin != "") {
+                y_axis["min"] = parseFloat(ymin);
+            }
+            if (ymax != "") {
+                y_axis["max"] = parseFloat(ymax);
+            }
         }
         var ch = Highcharts.chart('ma_plot', {
             chart: {
@@ -64,7 +70,7 @@ $(document).ready(function() {
                     tooltip: {
                         headerFormat: '',
                         pointFormat: '<b>Counts: </b>{point.x:.0f}<br><b>Log2 fc: </b>{point.y:.2f}<br><b>p value: </b>' +
-                            '{point.pvalue:.2f}<br><b>Transcript: </b>{point.transcript}'
+                            '{point.pvalue:.2f}<br><b>Gene name: </b>{point.gene_name}<br><b>Gene ID: </b>{point.gene_id}'
                     }
                 },
                 series: {
