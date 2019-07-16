@@ -15,10 +15,10 @@ $(document).ready(function() {
         var plot_series3 = $('#3_'+sample).attr('data-plot-series');
         var plot_series4 = $('#4_'+sample).attr('data-plot-series');
 
-        plot_series1 = plot_series1.replace(/'/g, '"').replace(/3"/g, "3'").replace(/5"/g, "5'"); //');
-        plot_series2 = plot_series2.replace(/'/g, '"').replace(/3"/g, "3'").replace(/5"/g, "5'"); // ');
-        plot_series3 = plot_series3.replace(/'/g, '"').replace(/3"/g, "3'").replace(/5"/g, "5'"); // ');
-        plot_series4 = plot_series4.replace(/'/g, '"').replace(/3"/g, "3'").replace(/5"/g, "5'"); // ');
+        plot_series1 = plot_series1.replace(/'/g, '"'); //");
+        plot_series2 = plot_series2.replace(/'/g, '"'); //");
+        plot_series3 = plot_series3.replace(/'/g, '"'); //");
+        plot_series4 = plot_series4.replace(/'/g, '"'); //");
 
         plot_series1 = JSON.parse(plot_series1);
         plot_series2 = JSON.parse(plot_series2);

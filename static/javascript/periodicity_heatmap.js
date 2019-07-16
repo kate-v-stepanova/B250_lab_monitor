@@ -6,16 +6,16 @@ $(document).ready(function() {
         sample = samples[i];
         // get 4 plots
         var start_5p_data = $('#'+sample+"_start_5p").attr('data-plot-series');
-        start_5p_data = start_5p_data.replace(/'/g, '"').replace(/3"/g, "3'").replace(/5"/g, "5'"); //")
+        start_5p_data = start_5p_data.replace(/'/g, '"'); //");
         start_5p_data = JSON.parse(start_5p_data);
         var stop_5p_data = $('#'+sample+"_stop_5p").attr('data-plot-series');
-        stop_5p_data = stop_5p_data.replace(/'/g, '"').replace(/3"/g, "3'").replace(/5"/g, "5'"); //")
+        stop_5p_data = stop_5p_data.replace(/'/g, '"'); //");
         stop_5p_data = JSON.parse(stop_5p_data);
         var start_3p_data = $('#'+sample+"_start_3p").attr('data-plot-series');
-        start_3p_data = start_3p_data.replace(/'/g, '"').replace(/3"/g, "3'").replace(/5"/g, "5'"); //"
+        start_3p_data = start_3p_data.replace(/'/g, '"'); //");
         start_3p_data = JSON.parse(start_3p_data);
         var stop_3p_data = $('#'+sample+"_stop_3p").attr('data-plot-series');
-        stop_3p_data = stop_3p_data.replace(/'/g, '"').replace(/3"/g, "3'").replace(/5"/g, "5'"); //"'
+        stop_3p_data = stop_3p_data.replace(/'/g, '"'); //");
         stop_3p_data = JSON.parse(stop_3p_data);
         // delete attributes
         $('#'+sample+"_start_5p").removeAttr('data-plot-series');

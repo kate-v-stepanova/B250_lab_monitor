@@ -17,6 +17,7 @@ def get_periodicity(project_id):
     full_df = pd.read_msgpack(result)
     full_df = full_df.sort_values(by=['end', 'length', 'dist'])
     full_df = full_df.replace({'sample': '.'}, '_') # javascript doesn't like dots
+    full_df['end'] = full_df['end'].str.replace("' ", 'p ') # javascript doesn't like single quotes
 
     samples = list(full_df['sample'].unique())
     lengths = list(full_df['length'].unique())
@@ -28,16 +29,16 @@ def get_periodicity(project_id):
     for sample in samples:
         # make 4 plots
         start_5p_df = full_df.loc[(full_df['region'] == "Distance from start (nt)") &
-                                  (full_df['end'] == "5' end") &
+                                  (full_df['end'] == "5p end") &
                                   (full_df['sample'] == sample)]
         stop_5p_df = full_df.loc[(full_df['region'] == "Distance from stop (nt)") &
-                                  (full_df['end'] == "5' end") &
+                                  (full_df['end'] == "5p end") &
                                   (full_df['sample'] == sample)]
         start_3p_df = full_df.loc[(full_df['region'] == "Distance from start (nt)") &
-                                  (full_df['end'] == "3' end") &
+                                  (full_df['end'] == "3p end") &
                                   (full_df['sample'] == sample)]
         stop_3p_df = full_df.loc[(full_df['region'] == "Distance from stop (nt)") &
-                                  (full_df['end'] == "3' end") &
+                                  (full_df['end'] == "3p end") &
                                   (full_df['sample'] == sample)]
         # columns
         start_5p_df.columns = ['length', 'x', 'y', 'region', 'end', 'sample']
