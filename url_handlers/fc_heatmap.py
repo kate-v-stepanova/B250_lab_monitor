@@ -1,7 +1,6 @@
 import pandas as pd
 from flask import Blueprint, render_template, request
 from flask_login import login_required
-from sklearn.cluster import KMeans
 
 fc_heatmap = Blueprint('fc_heatmap', __name__)
 
