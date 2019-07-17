@@ -21,6 +21,7 @@ def get_project_info(project_id):
         if rdb_data is not None:
             samples_info = json.loads(rdb_data.decode('utf-8'))
 
+        # BASIC STATS
         available_stats = []
         bc_split_stats = rdb.get('bc_split_{}'.format(project_id))
         if bc_split_stats is not None:
@@ -38,6 +39,7 @@ def get_project_info(project_id):
         ucsc_link = rdb.get('ucsc_link_{}'.format(project_id))
         ucsc_link = ucsc_link.decode('utf-8') if ucsc_link else None
 
+        # OTHER ANALYSIS
         analysis_list = []
         periodicity = rdb.get('{}_periodicity_heatmap'.format(project_id))
         if periodicity:
@@ -58,11 +60,16 @@ def get_project_info(project_id):
             })
 
         ma_plot = rdb.smembers("contrasts_{}".format(project_id))
-
         if ma_plot:
             analysis_list.append({
                 'name': "MA plot",
                 'link': "{}ma_plot/{}".format(request.url_root, project_id)
+            })
+        fc_heatmap = rdb.exists("fc_coding_{}".format(project_id))
+        if fc_heatmap:
+            analysis_list.append({
+                'name': "FC_heatmap",
+                'link': "{}fc_heatmap/{}".format(request.url_root, project_id)
             })
 
         return render_template("project_info.html", project_id=project_id, project_info=project_info,
@@ -91,6 +98,7 @@ def get_bc_stats(project_id):
     if data is not None:
         df = pd.read_msgpack(data)
         df = df[['Barcode', 'Count']][:-1]
+        total = int(df["Count"].sum())
         samples = sorted(list(df['Barcode'].unique()))
         result = {
             'samples': samples
@@ -99,7 +107,8 @@ def get_bc_stats(project_id):
         for i, row in df.iterrows():
             series.append({
                 'name': row['Barcode'],
-                'data': [row['Count']]
+                'data': [row['Count']],
+                'total': total
             })
         result['series'] = series
         return json.dumps(result)
@@ -165,6 +174,7 @@ def get_diricore_stats(project_id):
     if data is not None:
         data = json.loads(data.decode('utf-8'))
         full_df = pd.DataFrame(data)
+        full_df = full_df.fillna(0)
         samples = sorted(list(full_df['sample'].unique()))
         result = {
             'samples': samples,

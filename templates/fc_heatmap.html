@@ -1,0 +1,44 @@
+{% extends 'layout.html' %}
+{% block body %}
+{# <script src="{{ url_for('static', filename='libraries/highcharts_heatmap.js') }}"></script>
+<script src="{{ url_for('static', filename='libraries/highcharts-more.js') }}"></script> #}
+<script src="{{ url_for('static', filename='libraries/plotly-latest.min.js') }}"></script>
+
+<script src="{{ url_for('static', filename='javascript/fc_heatmap.js') }}"></script>
+{# ERROR MESSAGE #}
+{% if error %}
+<div class="alert alert-danger mt-2" role="alert" id="error_div">
+  <div class="row">
+    <div class="col col-xs-10" id="error_messages">{{ error }}</div>
+    <div class="col col-sm-2"><span class="close" aria-label="Close"> &times;</span></div>
+  </div>
+</div>
+{% endif %}
+
+{% if not no_data %}
+<form action="" method="POST">
+  <label for="contrast">Filter dataset by:</label>
+  <select name="filter_by" class="custom-select" id="contrast">
+    <option value="top_50_coding" {% if not filter_by or filter_by == "top_50_coding" %}selected{% endif %}>
+        Top 50 coding genes (default)</option>
+      <option value="top_50" {% if filter_by == "top_50" %}selected{% endif %}>
+        Top 50 genes (coding and non-coding)</option>
+      <option value="fc_range" {% if filter_by=="fc_range" %}selected{% endif %}>Log2FC range (not implemented)</option>
+      <option value="list_of_genes" {% if filter_by=="list_of_genes" %}selected{% endif %}>List of genes</option>
+  </select>
+
+  <div id="list_of_genes" class="d-none">
+    <label class="mb-0 mt-3">Enter list of genes to plot:</label><br>
+    <label class="mt-0 text-sm">allowed delimiters: space, tab, newline</label>
+    <textarea class="form-control" rows="5" id="selected_genes" name="selected_genes">{{ selected_genes | join('\n') }}</textarea>
+  </div>
+
+  <button class="btn btn-outline-primary mt-4" type="submit" id="plot_button">Show heatmap</button>
+  {% if z %}
+    <div data-series="{{ plot_series }}" id="heatmap" data-xcat="{{ x_categories }}" data-ycat="{{ y_categories }}"
+         data-z="{{ z }}", data-zmax="{{ z_max }}">
+    </div>
+  {% endif %}
+</form>
+{% endif %}
+{% endblock %}

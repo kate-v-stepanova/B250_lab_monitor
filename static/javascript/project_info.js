@@ -51,8 +51,9 @@ $(document).ready(function() {
                         categories: samples,
                     },
                     tooltip: {
-                        headerFormat: '',
-                        pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
+                        shared: true,
+                        headerFormat: 'Total: {series.total} {point.stackTotal}<br>',
+                        //pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
                     },
                     plotOptions: {
                         column: {
@@ -166,12 +167,9 @@ $(document).ready(function() {
         var url = "/diricore_stats/" + project_id;
         $.post(url, function(data) {
             if (data.length != 0) {
-                console.log(data);
                 data = JSON.parse(data);
-                console.log(data)
                 series = data["series"];
                 samples = data["samples"];
-                console.log(series);
                 Highcharts.chart('plot_div', {
                     chart: {
                         type: "bar",
