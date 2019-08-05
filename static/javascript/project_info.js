@@ -203,6 +203,43 @@ $(document).ready(function() {
         })
     });
 
+    $('#rrna_genes').on('click', function() {
+        var project_id = $(location).attr("href").split('/').pop();
+        var url = "/rrna_genes/" + project_id;
+        $.post(url, function(data) {
+            data = JSON.parse(data);
+            series = data["series"];
+            samples = data["samples"];
+            Highcharts.chart('plot_div', {
+                chart: {
+                    type: 'column',
+                },
+                title: {
+                    text: "rRNA genes",
+                },
+                xAxis: {
+                    categories: samples
+                },
+                plotOptions: {
+                    series: {
+                        stacking: 'normal',
+                    }
+                },
+                tooltip: {
+                    shared: true,
+                    headerFormat: "",
+                },
+                exporting: {
+                    filename: project_id + "_rRNA_genes"
+                },
+                series: series
+            });
+
+            $('#plot_div').removeClass('d-none');
+            $('#hide_plot').removeClass('d-none');
+        });
+    });
+
     $('#hide_plot').on('click', function() {
         $(this).addClass('d-none');
         $('#plot_div').addClass('d-none');

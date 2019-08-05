@@ -35,6 +35,9 @@ def get_project_info(project_id):
         transcript_regions = rdb.get('transcript_regions_{}'.format(project_id))
         if transcript_regions is not None:
             available_stats.append('transcript_regions')
+        rrna_genes = rdb.get('rrna_genes_{}'.format(project_id))
+        if rrna_genes is not None:
+            available_stats.append('rrna_genes')
 
         ucsc_link = rdb.get('ucsc_link_{}'.format(project_id))
         ucsc_link = ucsc_link.decode('utf-8') if ucsc_link else None
@@ -199,4 +202,40 @@ def get_diricore_stats(project_id):
         result['series'] = series
         return json.dumps(result)
 
+    return ""
+
+
+@project_page.route("/rrna_genes/<project_id>", methods=["POST"])
+def get_rrna_genes(project_id):
+    from main import get_db
+    rdb = get_db()
+    data = rdb.get("rrna_genes_{}".format(project_id))
+    if data is not None:
+        df = pd.read_msgpack(data)
+        genes = list(df["gene_name"].unique())
+        samples = sorted(list(df["sample"].unique()))
+        series = []
+        for gene in genes:
+            data = []
+            for sample in samples:
+                df1 = df.loc[df['sample'] == sample]
+                if len(df1.loc[df1["gene_name"] == gene]) == 0:
+                    y = 0
+                else:
+                    y = df1.loc[df1["gene_name"] == gene]["gene_counts"].tolist()[0]
+                data.append({
+                    'sample': sample,
+                    'y': y,
+                    'gene': gene,
+                })
+            series.append({
+                'name': gene,
+                'data': data
+            })
+
+        result = {
+            'samples': samples,
+            'series': series
+        }
+        return json.dumps(result)
     return ""
