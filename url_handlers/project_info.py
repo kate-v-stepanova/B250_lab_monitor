@@ -182,7 +182,7 @@ def get_diricore_stats(project_id):
         result = {
             'samples': samples,
         }
-        stats = ["rRNA_reads", "tRNA_reads", "No_HQ", "HQ_with_duplicates", "Unique_HQ"]
+        stats = ["rrna", "trna", "lq_with_dup", "lq_unique", "hq_with_dup", "hq_unique"]
         series = []
         for stat in stats:
             data = []
@@ -192,7 +192,7 @@ def get_diricore_stats(project_id):
                     'sample': sample,
                     'y': df.get(stat, [0]).tolist()[0],
                     'stat': stat,
-                    'initial_reads': df['Initial_reads'].tolist()[0],
+                    'initial_reads': df['bc_split'].tolist()[0],
                 })
             series.append({
                 'name': stat,
