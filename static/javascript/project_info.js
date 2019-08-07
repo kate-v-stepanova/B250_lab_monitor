@@ -50,6 +50,11 @@ $(document).ready(function() {
                     xAxis: {
                         categories: samples,
                     },
+                    yAxis: {
+                        title: {
+                            text: "# Reads"
+                        }
+                    },
                     tooltip: {
                         shared: true,
                         headerFormat: 'Total: {series.total} {point.stackTotal}<br>',
@@ -92,6 +97,11 @@ $(document).ready(function() {
                         text: 'Cutadapt stats'
                     },
 
+                    yAxis: {
+                        title: {
+                            text: "# Reads"
+                        }
+                    },
                     tooltip: {
                         shared: true,
                         headerFormat: ''
@@ -139,9 +149,14 @@ $(document).ready(function() {
                     xAxis: {
                         categories: samples
                     },
+                    yAxis: {
+                        title: {
+                            text: "# Reads"
+                        }
+                    },
                     plotOptions: {
                         column: {
-                            stacking: 'percent',
+                            stacking: 'normal',
                             pointWidth: 40,
                         },
                     },
@@ -180,6 +195,11 @@ $(document).ready(function() {
 
                     xAxis: {
                         categories: samples
+                    },
+                    yAxis: {
+                        title: {
+                            text: "# Reads"
+                        }
                     },
                     plotOptions: {
                         series: {
@@ -220,6 +240,11 @@ $(document).ready(function() {
                 },
                 xAxis: {
                     categories: samples
+                },
+                yAxis: {
+                    title: {
+                        text: "# Reads"
+                    }
                 },
                 plotOptions: {
                     series: {

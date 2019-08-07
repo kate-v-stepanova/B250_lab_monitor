@@ -19,13 +19,13 @@
             </h5>
             <table class="table table-bordered">
                 <tbody>
-                <tr><td class="w-25">Cluster ID</td><td class="w-50">{{ project_id }}</td></tr>
+                <tr><td class="w-25">Cluster ID</td><td class="w-60">{{ project_id }}</td></tr>
                 <tr><td>Project Name</td><td id="project_name">{{ project_info.get('project_name', project_id) }}</td></tr>
                 <tr><td>Project Description</td><td id="description">{{ project_info.get('description', '') }}{#Project of collaborators from Netherlands, prepared with the new protocol, to be demultiplexed and analysed with diricore. The aim is to see if there’s an overabundance of codons of specific amino acids in the A-site, which would suggest ribosome stalling to occur in these cells#}</td></tr>
                 <tr><td>Prepared by</td><td id="prepared_by">{{ project_info.get('prepared_by', '') }}</td></tr>
                 <tr><td>Protocol</td><td id="protocol">{{ project_info.get('protocol', '') }}</td></tr>
                 <tr><td>UCSC link</td><td>{% if ucsc_links %}{% for ucsc_link in ucsc_links %}
-                    <a href="{{ ucsc_link }}" target="_blank">{{ ucsc_link }}</a>
+                    <a href="{{ ucsc_link }}" target="_blank">{{ ucsc_link }}</a><br>
                     {% endfor %}{% else %}Not available{% endif %}</td></tr>
                 {% if analysis_list %}
                 <tr><td>Other analysis</td>
