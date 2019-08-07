@@ -39,8 +39,16 @@ def get_project_info(project_id):
         if rrna_genes is not None:
             available_stats.append('rrna_genes')
 
-        ucsc_link = rdb.get('ucsc_link_{}'.format(project_id))
-        ucsc_link = ucsc_link.decode('utf-8') if ucsc_link else None
+        ucsc_links = []
+        try:
+            ucsc_link = rdb.get('ucsc_link_{}'.format(project_id))
+            ucsc_link = ucsc_link.decode('utf-8') if ucsc_link else None
+            if ucsc_link:
+                ucsc_links = [ucsc_link]
+        except:
+            ucsc_links = rdb.smembers('ucsc_link_{}'.format(project_id))
+            if ucsc_links:
+                ucsc_links = [ucsc.decode('utf-8') for ucsc in ucsc_links]
 
         # OTHER ANALYSIS
         analysis_list = []
@@ -76,7 +84,7 @@ def get_project_info(project_id):
             })
 
         return render_template("project_info.html", project_id=project_id, project_info=project_info,
-                                samples=samples_info, available_stats=available_stats, ucsc_link=ucsc_link,
+                                samples=samples_info, available_stats=available_stats, ucsc_links=ucsc_links,
                                analysis_list=analysis_list)
 
     else: # if request.method == "POST":

@@ -214,6 +214,7 @@ $(document).ready(function() {
                 chart: {
                     type: 'column',
                 },
+                colors: ["#538cc6", "#0077b3", "#204060"],
                 title: {
                     text: "rRNA genes",
                 },
