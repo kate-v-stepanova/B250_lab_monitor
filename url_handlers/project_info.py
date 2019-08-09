@@ -76,11 +76,11 @@ def get_project_info(project_id):
                 'name': "MA plot",
                 'link': "{}ma_plot/{}".format(request.url_root, project_id)
             })
-        fc_heatmap = rdb.exists("fc_coding_{}".format(project_id))
-        if fc_heatmap:
+        heatmap = rdb.exists("cpm_coding_{}".format(project_id))
+        if heatmap:
             analysis_list.append({
-                'name': "FC_heatmap",
-                'link': "{}fc_heatmap/{}".format(request.url_root, project_id)
+                'name': "Heatmap",
+                'link': "{}heatmap/{}".format(request.url_root, project_id)
             })
 
         return render_template("project_info.html", project_id=project_id, project_info=project_info,
