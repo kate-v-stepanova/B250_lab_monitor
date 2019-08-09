@@ -1,0 +1,73 @@
+{% extends 'layout.html' %}
+{% block body %}
+<!-- Include Choices CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='libraries/choices.min.css') }}">
+<!-- Include Choices JavaScript -->
+<script src="{{ url_for('static', filename='libraries/choices.min.js') }}"></script>
+<!-- Heatmap JavaScript -->
+<script src="{{ url_for('static', filename='javascript/heatmap.js') }}"></script>
+
+<!--inchlib-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/kineticjs/5.2.0/kinetic.js"></script>
+<script src="{{ url_for('static', filename='libraries/inchlib-1.2.0.js') }}"></script>
+
+{# ERROR MESSAGE #}
+{% if error %}
+<div class="alert alert-danger mt-2" role="alert" id="error_div">
+  <div class="row">
+    <div class="col col-xs-10" id="error_messages">{{ error }}</div>
+    <div class="col col-sm-2"><span class="close" aria-label="Close"> &times;</span></div>
+  </div>
+</div>
+{% endif %}
+
+<form action="" method="POST">
+  <div class="row mt-4">
+    <div class="col col-sm-2 mt-2">
+      <label>Plot samples: </label>
+    </div>
+    <div class="col col-sm-10">
+        <select multiple id="selected_samples" class="choices" data-type="select-multiple" name="selected_samples">
+          {% for sample in samples %}
+            <option name="{{ sample }}" value="{{ sample }}"
+                    {% if sample in selected_samples %}selected{% endif %}>{{ sample }}</option>
+          {% endfor %}
+        </select>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col col-sm-2">
+      <label for="filter_by">Filter dataset by:</label>
+    </div>
+    <div class="col col-sm-3">
+      <select name="filter_by" class="custom-select" id="filter_by">
+        <option value="top_coding" {% if not filter_by or filter_by == "top_coding" %}selected{% endif %}>
+            Top coding genes</option>
+          <option value="top_non_coding" {% if filter_by == "top_noncoding" %}selected{% endif %}>
+            Top coding plus non-coding genes</option>
+          <option value="list_of_genes" {% if filter_by=="list_of_genes" %}selected{% endif %}>List of genes</option>
+      </select>
+    </div>
+    <div class="col col-sm-1 {% if filter_by == 'list_of_genes' %}d-none{% endif %}">
+      <input type="number" min="0" step="1" class="form-control" id="number_of_genes" name="number_of_genes"
+             value="{% if number_of_genes %}{{ number_of_genes }}{% else %}50{% endif %}">
+    </div>
+  </div>
+
+  <div id="list_of_genes" {% if filter_by != "list_of_genes" %}class="d-none"{% endif %}>
+    <label class="mb-0 mt-3">Enter list of genes to plot:</label><br>
+    <label class="mt-0 text-sm">allowed delimiters: space, tab, newline</label>
+    <textarea class="form-control" rows="5" id="selected_genes" name="list_of_genes">{{ list_of_genes | join('\n') }}</textarea>
+  </div>
+
+  <button class="btn btn-outline-primary mt-4" type="submit" id="plot_button">Show heatmap</button>
+</form>
+
+{% if plot_data %}
+  <body>
+      <div id="inchlib" data-series="{{ plot_data }}" data-samples="{{ selected_samples }}"></div>
+  </body>
+{% endif %}
+
+{% endblock %}

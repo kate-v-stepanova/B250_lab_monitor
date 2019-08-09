@@ -12,7 +12,7 @@ from url_handlers.login import login_page
 from url_handlers.projects import projects_page
 from url_handlers.project_info import project_page
 from url_handlers.ma_plot import ma_plot
-from url_handlers.fc_heatmap import fc_heatmap
+from url_handlers.heatmap import heatmap
 
 app = Flask(__name__)
 
@@ -23,7 +23,7 @@ app.register_blueprint(login_page)
 app.register_blueprint(projects_page)
 app.register_blueprint(project_page)
 app.register_blueprint(ma_plot)
-app.register_blueprint(fc_heatmap)
+app.register_blueprint(heatmap)
 
 app.secret_key = 'super secret key'
 app.config['SESSION_TYPE'] = 'filesystem'
@@ -40,12 +40,14 @@ login_manager.init_app(app)
 def load_user(user_id):
     return User.get_by_id(user_id)
 
+
 # Database stuff
 def connect_db():
-    """ connects to our redis database """
+    """ connects to redis database """
     redis_store = FlaskRedis()
     redis_store.init_app(app)
     return redis_store
+
 
 def get_db():
     """ opens a new database connection if there is none yet for the
