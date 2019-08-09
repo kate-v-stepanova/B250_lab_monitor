@@ -11,6 +11,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/kineticjs/5.2.0/kinetic.js"></script>
 <script src="{{ url_for('static', filename='libraries/inchlib-1.2.0.js') }}"></script>
 
+<!--FileSaver-->
+<script src="{{ url_for('static', filename='libraries/FileSaver.js') }}"></script>
 {# ERROR MESSAGE #}
 {% if error %}
 <div class="alert alert-danger mt-2" role="alert" id="error_div">
@@ -65,9 +67,10 @@
 </form>
 
 {% if plot_data %}
-  <body>
-      <div id="inchlib" data-series="{{ plot_data }}" data-samples="{{ selected_samples }}"></div>
-  </body>
+<div>
+    <button type="button" class="btn btn-sm btn-outline-info mb-0 float-right" id="export_button">Export as CSV</button><br>
+    <div id="inchlib" data-series="{{ plot_data }}" data-csv="{{ csv_data }}"></div>
+</div>
 {% endif %}
 
 {% endblock %}

@@ -27,10 +27,6 @@ $(document).ready(function() {
     a = a.replace(/'/g, '"'); //");
     a = JSON.parse(a);
     $('#inchlib').removeAttr('data-series');
-    order = $('#inchlib').attr('data-samples');
-    order = order.replace(/'/g, '"'); //");
-    order = JSON.parse(order);
-    $('#inchlib').removeAttr('data-samples');
     window.inchlib = new InCHlib({ //instantiate InCHlib
         target: "inchlib", //ID of a target HTML element
         metadata: true, //turn on the metadata
@@ -42,4 +38,13 @@ $(document).ready(function() {
     });
     inchlib.read_data(a);
     inchlib.draw(); //draw cluster heatmap
+
+    // export CSV data
+    var csv_data = $('#inchlib').attr('data-csv')
+    if (csv_data) {
+        $('#export_button').on('click', function() {
+            var blob = new Blob([csv_data], {type: "text/plain;charset=utf-8"});
+            saveAs(blob, "heatmap.csv");
+        });
+    }
 });

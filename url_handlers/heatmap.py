@@ -67,6 +67,7 @@ def get_heatmap(project_id):
     plot_data = dendrogram.create_cluster_heatmap()
     plot_data = json.dumps(plot_data)
 
+    csv_data = df.to_csv(sep=",", header=False, index=False)
     return render_template("heatmap.html", samples=samples, selected_samples=selected_samples,
                            number_of_genes=number_of_genes, filter_by=filter_by, list_of_genes=list_of_genes,
-                           plot_data=plot_data)
+                           plot_data=plot_data, csv_data=csv_data)
