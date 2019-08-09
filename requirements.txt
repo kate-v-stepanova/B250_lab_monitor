@@ -5,3 +5,6 @@ click
 flask_login
 passlib
 flask_session
+scipy
+fastcluster
+sklearn
