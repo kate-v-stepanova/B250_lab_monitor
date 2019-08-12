@@ -33,6 +33,7 @@ def get_heatmap(project_id):
     number_of_genes = int(request.form.get('number_of_genes'))
     list_of_genes = request.form.get('list_of_genes', '').split()
 
+    # filter by genes
     if filter_by == "top_coding" or filter_by == "list_of_genes":
         data = rdb.get('cpm_coding_{}'.format(project_id))
         df = pd.read_msgpack(data)
@@ -41,6 +42,14 @@ def get_heatmap(project_id):
         data = rdb.get('cpm_non_coding_{}'.format(project_id))
         df = pd.read_msgpack(data)
 
+    # select samples and sort by variance
+    df = df[['gene_name'] + selected_samples]
+    for sample in selected_samples:
+        df[sample] = df[sample].round(2)
+
+    df = df.reindex(df.var(axis=1).sort_values(ascending=False).index)
+
+    # select genes
     if filter_by == "top_coding" or filter_by == "top_non_coding":
         df = df[:number_of_genes]
 
@@ -52,16 +61,11 @@ def get_heatmap(project_id):
             df1 = row if df1 is None else df1.append(row, ignore_index=True)
         df = df1
 
-    df = df[['gene_name'] + selected_samples]
-    for sample in selected_samples:
-        df[sample] = df[sample].round(2)
-
-    df.loc[-1] = ['gene_name'] + selected_samples
-    df.index = df.index + 1
-    df.sort_index(inplace=True)
+    # input for clustering: header + df
+    data = [['gene_name'] + selected_samples] + df.values.tolist()
 
     cluster = Cluster()
-    cluster.read_data(rows=df.values.tolist(), header=True)
+    cluster.read_data(rows=data, header=True)
     cluster.cluster_data()
     dendrogram = Dendrogram(cluster)
     plot_data = dendrogram.create_cluster_heatmap()
