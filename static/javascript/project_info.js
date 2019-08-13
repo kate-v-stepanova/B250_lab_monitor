@@ -62,7 +62,7 @@ $(document).ready(function() {
                     },
                     plotOptions: {
                         column: {
-                            stacking: 'percent',
+                            stacking: 'normal',
                             pointWidth: 60
                         }
                     },
