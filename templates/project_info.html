@@ -44,8 +44,9 @@
                     <button class="btn btn-sm btn-outline-primary plot_button mb-1" id="{{ stat }}" type="button">{{ stat }}</button>
                     {% endfor %}
                     <div class="w-100">
-                          <button type="button" class="btn btn-sm btn-outline-secondary d-none float-right" id="hide_plot">Hide Plot</button>
-                        <br></div><br> {# this br and div have to be exactly like this!! otherwise button is somewhere else #}
+                        <button type="button" class="btn btn-sm btn-outline-secondary d-none float-right" id="hide_plot">Hide Plot</button>
+                        <button type="button" class="btn btn-sm btn-outline-warning d-none float-right mr-2" id="to_100_per">Scale to 100%</button>
+                    <br></div><br> {# this br and div have to be exactly like this!! otherwise button is somewhere else #}
                     <div id="plot_div" class="d-none mt-2"></div>
                 </td>
                 </tr>

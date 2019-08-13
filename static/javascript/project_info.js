@@ -129,7 +129,8 @@ $(document).ready(function() {
         });
     });
 
-    $('#transcript_regions').on('click', function() {
+    function transcript_regions(stacking) {
+        // stacking can be: "normal" or "percent"
         var project_id = $(location).attr('href').split('/').pop();
         var url = "/transcript_regions/" + project_id;
         $.post(url, function(data) {
@@ -156,7 +157,7 @@ $(document).ready(function() {
                     },
                     plotOptions: {
                         column: {
-                            stacking: 'percent',
+                            stacking: stacking,
                             pointWidth: 40,
                         },
                     },
@@ -172,8 +173,13 @@ $(document).ready(function() {
 
                 $('#plot_div').removeClass('d-none');
                 $('#hide_plot').removeClass('d-none');
+                $('#to_100_per').removeClass('d-none');
+                $('#plot_div').attr('data-plot-type', "trans");
             }
         });
+    }
+    $('#transcript_regions').on('click', function() {
+        transcript_regions("normal");
     });
 
 
@@ -223,7 +229,8 @@ $(document).ready(function() {
         })
     });
 
-    $('#rrna_genes').on('click', function() {
+    function rrna_genes(stacking) {
+        // stacking cant be: "percent" or "normal"
         var project_id = $(location).attr("href").split('/').pop();
         var url = "/rrna_genes/" + project_id;
         $.post(url, function(data) {
@@ -248,7 +255,7 @@ $(document).ready(function() {
                 },
                 plotOptions: {
                     series: {
-                        stacking: 'percent',
+                        stacking: stacking,
                     }
                 },
                 tooltip: {
@@ -263,11 +270,32 @@ $(document).ready(function() {
 
             $('#plot_div').removeClass('d-none');
             $('#hide_plot').removeClass('d-none');
+            $('#to_100_per').removeClass('d-none');
+            $('#plot_div').attr('data-plot-type', "rrna");
         });
+    }
+    $('#rrna_genes').on('click', function() {
+        rrna_genes("normal");
     });
 
     $('#hide_plot').on('click', function() {
         $(this).addClass('d-none');
         $('#plot_div').addClass('d-none');
+    });
+
+    $('#to_100_per').on('click', function() {
+        if ($(this).text() == "Scale to 100%") {
+            $(this).text('Scale to #reads');
+            stacking = "percent";
+        } else {
+            $(this).text('Scale to 100%');
+            stacking = "normal";
+        }
+        console.log($('#plot_div').attr('data-plot-type'));
+        if ($('#plot_div').attr('data-plot-type') == 'rrna') {
+            rrna_genes(stacking);
+        } else {
+            transcript_regions(stacking);
+        }
     });
 });
