@@ -156,7 +156,7 @@ $(document).ready(function() {
                     },
                     plotOptions: {
                         column: {
-                            stacking: 'normal',
+                            stacking: 'percent',
                             pointWidth: 40,
                         },
                     },
@@ -248,7 +248,7 @@ $(document).ready(function() {
                 },
                 plotOptions: {
                     series: {
-                        stacking: 'normal',
+                        stacking: 'percent',
                     }
                 },
                 tooltip: {
