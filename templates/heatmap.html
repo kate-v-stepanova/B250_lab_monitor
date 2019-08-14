@@ -4,8 +4,6 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='libraries/choices.min.css') }}">
 <!-- Include Choices JavaScript -->
 <script src="{{ url_for('static', filename='libraries/choices.min.js') }}"></script>
-<!-- Heatmap JavaScript -->
-<script src="{{ url_for('static', filename='javascript/heatmap.js') }}"></script>
 
 <!--inchlib-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/kineticjs/5.2.0/kinetic.js"></script>
@@ -13,6 +11,9 @@
 
 <!--FileSaver-->
 <script src="{{ url_for('static', filename='libraries/FileSaver.js') }}"></script>
+
+<!-- Heatmap JavaScript -->
+<script src="{{ url_for('static', filename='javascript/heatmap.js') }}"></script>
 {# ERROR MESSAGE #}
 {% if error %}
 <div class="alert alert-danger mt-2" role="alert" id="error_div">
@@ -24,51 +25,118 @@
 {% endif %}
 
 <form action="" method="POST">
-  <div class="row mt-4">
-    <div class="col col-sm-2 mt-2">
-      <label>Plot samples: </label>
-    </div>
-    <div class="col col-sm-10">
-        <select multiple id="selected_samples" class="choices" data-type="select-multiple" name="selected_samples">
-          {% for sample in samples %}
-            <option name="{{ sample }}" value="{{ sample }}"
-                    {% if sample in selected_samples %}selected{% endif %}>{{ sample }}</option>
-          {% endfor %}
-        </select>
-    </div>
-  </div>
+  <ul class="list-group mt-4">
+    {# FIRST GROUP #}
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col col-sm-2 mt-2">
+          <label>Select samples: </label>
+        </div>
+        <div class="col col-sm-10">
+            <select multiple id="first_group" class="choices" data-type="select-multiple" name="first_group">
+              {% for sample in samples %}
+                <option name="{{ sample }}" value="{{ sample }}"
+                        {% if sample in first_group %}selected{% endif %}>{{ sample }}</option>
+              {% endfor %}
+            </select>
+        </div>
+      </div>
+      <div class="row mt-2">
+        <div class="col col-sm-2 mt-2">
+          <label for="filter1">Filter dataset by:</label>
+        </div>
+        <div class="col col-sm-3">
+          <select name="filter1" class="custom-select" id="filter1">
+            <option value="most" {% if not filter1 or filter1 == "most" %}selected{% endif %}>
+                Most changing genes</option>
+            <option value="least" {% if filter1 == "least" %}selected{% endif %}>
+                Least changing genes</option>
+              <option value="list_of_genes" {% if filter1 == "list_of_genes" %}selected{% endif %}>List of genes</option>
+          </select>
+        </div>
+        <div class="col col-sm-1 {% if filter1 == 'list_of_genes' %}d-none{% endif %}">
+          <input type="number" min="0" step="1" class="form-control" id="number_of_genes1" name="number_of_genes1"
+                 value="{% if number_of_genes1 or number_of_genes1 == 0 %}{{ number_of_genes1 }}{% else %}50{% endif %}"
+                 data-toggle="tooltip" data-placement="right" title="Enter 0 to select ALL genes">
+        </div>
+      </div>
+      <div id="list_of_genes" {% if filter1 != "list_of_genes" %}class="d-none"{% endif %}>
+        <label class="mb-0 mt-3">Enter list of genes to plot:</label><br>
+        <label class="mt-0 text-sm">allowed delimiters: space, tab, newline</label>
+        <textarea class="form-control" rows="5" id="selected_genes" name="list_of_genes">{{ list_of_genes | join('\n') }}</textarea>
+      </div>
 
-  <div class="row mt-4">
-    <div class="col col-sm-2">
-      <label for="filter_by">Filter dataset by:</label>
-    </div>
-    <div class="col col-sm-3">
-      <select name="filter_by" class="custom-select" id="filter_by">
-        <option value="top_coding" {% if not filter_by or filter_by == "top_coding" %}selected{% endif %}>
-            Top coding genes</option>
-          <option value="top_non_coding" {% if filter_by == "top_noncoding" %}selected{% endif %}>
-            Top coding plus non-coding genes</option>
-          <option value="list_of_genes" {% if filter_by=="list_of_genes" %}selected{% endif %}>List of genes</option>
-      </select>
-    </div>
-    <div class="col col-sm-1 {% if filter_by == 'list_of_genes' %}d-none{% endif %}">
-      <input type="number" min="0" step="1" class="form-control" id="number_of_genes" name="number_of_genes"
-             value="{% if number_of_genes %}{{ number_of_genes }}{% else %}50{% endif %}">
-    </div>
-  </div>
+      <div class="row mt-2">
+        <a href="#" id="add_group" class="ml-3 {% if second_group %}d-none{% endif %}">+ add another group of samples</a>
+      </div>
+    </li>
+    {# SECOND GROUP #}
+    <li class="list-group-item {% if not second_group %}d-none{% endif %}" id="group2">
 
-  <div id="list_of_genes" {% if filter_by != "list_of_genes" %}class="d-none"{% endif %}>
-    <label class="mb-0 mt-3">Enter list of genes to plot:</label><br>
-    <label class="mt-0 text-sm">allowed delimiters: space, tab, newline</label>
-    <textarea class="form-control" rows="5" id="selected_genes" name="list_of_genes">{{ list_of_genes | join('\n') }}</textarea>
-  </div>
+      <div class="row ml-0 {% if second_group %} d-none {% endif %}" id="info">
+        <div class="alert alert-info" role="alert">
+          <div><span class="close float-right" aria-label="Close"> &times;</span></div>
+          <div>
+            <div class="col col-sm-2 h5">Info</div>
+            <div>
+              <p>By adding <u>a second group</u> you will get an <b>intersection</b> of the samples from the first group and the second group.</p>
+              <p><b>A hint: </b>If you selected the <b>most</b> changing genes in the <u>first group</u>, select the <b>least</b> changing genes in the <u>second group</u> (or vice versa).</p>
+              <p><b>Option 1: </b>If you want to get a <u>final list of 50 genes</u>, select 0 genes in the first group, and 50 genes in the second group (<u>or vice versa</u>).</p>
+              <p><b>Option2: </b>Or you can select 1000 top genes in the first group, and 1000 top genes in the second group, and see <u>how many common genes</u> you will get.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col col-sm-2 mt-2">
+          <label>Second group of samples: </label>
+        </div>
+        <div class="col col-sm-10">
+            <select multiple id="second_group" class="choices" data-type="select-multiple" name="second_group">
+              {% for sample in samples %}
+                <option name="{{ sample }}" value="{{ sample }}"
+                        {% if sample in second_group %}selected{% endif %}>{{ sample }}</option>
+              {% endfor %}
+            </select>
+        </div>
+      </div>
+      <div class="row mt-2">
+        <div class="col col-sm-2 mt-2">
+          <label for="filter2">Filter dataset by:</label>
+        </div>
+        <div class="col col-sm-3">
+          <select name="filter2" class="custom-select" id="filter2">
+            <option value="most" {% if not filter2 or filter2 == "most" %}selected{% endif %}>
+                Most changing genes</option>
+            <option value="least" {% if filter2 == "least" %}selected{% endif %}>
+                Least changing genes</option>
+          </select>
+        </div>
+        <div class="col col-sm-1">
+          <input type="number" min="0" step="1" class="form-control" id="number_of_genes2" name="number_of_genes2"
+                 value="{% if number_of_genes2 or number_of_genes2 == 0 %}{{ number_of_genes2 }}{% else %}50{% endif %}"
+                 data-toggle="tooltip" data-placement="right" title="Enter 0 to select ALL genes">
+        </div>
+      </div>
+      <div class="row mt-2">
+        <a href="#" id="remove_group" class="ml-3">- remove the group</a>
+      </div>
+    </li>
+  </ul>
 
+  <div class="form-check mt-4">
+    <input class="form-check-input" type="checkbox" value="True" name="include_non_coding" id="include_non_coding"
+      {% if include_non_coding %}checked{% endif %}>
+    <label class="form-check-label" for="include_non_coding">Include non-coding genes</label>
+  </div>
   <button class="btn btn-outline-primary mt-4" type="submit" id="plot_button">Show heatmap</button>
 </form>
-
 {% if plot_data %}
 <div>
-    <button type="button" class="btn btn-sm btn-outline-info mb-0 float-right" id="export_button">Export as CSV</button><br>
+  <button type="button" class="btn btn-sm btn-outline-info mb-0 float-right" id="export_button">Export as CSV</button>
+    {% if common_genes %}
+      <h5>Number of genes: <span class="badge badge-secondary mt-4">{{ common_genes }}</span></h5>
+    {% endif %}
     <div id="inchlib" data-series="{{ plot_data }}" data-csv="{{ csv_data }}"></div>
 </div>
 {% endif %}
