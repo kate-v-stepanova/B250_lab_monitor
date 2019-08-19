@@ -1,0 +1,73 @@
+{% extends 'layout.html' %}
+{% block body %}
+<!-- Include Choices CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='libraries/choices.min.css') }}">
+<!-- Include Choices JavaScript -->
+<script src="{{ url_for('static', filename='libraries/choices.min.js') }}"></script>
+
+<!-- Translational Efficiency JavaScript -->
+<script src="{{ url_for('static', filename='javascript/translational_efficiency.js') }}"></script>
+
+{# ERROR MESSAGE #}
+{% if error %}
+<div class="alert alert-danger mt-2" role="alert" id="error_div">
+  <div class="row">
+    <div class="col col-xs-10" id="error_messages">{{ error }}</div>
+    <div class="col col-sm-2"><span class="close" aria-label="Close"> &times;</span></div>
+  </div>
+</div>
+{% endif %}
+
+
+<form action="" method="POST">
+  <ul class="list-group mt-4">
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col col-sm-2 mt-3">
+          <label>Select samples: </label>
+        </div>
+        <div class="col col-sm-10">
+            <select multiple id="selected_samples" class="choices" data-type="select-multiple" name="selected_samples">
+              {% for sample in samples %}
+                <option name="{{ sample }}" value="{{ sample }}"
+                        {% if sample in selected_samples %}selected{% endif %}>{{ sample }}</option>
+              {% endfor %}
+            </select>
+        </div>
+      </div>
+      <div class="form-check mt-2">
+        <input class="form-check-input" type="checkbox" value="True" name="apply_filter" id="apply_filter"
+          {% if apply_filter %}checked{% endif %}>
+        <label class="form-check-label" for="apply_filter">Filter dataset</label>
+      </div>
+    </li>
+    <li class="list-group-item {% if not apply_filter %}d-none{% endif %}" id="filters">
+       <div class="row mt-2">
+        <div class="col col-sm-2 mt-2">
+          <label for="min_y">Min log2(y) value:</label>
+        </div>
+        <div class="col col-sm-1">
+          <input type="number" step="0.1" class="form-control" id="min_y" name="min_y"
+                 value="{% if min_y %}{{ min_y }}{% else %}-100{% endif %}">
+        </div>
+      </div>
+
+       <div class="row mt-2">
+        <div class="col col-sm-2 mt-2">
+          <label for="max_y">Max log2(y) value:</label>
+        </div>
+        <div class="col col-sm-1">
+          <input type="number" step="0.1" class="form-control" id="max_y" name="max_y"
+                 value="{% if max_y %}{{ max_y }}{% else %}100{% endif %}">
+        </div>
+      </div>
+    </li>
+  </ul>
+  <button class="btn btn-outline-primary mt-4" type="submit" id="plot_button">Plot dataset</button>
+</form>
+{% if plot_series %}
+<div id="plot" data-series="{{ plot_series }}" data-ymax="{{ max_y }}" data-ymin="{{ min_y }}">
+</div>
+{% endif %}
+
+{% endblock %}

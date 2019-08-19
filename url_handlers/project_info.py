@@ -82,6 +82,12 @@ def get_project_info(project_id):
                 'name': "Heatmap",
                 'link': "{}heatmap/{}".format(request.url_root, project_id)
             })
+        translational_efficiency = rdb.exists("{}_rpkm_rna".format(project_id))
+        if translational_efficiency:
+            analysis_list.append({
+                'name': "Translational Efficiency",
+                'link': "{}translational_efficiency/{}".format(request.url_root, project_id)
+            })
 
         return render_template("project_info.html", project_id=project_id, project_info=project_info,
                                 samples=samples_info, available_stats=available_stats, ucsc_links=ucsc_links,
