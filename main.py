@@ -13,7 +13,7 @@ from url_handlers.projects import projects_page
 from url_handlers.project_info import project_page
 from url_handlers.ma_plot import ma_plot
 from url_handlers.heatmap import heatmap
-from url_handlers.translational_efficiency import translational_efficiency
+from url_handlers.ribo_diff import ribo_diff
 
 app = Flask(__name__)
 
@@ -25,7 +25,7 @@ app.register_blueprint(projects_page)
 app.register_blueprint(project_page)
 app.register_blueprint(ma_plot)
 app.register_blueprint(heatmap)
-app.register_blueprint(translational_efficiency)
+app.register_blueprint(ribo_diff)
 
 app.secret_key = 'super secret key'
 app.config['SESSION_TYPE'] = 'filesystem'
