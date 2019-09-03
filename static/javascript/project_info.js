@@ -229,6 +229,56 @@ $(document).ready(function() {
         })
     });
 
+    function snoRNAs(stacking) {
+        // stacking cant be: "percent" or "normal"
+        var project_id = $(location).attr("href").split('/').pop();
+        var url = "/snoRNAs/" + project_id;
+        $.post(url, function(data) {
+            data = JSON.parse(data);
+            series = data["series"];
+            samples = data["samples"];
+            Highcharts.chart('plot_div', {
+                chart: {
+                    type: 'column',
+                },
+                colors: ["#b3d9ff", "#538cc6", "#0077b3", "#204060"],
+                title: {
+                    text: "snoRNAs",
+                },
+                xAxis: {
+                    categories: samples
+                },
+                yAxis: {
+                    title: {
+                        text: "# Reads"
+                    }
+                },
+                plotOptions: {
+                    series: {
+                        stacking: stacking,
+                    }
+                },
+                tooltip: {
+                    shared: true,
+                    headerFormat: '<b>Sample: </b>{point.key}<br>',
+
+                },
+                exporting: {
+                    filename: project_id + "_snoRNAs"
+                },
+                series: series
+            });
+
+            $('#plot_div').removeClass('d-none');
+            $('#hide_plot').removeClass('d-none');
+            $('#to_100_per').removeClass('d-none');
+            $('#plot_div').attr('data-plot-type', "snoRNAs");
+        });
+    }
+    $('#snoRNAs').on('click', function() {
+        snoRNAs("normal");
+    });
+
     function rrna_genes(stacking) {
         // stacking cant be: "percent" or "normal"
         var project_id = $(location).attr("href").split('/').pop();
@@ -291,9 +341,10 @@ $(document).ready(function() {
             $(this).text('Scale to 100%');
             stacking = "normal";
         }
-        console.log($('#plot_div').attr('data-plot-type'));
         if ($('#plot_div').attr('data-plot-type') == 'rrna') {
             rrna_genes(stacking);
+        } else if ($('#plot_div').attr('data-plot-type') == 'snoRNAs') {
+            snoRNAs(stacking);
         } else {
             transcript_regions(stacking);
         }

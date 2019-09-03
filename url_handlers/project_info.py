@@ -39,6 +39,10 @@ def get_project_info(project_id):
         if rrna_genes is not None:
             available_stats.append('rrna_genes')
 
+        snoRNAs = rdb.get('{}_snoRNAs'.format(project_id))
+        if snoRNAs is not None:
+            available_stats.append('snoRNAs')
+
         ucsc_links = []
         try:
             ucsc_link = rdb.get('ucsc_link_{}'.format(project_id))
@@ -244,6 +248,39 @@ def get_rrna_genes(project_id):
                 })
             series.append({
                 'name': gene,
+                'data': data
+            })
+
+        result = {
+            'samples': samples,
+            'series': series
+        }
+        return json.dumps(result)
+    return ""
+
+
+@project_page.route("/snoRNAs/<project_id>", methods=["POST"])
+def get_sno_rnas(project_id):
+    from main import get_db
+    rdb = get_db()
+    data = rdb.get('{}_snoRNAs'.format(project_id))
+    if data is not None:
+        df = pd.read_msgpack(data)
+        series = []
+        samples = sorted(list(df['sample']))
+        rna_types = list(df.columns)
+        rna_types.remove('sample')
+        for rna in rna_types:
+            data = []
+            for sample in samples:
+                row = df.loc[df['sample'] == sample]
+                data.append({
+                    'sample': sample,
+                    'y': row.get(rna, [0]).tolist()[0],
+                    'group': rna,
+                })
+            series.append({
+                'name': rna,
                 'data': data
             })
 
