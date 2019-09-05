@@ -3,10 +3,14 @@
 <script src="{{ url_for('static', filename='libraries/highcharts_heatmap.js') }}"></script>
 <script src="{{ url_for('static', filename='libraries/highcharts-more.js') }}"></script>
 <script src="{{ url_for('static', filename='javascript/periodicity_heatmap.js') }}"></script>
+
+
 {% for sample in samples %}
 <div id="samples" data-samples="{{ samples }}">
     <div id="{{ sample }}">
         <p class="h4 text-center mt-4">{{ sample }}</p>
+        <ul class="list-group">
+        <li class="list-group-item">
         <div class="row">
             <p class="h7 text-center col-sm-6">Distance from start (nt)</p>
             <p class="h7 text-center col-sm-6">Distance from stop (nt)</p>
@@ -17,6 +21,8 @@
             <div class="col-sm-6" id="{{ sample }}_start_3p" data-plot-series="{{ start_3p_plots[sample] }}"></div>
             <div class="col-sm-6" id="{{ sample }}_stop_3p" data-plot-series="{{ stop_3p_plots[sample] }}"></div>
         </div>
+        </li>
+        </ul>
     </div>
 </div>
 {% endfor %}

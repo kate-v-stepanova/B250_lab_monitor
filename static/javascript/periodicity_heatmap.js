@@ -30,6 +30,9 @@ $(document).ready(function() {
             title: {
                 text: '',
             },
+            legend: {
+                enabled: false
+            },
             xAxis: {
                 title: {
                     text: "Distance from start (nt)"
@@ -57,6 +60,7 @@ $(document).ready(function() {
                     [0, 'white'],
                     [0.1, '#666666'],
                     [0.2, '#333333'],
+//                    [0.5, '#333333'],
                     [1, 'black']
                 ],
                 min: 0,
@@ -75,6 +79,9 @@ $(document).ready(function() {
             },
             title: {
                 text: ''
+            },
+            legend: {
+                enabled: false
             },
             xAxis: {
                 title: {
@@ -98,6 +105,7 @@ $(document).ready(function() {
                     [0, 'white'],
                     [0.1, '#666666'],
                     [0.2, '#333333'],
+//                    [0.5, '#333333'],
                     [1, 'black']
                 ],
                 min: 0,
@@ -147,6 +155,7 @@ $(document).ready(function() {
                     [0, 'white'],
                     [0.1, '#666666'],
                     [0.2, '#333333'],
+//                    [0.5, '#333333'],
                     [1, 'black']
                 ],
                 min: 0,
@@ -165,6 +174,9 @@ $(document).ready(function() {
             },
             title: {
                 text: ''
+            },
+            legend: {
+                enabled: false
             },
             xAxis: {
                 title: {
