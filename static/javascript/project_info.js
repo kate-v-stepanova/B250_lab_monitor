@@ -349,4 +349,12 @@ $(document).ready(function() {
             transcript_regions(stacking);
         }
     });
+
+    // export analysis_info
+    $('#analysis_info').on('click', function() {
+        var file_content = $('#analysis_info').attr('data-content');
+        project_id = $(location).attr("href").split('/').pop().replace('#', '');
+        var blob = new Blob([file_content], {type:"text/plain;charset=utf-8"});
+        saveAs(blob, project_id + ".md");
+    });
 });

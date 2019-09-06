@@ -93,11 +93,15 @@ def get_project_info(project_id):
                 'link': "{}translational_efficiency/{}".format(request.url_root, project_id)
             })
 
+        analysis_info = rdb.get('{}_analysis_info'.format(project_id))
+        if analysis_info is not None:
+            analysis_info = analysis_info.decode('utf-8')
+
         return render_template("project_info.html", project_id=project_id, project_info=project_info,
                                 samples=samples_info, available_stats=available_stats, ucsc_links=ucsc_links,
-                               analysis_list=analysis_list)
+                               analysis_list=analysis_list, analysis_info=analysis_info)
 
-    else: # if request.method == "POST":
+    else:  # if request.method == "POST":
         rdb_data = rdb.get('project_info_{}'.format(project_id))
         if rdb_data is None:
             project_info = {'project_id': project_id}

@@ -3,6 +3,7 @@
 <link href="{{ url_for('static', filename='libraries/bootstrap-editable.css') }}" rel="stylesheet"/>
 <script src="{{ url_for('static', filename='libraries/fontawesome.js') }}"></script>
 <script src="{{ url_for('static', filename='libraries/bootstrap-editable.min.js') }}"></script>
+<script src="{{ url_for('static', filename='libraries/FileSaver.js') }}"></script>
 <script src="{{ url_for('static', filename='javascript/project_info.js') }}"></script>
 <div class="align-middle">
     <div class="row justify-content-center">
@@ -24,6 +25,10 @@
                 <tr><td>Project Description</td><td id="description">{{ project_info.get('description', '') }}{#Project of collaborators from Netherlands, prepared with the new protocol, to be demultiplexed and analysed with diricore. The aim is to see if there’s an overabundance of codons of specific amino acids in the A-site, which would suggest ribosome stalling to occur in these cells#}</td></tr>
                 <tr><td>Prepared by</td><td id="prepared_by">{{ project_info.get('prepared_by', '') }}</td></tr>
                 <tr><td>Protocol</td><td id="protocol">{{ project_info.get('protocol', '') }}</td></tr>
+                {% if analysis_info %}
+                <tr><td>Analysis info</td><td><a href="#" data-content="{{ analysis_info }}"
+                        id="analysis_info">{{ project_id }}.md</a></td></tr>
+                {% endif %}
                 <tr><td>UCSC link</td><td>{% if ucsc_links %}{% for ucsc_link in ucsc_links %}
                     <a href="{{ ucsc_link }}" target="_blank">{{ ucsc_link }}</a><br>
                     {% endfor %}{% else %}Not available{% endif %}</td></tr>
