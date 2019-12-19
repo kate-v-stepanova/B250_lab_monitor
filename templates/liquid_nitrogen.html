@@ -1,0 +1,35 @@
+{% extends 'layout.html' %}
+{% block body %}
+<script src="{{ url_for('static', filename='libraries/highcharts_heatmap.js') }}"></script>
+<script src="{{ url_for('static', filename='libraries/highcharts-more.js') }}"></script>
+<script src="{{ url_for('static', filename='javascript/liquid_nitrogen.js') }}"></script>
+<script src="{{ url_for('static', filename='libraries/fontawesome.js') }}"></script>
+<script src="{{ url_for('static', filename='libraries/bootstrap-editable.min.js') }}"></script>
+
+<div class="row h-100">
+    <div id="towers" class="col col-sm2 mt-4"></div>
+    <div id="rack" class="col col-sm-4" data-series="{{ series }}"></div>
+    <div id="cell_lines" class="col col-sm-6 mt-2" data-cell_lines="{{ cell_lines }}">
+        <p class="h5"></p>
+        <table class="table table-bordered mt-3 d-none">
+            <tbody>
+                <tr><td>Location</td><td id="location"></td></tr>
+                <tr><td class="w-25">Cell line ID</td><td class="w-75" id="cell_line_ID"></td></tr>
+                <tr><td>Cell line</td><td id="cell_line"></td></tr>
+                <tr><td>Media (Freezing Medium)</td><td id="media"></td></tr>
+                <tr><td>Transferred plasmid</td><td id="plasmid"></td></tr>
+                <tr><td>Selection</td><td id="selection"></td></tr>
+                <tr><td>Type</td><td id="type"></td></tr>
+                <tr><td>Biosafety Level</td><td id="biosafety"></td></tr>
+                <tr><td>Mycoplasma checked</td><td id="mycoplasma"></td></tr>
+                <tr><td>Source</td><td id="source"></td></tr>
+                <tr><td>Date</td><td id="date"></td></tr>
+                <tr><td>Responsible person</td><td id="responsible"></td></tr>
+                <tr><td>Comments</td><td id="comments"></td></tr>
+            </tbody>
+        </table>
+        <button id="save_changes" class="btn btn-primary btn-sm d-none" type="button">Save Changes</button>
+    </div>
+
+</div>
+{% endblock %}

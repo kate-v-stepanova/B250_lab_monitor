@@ -16,6 +16,7 @@ from url_handlers.heatmap import heatmap
 from url_handlers.ribo_diff import ribo_diff
 from url_handlers.analysis_info import analysis_info
 from url_handlers.alignments import alignments
+from url_handlers.liquid_nitrogen import liquid_nitrogen
 
 app = Flask(__name__)
 
@@ -30,6 +31,7 @@ app.register_blueprint(heatmap)
 app.register_blueprint(ribo_diff)
 app.register_blueprint(analysis_info)
 app.register_blueprint(alignments)
+app.register_blueprint(liquid_nitrogen)
 
 app.secret_key = 'super secret key'
 app.config['SESSION_TYPE'] = 'filesystem'
@@ -50,7 +52,7 @@ def load_user(user_id):
 # Database stuff
 def connect_db():
     """ connects to redis database """
-    redis_store = FlaskRedis()
+    redis_store = FlaskRedis(health_check_interval=30)
     redis_store.init_app(app)
     return redis_store
 
