@@ -60,6 +60,7 @@ def upload(remote, filename, tower):
         data = df3.to_dict('list')
         data = json.dumps(data)
         rdb.set(tower, data)
+        rdb.sadd('towers', tower)
 
     else:
         print("File does not exist? {}".format(filename))
