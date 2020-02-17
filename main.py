@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from flask import Flask, g
 from flask_redis import FlaskRedis
 from flask_login import LoginManager
@@ -35,6 +37,7 @@ app.register_blueprint(liquid_nitrogen)
 
 app.secret_key = 'super secret key'
 app.config['SESSION_TYPE'] = 'filesystem'
+app.config['REMEMBER_COOKIE_DURATION'] = timedelta(weeks=26)
 
 sess = Session(app)
 
