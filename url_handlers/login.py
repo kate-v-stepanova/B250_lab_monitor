@@ -9,7 +9,7 @@ login_page = Blueprint('login_page', __name__)
 # creating a custom User class
 class User(UserMixin):
     def __init__(self, id, email, password):
-        self.id = id
+        self.id = id # id is equal to email
         self.email = email
         self.password = password
 
@@ -27,14 +27,17 @@ class User(UserMixin):
         return None
 
     @classmethod
-    def get_by_id(self, id):
+    def get_by_id(self, email):
         # for now get user by email and use email as an id
         from main import get_db
         rdb = get_db()
-        password = rdb.hget('users', id) or ''
+        password = rdb.hget('users', email) or ''
         if password:
-            return User(id, id, password)
+            return User(email, email, password)
         return None
+
+    def get_id(self):
+        return self.id
 
 
 @login_page.route('/login', methods=['GET', 'POST'])
@@ -45,7 +48,7 @@ def login():
         password = request.form['password']
         user = User.get_user(email, password)
         if user is not None:
-            login_user(user)
+            login_user(user, remember=True)
             return redirect('/')
         else:
             error = "Incorrect username or password"

@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from flask import Flask, g
 from flask_redis import FlaskRedis
 from flask_login import LoginManager
@@ -18,6 +20,7 @@ from url_handlers.heatmap import heatmap
 from url_handlers.ribo_diff import ribo_diff
 from url_handlers.analysis_info import analysis_info
 from url_handlers.alignments import alignments
+from url_handlers.liquid_nitrogen import liquid_nitrogen
 
 app = Flask(__name__)
 
@@ -32,9 +35,11 @@ app.register_blueprint(heatmap)
 app.register_blueprint(ribo_diff)
 app.register_blueprint(analysis_info)
 app.register_blueprint(alignments)
+app.register_blueprint(liquid_nitrogen)
 
 app.secret_key = 'super secret key'
 app.config['SESSION_TYPE'] = 'filesystem'
+app.config['REMEMBER_COOKIE_DURATION'] = timedelta(weeks=26)
 
 sess = Session(app)
 
@@ -58,6 +63,7 @@ def connect_db():
     #redis_store = redis.StrictRedis(host="172.22.25.100", health_check_interval=30)
     redis_store = redis.StrictRedis(host=ip, health_check_interval=30)
 
+    redis_store.init_app(app)
     return redis_store
 
 

@@ -1,0 +1,174 @@
+{% extends 'layout.html' %}
+{% block body %}
+<script src="{{ url_for('static', filename='libraries/highcharts_heatmap.js') }}"></script>
+<script src="{{ url_for('static', filename='libraries/highcharts-more.js') }}"></script>
+<script src="{{ url_for('static', filename='libraries/fontawesome.js') }}"></script>
+<script src="{{ url_for('static', filename='libraries/bootstrap-editable.min.js') }}"></script>
+<script src="{{ url_for('static', filename='javascript/liquid_nitrogen.js') }}"></script>
+{% if error %}
+<div class="alert alert-danger alert-dismissible fade show" role="alert" id="error">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+    {{ error }}
+</div>
+{% endif %}
+
+<div class="row h-100">
+    <div id="towers" class="col col-sm-3 mt-4"></div>
+    <div id="rack" class="col col-sm-4" data-series="{{ series }}"></div>
+    <div id="cell_lines" class="col col-sm-5 mt-2" data-cell_lines="{{ cell_lines }}" data-dropdown="{{ cell_lines_dropdown }}">
+        <div class="row ml-2"><p class="h5 mt-2"></p>
+            <button id="erase" class="btn btn-outline-primary btn-sm d-none ml-4" data-toggle="modal" data-target="#confirm_erase">
+                Remove <i class="fas fa-eraser"></i></button></div>
+        <table class="table table-bordered mt-3 d-none">
+            <tbody>
+                <tr><td>Location</td><td id="location"></td></tr>
+                <tr><td class="w-25">Cell line ID</td><td class="w-75" id="cell_line_ID"></td></tr>
+                <tr><td>Cell line</td><td id="cell_line"></td></tr>
+                <tr><td>Media (Freezing Medium)</td><td id="media"></td></tr>
+                <tr><td>Transferred plasmid</td><td id="plasmid"></td></tr>
+                <tr><td>Selection</td><td id="selection"></td></tr>
+                <tr><td>Type</td><td id="type"></td></tr>
+                <tr><td>Biosafety Level</td><td id="biosafety"></td></tr>
+                <tr><td>Mycoplasma checked</td><td id="mycoplasma"></td></tr>
+                <tr><td>Source</td><td id="source"></td></tr>
+                <tr><td>Date</td><td id="date"></td></tr>
+                <tr><td>Responsible person</td><td id="responsible_name"></td></tr>
+                <tr><td>Comments</td><td id="comments"></td></tr>
+            </tbody>
+        </table>
+        <button id="save_changes" class="btn btn-primary btn-sm d-none" type="button">Save Changes</button>
+        <button id="discard_changes" class="btn btn-secondary btn-sm d-none" type="button">Discard Changes</button>
+    </div>
+
+    {# REMOVE cell line #}
+    <div id="confirm_erase" class="modal fade" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modal_title">This action cannot be undone!!</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger alert-dismissible fade show d-none" role="alert" id="error-1">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    Are you sure you want to remove cell line from the selected position?
+                    If yes, please enter your name: <input type="text" class="form-control" id="responsible">
+
+                    <label>Enter comments: </label><textarea class="form-control" id="comments-1"></textarea>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="remove_from_rack">Remove</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {# END of remove #}
+
+    {# ASSIGN a cell line #}
+    <div class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel"
+         id="modal-2"> <!--aria-hidden="true">-->
+      <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Enter required information</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+               <form>
+                   <div class="alert alert-danger alert-dismissible fade show d-none" role="alert" id="error">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="form-group">
+                        <label>Enter your name: </label><input type="text" class="form-control" id="responsible-2">
+                        <label>Enter comments: </label><textarea class="form-control" id="comments-2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="modal-ok">OK</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" id="modal-cancel">Cancel</button>
+              </div>
+        </div>
+      </div>
+    </div>
+    {# END of assign #}
+
+    {# modal NEW CELL_LINE #}
+    <div id="new_cell_line" class="modal fade" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add a new cell line</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger alert-dismissible fade show d-none" role="alert" id="error-3">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form>
+                        <div class="form-group row mr-2 mb-0">
+                            <label for="new_cell_line_name" class="col-sm-4 col-form-label">Cell line:</label>
+                            <input type="text" id="new_cell_line_name" name="cell_line" class="col-sm-8 form-control">
+                        </div>
+                        <div class="form-group row mr-2 mb-0">
+                            <label for="new_cell_line_id" class="col-sm-4 col-form-label">Cell line ID:</label>
+                            <input type="text" id="new_cell_line_id" name="cell_line_id" class="col-sm-8 form-control">
+                        </div>
+                        <div class="form-group row mr-2 mb-0">
+                            <label for="new_media" class="col-sm-4 col-form-label">Media (Freezing Medium):</label>
+                            <input type="text" id="new_media" name="media" class="col-sm-8 form-control">
+                        </div>
+                        <div class="form-group row mr-2 mb-0">
+                            <label for="new_plasmid" class="col-sm-4 col-form-label">Transferred plasmid:</label>
+                            <input type="text" id="new_plasmid" name="plasmid" class="col-sm-8 form-control">
+                        </div>
+                        <div class="form-group row mr-2 mb-0">
+                            <label for="new_selection" class="col-sm-4 col-form-label">Selection:</label>
+                            <input type="text" id="new_selection" name="selection" class="col-sm-8 form-control">
+                        </div>
+                        <div class="form-group row mr-2 mb-0">
+                            <label for="new_type" class="col-sm-4 col-form-label">Type:</label>
+                            <input type="text" id="new_type" name="type" class="col-sm-8 form-control">
+                        </div>
+                        <div class="form-group row mr-2 mb-0">
+                            <label for="new_biosafety" class="col-sm-4 col-form-label">Biosafety Level:</label>
+                            <input type="text" id="new_biosafety" name="biosafety" class="col-sm-8 form-control">
+                        </div>
+                        <div class="form-group row mr-2 mb-0">
+                            <label for="new_mycoplasma" class="col-sm-4 col-form-label">Mycoplasma checked:</label>
+                            <input type="text" id="new_mycoplasma" name="mycoplasma" class="col-sm-8 form-control">
+                        </div>
+                        <div class="form-group row mr-2 mb-0">
+                            <label for="new_source" class="col-sm-4 col-form-label">Source:</label>
+                            <input type="text" id="new_source" name="source" class="col-sm-8 form-control">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="create_new">Submit</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {# end of NEW CELL_LINE #}
+
+</div>
+{% endblock %}
