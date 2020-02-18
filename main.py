@@ -2,6 +2,8 @@ from flask import Flask, g
 from flask_redis import FlaskRedis
 from flask_login import LoginManager
 from flask_session import Session
+import redis
+
 
 from url_handlers.login import User
 
@@ -50,8 +52,12 @@ def load_user(user_id):
 # Database stuff
 def connect_db():
     """ connects to redis database """
-    redis_store = FlaskRedis()
-    redis_store.init_app(app)
+#    redis_store = FlaskRedis(health_check_interval=30)
+#    redis_store.init_app(app)
+    ip = "172.22.54.5"
+    #redis_store = redis.StrictRedis(host="172.22.25.100", health_check_interval=30)
+    redis_store = redis.StrictRedis(host=ip, health_check_interval=30)
+
     return redis_store
 
 
@@ -62,3 +68,7 @@ def get_db():
     if not hasattr(g, 'redis_db'):
         g.redis_db = connect_db()
     return g.redis_db
+
+
+if __name__ == '__main__':
+    app.run(debug=True, port=int("80"))
