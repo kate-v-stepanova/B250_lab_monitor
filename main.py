@@ -18,7 +18,6 @@ from url_handlers.project_info import project_page
 from url_handlers.ma_plot import ma_plot
 from url_handlers.heatmap import heatmap
 from url_handlers.ribo_diff import ribo_diff
-from url_handlers.analysis_info import analysis_info
 from url_handlers.alignments import alignments
 from url_handlers.liquid_nitrogen import liquid_nitrogen
 
@@ -33,7 +32,6 @@ app.register_blueprint(project_page)
 app.register_blueprint(ma_plot)
 app.register_blueprint(heatmap)
 app.register_blueprint(ribo_diff)
-app.register_blueprint(analysis_info)
 app.register_blueprint(alignments)
 app.register_blueprint(liquid_nitrogen)
 
@@ -63,7 +61,6 @@ def connect_db():
     #redis_store = redis.StrictRedis(host="172.22.25.100", health_check_interval=30)
     redis_store = redis.StrictRedis(host=ip, health_check_interval=30)
 
-    redis_store.init_app(app)
     return redis_store
 
 
