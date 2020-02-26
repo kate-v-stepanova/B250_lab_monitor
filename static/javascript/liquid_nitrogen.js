@@ -23,7 +23,6 @@ $(document).ready(function() {
             /*
                 // here will be processed modal inputs
             */
-            value = $('#new_cell_line_id').val();
         } else {
             $('#modal-2').modal();
             /*
@@ -33,18 +32,19 @@ $(document).ready(function() {
         var cell_line = cell_lines[value];
 
 
-
-        // then update fields
-        $('#cell_line').text(cell_line['Cell line']);
-        $('#media').text(cell_line['Media (Freezing Medium)']);
-        $('#plasmid').text(cell_line['Transferred plasmid']);
-        $('#selection').text(cell_line['Selection']);
-        $('#type').text(cell_line['Typ']);
-        $('#biosafety').text(cell_line['Biosafety Level']);
-        $('#mycoplasma').text(cell_line['Mycoplasma checked']);
-        $('#source').text(cell_line['Source']);
-        // mark with bold (updated values)
-        $('#cell_line_ID').addClass('font-weight-bold');
+        if (cell_line != undefined) {
+            // then update fields
+            $('#cell_line').text(cell_line['Cell line']);
+            $('#media').text(cell_line['Media (Freezing Medium)']);
+            $('#plasmid').text(cell_line['Transferred plasmid']);
+            $('#selection').text(cell_line['Selection']);
+            $('#type').text(cell_line['Typ']);
+            $('#biosafety').text(cell_line['Biosafety Level']);
+            $('#mycoplasma').text(cell_line['Mycoplasma checked']);
+            $('#source').text(cell_line['Source']);
+            // mark with bold (updated values)
+            $('#cell_line_ID').addClass('font-weight-bold');
+        }
     }
 
     $('#cell_line_ID').editable({
@@ -56,18 +56,18 @@ $(document).ready(function() {
     });
 
     $('#create_new').on('click', function(e) {
+        var new_ID = $('#new_cell_line_id').val()
         var data = {
-            'new_id': $('#new_cell_line_id').val(),
-            'new_name': $('#new_cell_line_name').val(),
-            'media': $('#new_media').val(),
-            'plasmid': $('#new_plasmid').val(),
-            'selection': $('#new_selection').val(),
-            'type': $('#new_type').val(),
-            'biosafety': $('#new_biosafety').val(),
-            'mycoplasma': $('#new_mycoplasma').val(),
-            'source': $('#new_source').val(),
+            'ID': new_ID,
+            'Cell line': $('#new_cell_line_name').val(),
+            'Media (Freezing Medium)': $('#new_media').val(),
+            'Transferred plasmid': $('#new_plasmid').val(),
+            'Selection': $('#new_selection').val(),
+            'Typ': $('#new_type').val(),
+            'Biosafety Level': $('#new_biosafety').val(),
+            'Mycoplasma checked': $('#new_mycoplasma').val(),
+            'Source': $('#new_source').val(),
         }
-
         var url = window.location.href + "/create_cell_line";
         $.ajax({
             type: "POST",
@@ -77,11 +77,33 @@ $(document).ready(function() {
             //json object to sent to the authentication url
             data: JSON.stringify(data),
             contentType: 'application/json',
-        }).done(function() {
-            alert( "success" );
-          }).fail(function() {
-            alert( "error" );
-          })
+        }).done(function(response) {
+            if (response['status'] == 'error') {
+                alert(response['error']);
+            } else {
+                alert('Successfully created');
+                // then update fields
+                $('#cell_line_ID').text(new_ID);
+                $('#cell_line').text(data['Cell line']).addClass('font-weight-bold');
+                $('#media').text(data['Media (Freezing Medium)']).addClass('font-weight-bold');
+                $('#plasmid').text(data['Transferred plasmid']).addClass('font-weight-bold');
+                $('#selection').text(data['Selection']).addClass('font-weight-bold');
+                $('#type').text(data['Typ']).addClass('font-weight-bold');
+                $('#biosafety').text(data['Biosafety Level']).addClass('font-weight-bold');
+                $('#mycoplasma').text(data['Mycoplasma checked']).addClass('font-weight-bold');
+                $('#source').text(data['Source']).addClass('font-weight-bold');
+                // mark with bold (updated values)
+                $('#cell_line_ID').addClass('font-weight-bold').addClass('font-weight-bold');
+                value = $('#new_cell_line_id').val();
+                $('#new_cell_line').modal('hide');
+                // add cell line to a list
+                cell_lines[new_ID] = data;
+                cell_lines_dropdown.push({'value': new_ID, 'text': new_ID});
+                $('#modal-2').modal();
+            }
+        }).fail(function(response) {
+            alert(response['responseJSON']['error']);
+        });
 
     });
 
@@ -121,9 +143,12 @@ $(document).ready(function() {
             val = 0;
         }
         var location = $('#location').text(); // Rack3, B9
+
         var rack = location.split(', ')[0].replace('Rack', '');
         var pos = location.split(', ')[1];
-        var ee = {point: {ID: prev_val, value: val, Rack: rack, pos: pos}}
+        var x = pos.substr(1) - 1;
+        var y = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].indexOf(pos[0]);
+        var ee = {point: {ID: prev_val, value: val, Rack: rack, pos: pos, x: x, y: y}};
         show_cell_line_details(ee);
     });
 
@@ -325,6 +350,7 @@ $(document).ready(function() {
         $('#save_changes').addClass('d-none');
         $('#discard_changes').addClass('d-none');
         $('#erase').addClass('d-none');
+
         Highcharts.chart('rack', {
             chart: {
                 type: 'heatmap',
@@ -368,14 +394,26 @@ $(document).ready(function() {
     }
 
     function show_cell_line_details(e) {
-        var cell_line = e.point.ID;
         $('#cell_lines').find('table').removeClass('d-none');
         $('#cell_lines').find('p.h5').removeClass('d-none');
         $('#save_changes').removeClass('d-none');
         $('#discard_changes').removeClass('d-none');
-        $('#cell_lines').find('p.h5').text('Rack' + e.point.Rack + ', ' + e.point.pos);
-        $('#erase').removeClass('d-none');
-        if (e.point.value == 0) {
+        var rack = $('#rack').find('text.highcharts-title tspan').text();
+        var x = e.point.x + 1;
+        var y = e.point.y;
+        y = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'][y];
+        $('#cell_lines').find('p.h5').text(rack + ', ' + y + x);
+        var cell_line = e.point.ID;
+        // if location is empty
+        if (cell_line == undefined || cell_line == '') {
+            if (!$('#erase').hasClass('d-none')) {
+                $('#erase').addClass('d-none');
+            }
+            $('#cell_line').attr('data-unchanged-val', '');
+        } else {
+            $('#erase').removeClass('d-none');
+        }
+        if (e.point.value == 0 || e.point.value == undefined) {
             $('#cell_lines').find("td[id]").text('');
         } else {
             data = cell_lines[cell_line];
@@ -392,7 +430,7 @@ $(document).ready(function() {
             $('#responsible_name').text(data['Responsible person']);
             $('#comments').text(data['Comments']);
         }
-        $('#location').text('Rack' + e.point.Rack + ", " + e.point.pos);
+        $('#location').text(rack + ", " + y + x);
     }
 
     $('#remove_from_rack').on('click', function(e) {
@@ -455,7 +493,9 @@ $(document).ready(function() {
         var location = $('#location').text();
         var rack = location.split(', ')[0].replace('Rack', '');
         var pos = location.split(', ')[1];
-        var ee = {point: {ID: cell_line, value: val, Rack: rack, pos: pos}}
+        var x = pos.substr(1) - 1;
+        var y = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].indexOf(pos[0]);
+        var ee = {point: {ID: cell_line, value: val, Rack: rack, pos: pos, x: x, y:y}};
         show_cell_line_details(ee);
     });
 
@@ -464,12 +504,15 @@ $(document).ready(function() {
         var rack = location.split(', ')[0].replace('Rack', '');
         var pos = location.split(', ')[1];
         var prev_cell_line = $('#cell_line').attr('data-unchanged-val');
+
         var cell_line = $('#cell_line_ID').text();
         var responsible = $('#responsible_name').text();
         var date = $('#date').text();
         var comments = $('#comments').text();
-
         var prev_data = cell_lines[prev_cell_line];
+        if (prev_data == undefined) {
+            prev_data = {};
+        }
         var prev_resp = prev_data['Responsible person'];
         var prev_comments = prev_data['Comments'];
         var prev_date = prev_data['Date'];
@@ -485,7 +528,7 @@ $(document).ready(function() {
             comments: comments,
             prev_resp: prev_resp,
             prev_comments: prev_comments,
-            prev_date: prev_date
+            prev_date: prev_date,
         }
 
         var url = window.location.href + "/update_rack";
@@ -497,9 +540,9 @@ $(document).ready(function() {
             //json object to sent to the authentication url
             data: JSON.stringify(data),
             contentType: 'application/json',
-        }).done(function() {
+        }).done(function(response) {
             alert( "success" );
-          }).fail(function() {
+          }).fail(function(response) {
             alert( "error" );
           })
     });
