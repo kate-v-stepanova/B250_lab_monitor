@@ -30,7 +30,11 @@ def rows_from_range(row):
 def upload(remote, filename, tower):
     if os.path.isfile(filename):
         df = pd.read_csv(filename, sep=";")
-        df1 = df.drop(['Rack', 'Drawer', 'Position', 'passage no.', 'Unnamed: 16', 'Date', 'Responsible person', 'Comments'], axis='columns')
+        import pdb; pdb.set_trace()
+        df = df.drop(['Unnamed: 16', 'Unnamed: 4'], axis=1)
+        # df1 = df.drop(['Rack', 'Drawer', 'Position', 'passage no.', 'Unnamed: 16', 'Date', 'Responsible person', 'Comments'], axis='columns')
+        df1 = df.drop(['Rack', 'Position', 'Tower', 'Date', 'Responsible person', 'Comments'], axis='columns')
+
         df1 = df1.fillna('')
         data = df1.to_dict('list')
         data = json.dumps(data)
