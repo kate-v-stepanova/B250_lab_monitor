@@ -407,7 +407,9 @@ $(document).ready(function() {
         var x = e.point.x + 1;
         var y = e.point.y;
         y = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'][y];
+        // update header
         $('#cell_lines').find('p.h5').text(rack + ', ' + y + x);
+
         var cell_line = e.point.ID;
         // if location is empty
         if (cell_line == undefined || cell_line == '') {
@@ -418,9 +420,13 @@ $(document).ready(function() {
         } else {
             $('#erase').removeClass('d-none');
         }
+        $('#pos-details').find('tr').removeClass('table-warning');
         if (e.point.value == 0 || e.point.value == undefined) {
             $('#cell_lines').find("td[id]").text('');
         } else {
+            if (e.point.value == 2) {
+                $('#pos-details').find('tr').addClass('table-warning');
+            }
             data = cell_lines[cell_line];
             $('#cell_line_ID').text(data['ID']);
             $('#cell_line').text(data['Cell line']);
