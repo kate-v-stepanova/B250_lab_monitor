@@ -3,10 +3,15 @@ $(document).ready(function() {
     // edit fields of cell line
     $.fn.editable.defaults.mode = 'inline';
     $('#comments').editable({
-       type:  'textarea',
+        type:  'textarea',
+        emptytext: '',
     });
-    $('#responsible_name').editable();
-    $('#date').editable();
+    $('#responsible_name').editable({
+        emptytext: '',
+    });
+    $('#date').editable({
+        emptytext: '',
+    });
 
     var cell_lines_dropdown = $('#cell_lines').attr('data-dropdown');
     cell_lines_dropdown = cell_lines_dropdown.replace(/'/g, '"'); //");
@@ -28,22 +33,21 @@ $(document).ready(function() {
             /*
                 // here will be processed modal inputs
             */
-        }
-        var cell_line = cell_lines[value];
-
-
-        if (cell_line != undefined) {
-            // then update fields
-            $('#cell_line').text(cell_line['Cell line']);
-            $('#media').text(cell_line['Media (Freezing Medium)']);
-            $('#plasmid').text(cell_line['Transferred plasmid']);
-            $('#selection').text(cell_line['Selection']);
-            $('#type').text(cell_line['Typ']);
-            $('#biosafety').text(cell_line['Biosafety Level']);
-            $('#mycoplasma').text(cell_line['Mycoplasma checked']);
-            $('#source').text(cell_line['Source']);
-            // mark with bold (updated values)
-            $('#cell_line_ID').addClass('font-weight-bold');
+            var cell_line = cell_lines[value];
+            if (cell_line != undefined) {
+                // then update fields
+                $('#cell_line').text(cell_line['Cell line']);
+                $('#cell_line_ID').text(cell_line)
+                $('#media').text(cell_line['Media (Freezing Medium)']);
+                $('#plasmid').text(cell_line['Transferred plasmid']);
+                $('#selection').text(cell_line['Selection']);
+                $('#type').text(cell_line['Typ']);
+                $('#biosafety').text(cell_line['Biosafety Level']);
+                $('#mycoplasma').text(cell_line['Mycoplasma checked']);
+                $('#source').text(cell_line['Source']);
+                // mark with bold (updated values)
+                $('#cell_line_ID').addClass('font-weight-bold');
+            }
         }
     }
 
@@ -51,7 +55,6 @@ $(document).ready(function() {
         type: 'select',
         value: $('#cell_line_ID').text(),
         source: cell_lines_dropdown,
-        emptytext: 'Empty',
         validate: validate_cell_line,
     });
 
@@ -238,6 +241,7 @@ $(document).ready(function() {
 
     function showRackContent(e) {
         var tower = e.point.category;
+        $('#towers').attr('selected-tower', tower);
         var rack = this.name;
         var key = tower + '_' + rack;
         data = rack_series[key];
@@ -399,6 +403,7 @@ $(document).ready(function() {
         $('#save_changes').removeClass('d-none');
         $('#discard_changes').removeClass('d-none');
         var rack = $('#rack').find('text.highcharts-title tspan').text();
+        var tower = $('#towers').attr('selected-tower');
         var x = e.point.x + 1;
         var y = e.point.y;
         y = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'][y];
@@ -426,9 +431,18 @@ $(document).ready(function() {
             $('#biosafety').text(data['Biosafety Level']);
             $('#mycoplasma').text(data['Mycoplasma checked']);
             $('#source').text(data['Source']);
-            $('#date').text(data['Date']);
-            $('#responsible_name').text(data['Responsible person']);
-            $('#comments').text(data['Comments']);
+            // get date, comment and responsible from the rack data and update fields
+            var rack_data = rack_series[tower + '_' + rack];
+            if (rack_data != undefined) {
+                $('#date').text(rack_data['Date']);
+                $('#responsible_name').text(rack_data['Responsible person']);
+                $('#comments').text(rack_data['Comments']);
+            } else {
+                $('#date').text('');
+                $('#responsible_name').text('');
+                $('#comments').text('');
+            }
+
         }
         $('#location').text(rack + ", " + y + x);
     }
@@ -500,6 +514,7 @@ $(document).ready(function() {
     });
 
     $('#save_changes').on('click', function(){
+        var tower = $('#towers').attr('selected-tower');
         var location = $('#location').text();
         var rack = location.split(', ')[0].replace('Rack', '');
         var pos = location.split(', ')[1];
@@ -516,16 +531,19 @@ $(document).ready(function() {
         var prev_resp = prev_data['Responsible person'];
         var prev_comments = prev_data['Comments'];
         var prev_date = prev_data['Date'];
-
+        var x = pos.substr(1);
+        var y = pos[0];
         data = {
-//            tower: tower,
-            rack: rack,
+            tower: tower,
+            Rack: rack,
             pos: pos,
+            x: x,
+            y: y,
             prev_cell_line: prev_cell_line,
             cell_line: cell_line,
-            responsible: responsible,
-            date: date,
-            comments: comments,
+            'Responsible person': responsible,
+            Date: date,
+            Comments: comments,
             prev_resp: prev_resp,
             prev_comments: prev_comments,
             prev_date: prev_date,
@@ -542,8 +560,12 @@ $(document).ready(function() {
             contentType: 'application/json',
         }).done(function(response) {
             alert( "success" );
-          }).fail(function(response) {
-            alert( "error" );
-          })
+            // todo: update rack_series and cell_line data
+            rack_series['Rack' + rack]
+        }).fail(function(response) {
+            console.log(response);
+            alert(response);
+
+        })
     });
 });
