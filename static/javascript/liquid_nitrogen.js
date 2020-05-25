@@ -411,6 +411,7 @@ $(document).ready(function() {
         $('#cell_lines').find('p.h5').text(rack + ', ' + y + x);
 
         var cell_line = e.point.ID;
+
         // if location is empty
         if (cell_line == undefined || cell_line == '') {
             if (!$('#erase').hasClass('d-none')) {
@@ -420,13 +421,11 @@ $(document).ready(function() {
         } else {
             $('#erase').removeClass('d-none');
         }
-        $('#pos-details').find('tr').removeClass('table-warning');
-        if (e.point.value == 0 || e.point.value == undefined) {
+
+
+        if (e.point.value == 0 || e.point.value == undefined || cell_line == '') {
             $('#cell_lines').find("td[id]").text('');
         } else {
-            if (e.point.value == 2) {
-                $('#pos-details').find('tr').addClass('table-warning');
-            }
             data = cell_lines[cell_line];
             $('#cell_line_ID').text(data['ID']);
             $('#cell_line').text(data['Cell line']);
@@ -448,8 +447,22 @@ $(document).ready(function() {
                 $('#responsible_name').text('');
                 $('#comments').text('');
             }
-
         }
+//        console.log(data);
+//        console.log(e.point.value);
+//        $('#pos-details').find('tr').removeClass('table-warning');
+
+        if (e.point.value == 2 || e.point.value == '2') { // 2 means to confirm
+            $('#pos-details').find('tr').addClass('table-warning');
+//            $('tr.to_approve').removeClass('d-none');
+//            $('#prev_cell_line').text(data['prev_cell_line']);
+//            $('#prev_responsible').text(data['prev_responsible']);
+//            $('#prev_comments').text(data['prev_comments']);
+//            $('#prev_date').text(data['prev_date']);
+        } else {
+            $('tr.to_approve').addClass('d-none');
+        }
+
         $('#location').text(rack + ", " + y + x);
     }
 
@@ -492,6 +505,7 @@ $(document).ready(function() {
             $('#confirm_erase').modal('hide');
         }
     });
+
 
     function get_today() {
         var today = new Date();
@@ -555,6 +569,8 @@ $(document).ready(function() {
             prev_date: prev_date,
         }
 
+
+        // add or remove
         var url = window.location.href + "/update_rack";
         $.ajax({
             type: "POST",
@@ -566,12 +582,57 @@ $(document).ready(function() {
             contentType: 'application/json',
         }).done(function(response) {
             alert( "success" );
-            // todo: update rack_series and cell_line data
-            rack_series['Rack' + rack]
+            // todo: update rack_series
+            console.log(rack_series[tower + '_Rack' + rack]);
+//            rack_series[tower + '_Rack' + rack] = data;
         }).fail(function(response) {
             console.log(response);
             alert(response);
 
         })
     });
+
+    $('#search_btn').on('click', function(){
+        console.log('search');
+        var to_search = $('#search').val();
+        console.log(to_search);
+        if (to_search != '') {
+            var url = window.location.href + "/search";
+            $.ajax({
+                type: "POST",
+                //the url where you want to sent the userName and password to
+                url: url,
+                dataType: 'json',
+                //json object to sent to the authentication url
+                data: to_search,
+                contentType: 'text/html',
+            }).done(function(response) {
+                $('#search_results').empty();
+                $('#search_results').append(response['html_result']);
+                $('#clear_search').removeClass('d-none');
+            }).fail(function(response) {
+                console.log(response);
+                alert('Failed');
+
+            })
+        }
+    });
+
+
+    $("#table_search").on("click-cell.bs.table", function (field, value, row, $el) {
+        console.log('CLICK ROW');
+        console.log(field);
+    });
+
+    $("tr").on("click", function (field, value, row, $el) {
+        console.log('CLICK ROW');
+        console.log(field);
+    });
+
+    $('#clear_search').on('click', function() {
+        $('#search_results').empty();
+        $('#search').val('');
+        $('#clear_search').addClass('d-none');
+    });
+
 });

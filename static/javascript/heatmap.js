@@ -43,7 +43,8 @@ $(document).ready(function() {
             target: "inchlib", //ID of a target HTML element
             metadata: true, //turn on the metadata
             draw_row_ids: true,
-            max_height: 1200, //set maximum height of visualization in pixels
+            //max_height: 1200, //set maximum height of visualization in pixels
+            min_row_height: 15,
             width: 1000, //set width of visualization in pixels
             heatmap_colors: "BuWhRd", //set color scale for clustered data
             column_dendrogram: true,

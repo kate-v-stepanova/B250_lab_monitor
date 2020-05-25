@@ -30,7 +30,7 @@ def get_ma_plot(project_id):
         'min_counts': min_counts,
         'max_counts': max_counts,
     }
-    bi_df = rdb.get('ma_plot_{}_{}'.format(project_id, contrast))
+    bi_df = rdb.get('ma_plot_all_{}_{}'.format(project_id, contrast))
     if not bi_df:
         return render_template("ma_plot.html", error="No data for the contrast {}".format(contrast),
                                selected_contrast=contrast, contrasts=contrasts, apply_filters=apply_filters,
@@ -38,17 +38,18 @@ def get_ma_plot(project_id):
     df = pd.read_msgpack(bi_df)
     # columns: ['baseMean', 'log2FoldChange', 'lfcSE', 'stat', 'pvalue', 'padj', 'transcript']
     df = df.rename({'baseMean': 'x', 'log2FoldChange': 'y'}, axis='columns')
+    df = df.fillna('')
     if apply_filters:
-        if pval:
+        if pval != '':
             pval = float(pval)
             df = df.loc[df["pvalue"] <= pval]
-        if fc:
+        if fc != '':
             fc = float(fc)
             df = df.loc[(df["y"] <= fc) & (df["y"] >= -1 * fc)]
-        if min_counts:
+        if min_counts != '':
             min_counts = int(min_counts)
             df = df.loc[df["x"] >= min_counts]
-        if max_counts:
+        if max_counts != '':
             max_counts = int(max_counts)
             df = df.loc[df["x"] <= max_counts]
 

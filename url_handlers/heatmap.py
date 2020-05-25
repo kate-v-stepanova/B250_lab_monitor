@@ -64,7 +64,7 @@ def get_heatmap(project_id):
             plot_data = json.dumps(plot_data)
 
             csv_data = df1.to_csv(sep=",", header=True, index=False)
-            return render_template("heatmap.html", plot_data=plot_data, first_group=first_group,
+            return render_template("heatmap.html", plot_data=plot_data, first_group=first_group, samples=samples,
                                    list_of_genes=list_of_genes, number_of_genes1=number_of_genes1, filter1=filter1,
                                    number_of_genes2=number_of_genes2, include_non_coding=include_non_coding,
                                    csv_data=csv_data, filter2=filter2)
@@ -98,7 +98,7 @@ def get_heatmap(project_id):
         plot_data = json.dumps(plot_data)
         csv_data = df1.to_csv(sep=",", header=True, index=False)
 
-        return render_template("heatmap.html", plot_data=plot_data, first_group=first_group,
+        return render_template("heatmap.html", plot_data=plot_data, first_group=first_group, samples=samples,
                    list_of_genes=list_of_genes, number_of_genes1=number_of_genes1, include_non_coding=include_non_coding,
                    filter1=filter1, number_of_genes2=number_of_genes2, csv_data=csv_data, filter2=filter2)
 
@@ -120,15 +120,20 @@ def get_heatmap(project_id):
     if number_of_genes2 != 0:
         df22 = df22[:number_of_genes2]
 
+    # not changing genes
     common_genes = list(set(df22['gene_name'].tolist()) & set(df1['gene_name'].tolist()))
 
-    if len(common_genes) == 0:
+    all_genes = set(df22['gene_name'].tolist() + df1['gene_name'].tolist())
+    common_genes = set(set(df22['gene_name'].tolist()) & set(df1['gene_name'].tolist()))
+    our_genes = set(df1['gene_name'].tolist()) - common_genes
+
+    if len(our_genes) == 0:
         error = "No common genes found between 2 groups. Try to increase the number of genes"
-        return render_template("heatmap.html", first_group=first_group, second_group=second_group,
+        return render_template("heatmap.html", first_group=first_group, second_group=second_group, samples=samples,
                list_of_genes=list_of_genes, number_of_genes1=number_of_genes1, include_non_coding=include_non_coding,
                filter1=filter1, number_of_genes2=number_of_genes2, filter2=filter2, error=error)
 
-    final_df = df2.loc[df2['gene_name'].isin(common_genes)]
+    final_df = df2.loc[df2['gene_name'].isin(our_genes)]
     for sample in first_group + second_group:
         final_df[sample] = final_df[sample].round(2)
 
@@ -141,7 +146,7 @@ def get_heatmap(project_id):
     dendrogram = Dendrogram(cluster)
     plot_data = dendrogram.create_cluster_heatmap()
     plot_data = json.dumps(plot_data)
-    csv_data = df1.to_csv(sep=",", header=True, index=False)
+    csv_data = final_df.to_csv(sep=",", header=True, index=False)
 
     return render_template("heatmap.html", samples=samples, first_group=first_group, second_group=second_group,
                            number_of_genes1=number_of_genes1, number_of_genes2=number_of_genes2, filter1=filter1,

@@ -28,6 +28,11 @@ $(document).ready(function() {
                     text: '# Reads'
                 }
             },
+            tooltip: {
+                formatter: function () {
+                    return '<b>Condition: </b>' + this.series.name + '<br><b>Position: </b>' + this.x + '<br><b>Counts: </b>' + this.y;
+                }
+            },
             series: series
         });
     }

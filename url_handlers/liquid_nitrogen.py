@@ -37,8 +37,6 @@ def get_liquid_nitrogen():
             rack_series = []
             for y in y_pos:
                 for x in range(1, 11):
-                    # if y == 'J' and x == 10 and str(rack) == '5':
-                    #     import pdb; pdb.set_trace()
                     approved = to_approve.loc[(to_approve['tower'] == tower) & (to_approve['Rack'].astype(str) == rack) &
                                               (to_approve['y'] == y) & (to_approve['x'].astype(int) == x)]
                     df1 = df.loc[(df['Rack'].astype(str) == rack) & (df['y'] == y) & (df['x'].astype(int) == x)]
@@ -50,7 +48,7 @@ def get_liquid_nitrogen():
                             'x': x-1,
                             'y': y_pos.index(y),
                             'value': 2, # means to approve
-                            'color': '#EEF287', # yellow
+                            'color': '#ffcc00', # yellow
 
                             'Responsible person': approved.iloc[0]['Responsible person'],
                             'ID': approved.iloc[0]['cell_line'],
@@ -97,16 +95,8 @@ def get_liquid_nitrogen():
             'value': key,
             'text': key,
         })
-    return render_template('liquid_nitrogen.html', series=series, cell_lines=cell_lines, cell_lines_dropdown=cell_lines_dropdown)
-
-
-@liquid_nitrogen.route('/remove_from_rack', methods=['POST'])
-@login_required
-def remove_from_rack():
-    from main import get_db
-    data = request.get_json()
-    print(data)
-    return ""
+    return render_template('liquid_nitrogen.html', series=series, cell_lines=json.dumps(cell_lines).replace("""\xa0""", " "),
+                           cell_lines_dropdown=cell_lines_dropdown)
 
 
 @liquid_nitrogen.route('/liquid_nitrogen/update_rack', methods=['POST'])
@@ -180,3 +170,82 @@ def create_cell_line():
 
     return make_response({'status': 'success'}, 200)
 
+
+@liquid_nitrogen.route('/liquid_nitrogen/search', methods=['POST'])
+@login_required
+def search():
+    from main import get_db
+    rdb = get_db()
+    to_search = request.get_data()
+    if to_search is None:
+        return make_response({'status': 'error', 'error': 'No input received'})
+    to_search = to_search.decode('utf-8').upper()
+
+    to_approve = rdb.get('to_approve')
+    if to_approve is not None:
+        to_approve = json.loads(to_approve)
+        to_approve = pd.DataFrame(to_approve)
+
+    cell_lines = rdb.get('cell_lines')
+    cell_lines = json.loads(cell_lines)
+    cell_lines = pd.DataFrame(cell_lines)
+    cell_lines = cell_lines.fillna('')
+
+
+    # search by ID or name
+    found = cell_lines.loc[(cell_lines['ID'].str.upper().str.contains(to_search)) | (cell_lines['Cell line'].str.upper().str.contains(to_search))]
+    ids = found['ID'].tolist()
+
+
+    results_df = None
+
+    towers = [tower.decode('utf-8') for tower in rdb.smembers('towers')]
+    for tower in towers:
+        data = rdb.get(tower)
+        if data is None:
+            continue
+        data = json.loads(data)
+        df = pd.DataFrame(data)
+        df = pd.merge(df, found, on='ID')
+        if len(df) == 0:
+            continue
+
+        df['tower'] = tower
+        df['status'] = 'confirmed'
+        if results_df is None:
+            results_df = df
+        else:
+            results_df = results_df.append(df, ignore_index=True)
+
+    found2 = to_approve.loc[(to_approve['cell_line'].str.upper().str.contains(to_search)) |
+                            (to_approve['prev_cell_line'].str.upper().str.contains(to_search))]
+    found2 = pd.merge(found2, cell_lines, left_on='cell_line', right_on='ID')
+    found2['status'] = 'to approve'
+
+    # results_df = results_df.loc[~results_df['ID'].isin(found2['ID'].tolist())]
+    if results_df is not None:
+        results_df = results_df.append(found2, ignore_index=True)
+    else:
+        results_df = found2
+
+    results_df = results_df.fillna('')
+
+    results_df = results_df[['ID', 'Cell line', 'tower', 'Rack', 'pos', 'Responsible person', 'Date', 'status']]
+
+    html_result = '<table class="table table-hover table-sm" id="table_search"><tr>'
+    for column in results_df.columns:
+        html_result += '<th>{}</th>'.format(column)
+
+    html_result += '</tr>'
+
+    for index, row in results_df.iterrows():
+        if row['status'] == 'to approve':
+            html_result += '<tr class="table-warning">'
+        else:
+            html_result += '<tr>'
+        for column in results_df:
+            html_result += '<td>{}</td>'.format(row[column])
+    html_result += '</tr>'
+    html_result += '</table>'
+
+    return make_response({'status': 'success', 'html_result': html_result}, 200)

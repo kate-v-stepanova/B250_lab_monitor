@@ -5,19 +5,18 @@ import click
 import redis
 import pandas as pd
 
-# from main import app
 
 @click.group()
 def cli():
     # do nothing
     pass
 
-BASE_DIR = "/Users/b250-admin/analysis/"
+BASE_DIR = "/icgc/dkfzlsdf/analysis/OE0532"
 
 @cli.command()
 @click.argument('project_id')
-@click.option('--remote-host')
-def reads_per_position(project_id, remote_host):
+@click.option('--remote/--local', default=False)
+def reads_per_position(project_id, remote):
     """
     Reads the data from *_reads_per_position.txt files,
     aggregates all samples into one DataFrame,
@@ -28,17 +27,14 @@ def reads_per_position(project_id, remote_host):
     # to change, use redis.StrictRedis(host=HOST, port=PORT)
     # but we are not going to change this
 
-    if remote_host:
+    if remote:
         rdb = redis.StrictRedis(host="172.22.54.5")
     else:
-        rdb = redis.StrictRedis()
+        rdb = redis.StrictRedis("localhost")
 
-    projects = rdb.smembers('projects')
+    rdb.sadd('projects', project_id)
 
-    if project_id not in projects:
-        rdb.sadd('projects', project_id)
-
-    rrna_positions_dir = "data_files/rrna_positions"
+    rrna_positions_dir = "analysis/output/rrna_positions"
     path = os.path.join(BASE_DIR, project_id, rrna_positions_dir, '*_reads_per_position.txt')
     input_files = glob.glob(path)
     if not input_files:
@@ -59,21 +55,21 @@ def reads_per_position(project_id, remote_host):
     key = "{}_reads_per_position".format(project_id)
 
     # save a binary string
+    print("Saving key to redis: {}".format(key))
     rdb.set(key, full_df.to_msgpack())
-
 
 @cli.command()
 @click.argument('project_id')
-@click.option('--remote-host')
-def periodicity(project_id, remote_host):
-    if remote_host:
+@click.option('--remote/--local', default=False)
+def periodicity(project_id, remote):
+    if remote:
         rdb = redis.StrictRedis(host="172.22.54.5")
     else:
-        rdb = redis.StrictRedis()
+        rdb = redis.StrictRedis("172.22.24.88")
     projects = rdb.smembers('projects')
     if project_id not in projects:
         rdb.sadd('projects', project_id)
-    path = os.path.join(BASE_DIR, project_id, 'data_files/periodicity/*_heatmap.txt')
+    path = os.path.join(BASE_DIR, project_id, 'analysis/output/periodicity/*.heatmap.tsv')
     input_files = glob.glob(path)
     if not input_files:
         print("No input files found: {}".format(path))
@@ -81,7 +77,7 @@ def periodicity(project_id, remote_host):
     full_df = None
     for input_file in input_files:
         df = pd.read_csv(input_file, sep='\t')
-        samplename = os.path.basename(input_file).replace('_heatmap.txt', '').replace('.', '_')
+        samplename = os.path.basename(input_file).replace('.heatmap.tsv', '').replace('.', '_')
         df['sample'] = samplename
         if full_df is None:
             full_df = df
@@ -93,6 +89,16 @@ def periodicity(project_id, remote_host):
         rdb.delete(key)
     rdb.set(key, full_df.to_msgpack())
 
+
+@cli.command()
+@click.argument('project_id')
+def copy_periodicity(project_id):
+    remote = redis.StrictRedis('172.22.54.5')
+    local = redis.StrictRedis('172.22.24.88')
+    import pdb; pdb.set_trace()
+    key = "{}_periodicity_heatmap".format(project_id)
+    dt = pd.read_msgpack(remote.get(key))
+    local.set(key, pd.to_msgpack(dt))
 
 if __name__ == '__main__':
     cli()

@@ -20,6 +20,8 @@ remote_host = "172.22.54.5" # remote
 
 def get_analysis_info(project_id, rdb):
     analysis_file = os.path.join(BASE_DIR, project_id, "{}.md".format(project_id))
+    if not os.path.isfile(analysis_file):
+        analysis_file = analysis_file.replace('.md', '_analysis.md')
     if os.path.isfile(analysis_file):
         print("File found: {}".format(analysis_file))
         with open(analysis_file, 'r') as fff:

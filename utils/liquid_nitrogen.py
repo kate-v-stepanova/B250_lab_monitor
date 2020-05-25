@@ -6,6 +6,7 @@ import json
 
 localhost = "172.22.24.88" # local
 remote_host = "172.22.25.100" # remote
+home = "192.168.0.157"
 port = "6379"
 
 
@@ -25,20 +26,24 @@ def rows_from_range(row):
 
 @cli.command()
 @click.option('--remote/--local', default=False)
+@click.option('--host', '-h', 'host')
 @click.argument('filename')
 @click.argument('tower') # example: tower7
-def upload(remote, filename, tower):
+def upload(remote, host, filename, tower):
     if os.path.isfile(filename):
         df = pd.read_csv(filename, sep=";")
         import pdb; pdb.set_trace()
         df = df.drop(['Unnamed: 16', 'Unnamed: 4'], axis=1)
-        # df1 = df.drop(['Rack', 'Drawer', 'Position', 'passage no.', 'Unnamed: 16', 'Date', 'Responsible person', 'Comments'], axis='columns')
+        # df1 = df.drop(['Rack', 'Drawer', 'Position', 'passage no.', 'Unnamed: 16', 'Date', 'Responsible person',
+        #               'Comments'], axis='columns')
         df1 = df.drop(['Rack', 'Position', 'Tower', 'Date', 'Responsible person', 'Comments'], axis='columns')
 
         df1 = df1.fillna('')
+        df1 = df1.drop_duplicates('ID')
         data = df1.to_dict('list')
         data = json.dumps(data)
-        host = remote_host if remote else localhost
+        if host is None:
+            host = remote_host if remote else localhost
         rdb = redis.StrictRedis(host)
         rdb.set('cell_lines', data)
 

@@ -28,7 +28,6 @@ def get_alignments(project_id):
     if not trans:
         return render_template("alignments.html", samples=list_of_samples, bam_types=bam_types, error="transcriptLength.txt not found!!")
 
-    # import pdb; pdb.set_trace()
     list_of_genes = rdb.smembers('genes_{}'.format(project_id))
     if request.method == "GET":
         return render_template("alignments.html", samples=list_of_samples, bam_types=bam_types, genes=list_of_genes)
@@ -67,16 +66,23 @@ def get_alignments(project_id):
         df1 = pd.DataFrame()
         df1['pos'] = [i for i in range(1, trans['cds_len'].iloc[0] + 1)]
         df1['counts'] = 0
+
+        total = 0
+        df = df.sort_values(by="start")
         for i, row in df.iterrows():
-            pos = [i for i in range(row['start'], row['start'] + len(row['seq']) + 1)]
-            df1.loc[df1['pos'].isin(pos), 'counts'] = df1.loc[df1['pos'].isin(pos), 'counts'] + row['dup']
+            total += row['dup']
+            df1.loc[df1['pos'] == row['start'], 'counts'] = total
+
+        ind = df1.loc[(df1['pos'] != 1) & (df1['pos'] != df1['pos'].max()) & (df1['counts'] == 0)].index
+        df1 = df1.loc[~df1.index.isin(ind)]
+        df1.loc[df1['pos'] == df1['pos'].max(), 'counts'] = df1['counts'].max()
+
         df1.columns = ['x', 'y']
         series.append({'name': sample, 'data': df1.to_dict('records'), 'turboThreshold': len(df1)})
+
     if error:
         return render_template("alignments.html", samples=list_of_samples, bam_types=bam_types,
                                selected_gene=selected_gene, bam_type=bam_type, selected_samples=selected_samples,
                                error=error, genes=list_of_genes)
     return render_template("alignments.html", samples=list_of_samples, bam_types=bam_types, selected_gene=selected_gene,
                            bam_type=bam_type, selected_samples=selected_samples, series=series, genes=list_of_genes)
-
-

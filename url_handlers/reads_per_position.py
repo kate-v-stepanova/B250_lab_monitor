@@ -28,13 +28,10 @@ def get_reads_per_position(project_id):
 
     genes = gene_lengths.keys()
     samples = df.get('sample').unique()
-    print(samples)
-    print(df.columns)
     for gene in genes:
         gene_length = gene_lengths.get(gene)
         for sample in samples:
             current_df = df.loc[(df['gene'] == gene) & (df['sample'] == sample)]
-            print(len(current_df))
             if current_df.empty:
                 continue
 

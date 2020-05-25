@@ -14,6 +14,17 @@
 </div>
 {% endif %}
 
+<div>
+    <div class="row mt-2 justify-content-md-center">
+        <form class="form-inline">
+                <input class="form-control" type="text" placeholder="Cell line (name, id...)" id="search">
+                <button type="button" class="btn btn-outline-primary ml-2" id="search_btn">Search</button>
+            <button type="button" class="btn btn-outline-danger ml-2 d-none" id="clear_search">Clear results</button>
+        </form>
+    </div>
+    <div id="search_results" class="mt-2">
+    </div>
+</div>
 <div class="row h-100">
     <div id="towers" class="col col-sm-3 mt-4"></div>
     <div id="rack" class="col col-sm-4" data-series="{{ series }}"></div>
@@ -36,6 +47,10 @@
                 <tr><td>Date</td><td id="date"></td></tr>
                 <tr><td>Responsible person</td><td id="responsible_name"></td></tr>
                 <tr><td>Comments</td><td id="comments"></td></tr>
+                <tr class="to_approve d-none"><td>Previous cell line:</td><td id="prev_cell_line"></td></tr>
+                <tr class="to_approve d-none"><td>Previous responsible:</td><td id="prev_responsible"></td></tr>
+                <tr class="to_approve d-none"><td>Previous date:</td><td id="prev_date"></td></tr>
+                <tr class="to_approve d-none"><td>Previous comments:</td><td id="prev_comments"></td></tr>
             </tbody>
         </table>
         <button id="save_changes" class="btn btn-primary btn-sm d-none" type="button">Save Changes</button>

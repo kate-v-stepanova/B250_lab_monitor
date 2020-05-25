@@ -6,7 +6,7 @@
 <script src="{{ url_for('static', filename='libraries/choices.min.js') }}"></script>
 
 <!--inchlib-->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/kineticjs/5.2.0/kinetic.js"></script>
+<script src="{{ url_for('static', filename='libraries/kinetic.js') }}"></script>
 <script src="{{ url_for('static', filename='libraries/inchlib-1.2.0.js') }}"></script>
 
 <!--FileSaver-->
@@ -134,6 +134,7 @@
 {% if plot_data %}
 <div>
   <button type="button" class="btn btn-sm btn-outline-info mb-0 float-right" id="export_button">Export as CSV</button>
+  {% if not common_genes %}<br>{% endif %}
     {% if common_genes %}
       <h5>Number of genes: <span class="badge badge-secondary mt-4">{{ common_genes }}</span></h5>
     {% endif %}

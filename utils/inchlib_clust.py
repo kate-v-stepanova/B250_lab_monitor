@@ -41,7 +41,7 @@ class Dendrogram():
             else:
                 node_left_child = node.get_left().id
                 node_right_child = node.get_right().id
-                node_id2node[node_id] = {"count":node.count, "distance":round(node.dist, 3), "left_child": node_left_child, "right_child": node_right_child}
+                node_id2node[node_id] = {"count": node.count, "distance": round(node.dist, 3), "left_child": node_left_child, "right_child": node_right_child}
 
         for n, node in node_id2node.items():
             if node["count"] != 1:

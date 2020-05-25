@@ -57,7 +57,9 @@ def connect_db():
     """ connects to redis database """
 #    redis_store = FlaskRedis(health_check_interval=30)
 #    redis_store.init_app(app)
-    ip = "172.22.54.5"
+#     ip = "172.22.54.5" # hz
+    ip = "172.22.24.88" # localhost
+    ip = "192.168.0.157" # home
     #redis_store = redis.StrictRedis(host="172.22.25.100", health_check_interval=30)
     redis_store = redis.StrictRedis(host=ip, health_check_interval=30)
 
