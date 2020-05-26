@@ -20,6 +20,7 @@ from url_handlers.heatmap import heatmap
 from url_handlers.ribo_diff import ribo_diff
 from url_handlers.alignments import alignments
 from url_handlers.liquid_nitrogen import liquid_nitrogen
+from url_handlers.user_details import user_details
 
 app = Flask(__name__)
 
@@ -34,10 +35,13 @@ app.register_blueprint(heatmap)
 app.register_blueprint(ribo_diff)
 app.register_blueprint(alignments)
 app.register_blueprint(liquid_nitrogen)
+app.register_blueprint(user_details)
 
 app.secret_key = 'super secret key'
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['REMEMBER_COOKIE_DURATION'] = timedelta(weeks=26)
+app.config['APP_ADMINS'] = ['e.stepanova@dkfz-heidelberg.de']
+app.config['LIQUID_NITROGEN_ADMINS'] = ['c.amayaramirez@dkfz-heidelberg.de', 'e.stepanova@dkfz-heidelberg.de'  ]
 
 sess = Session(app)
 

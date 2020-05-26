@@ -14,17 +14,47 @@
 </div>
 {% endif %}
 
+
+{# REQUESTS TO APPROVE (only for admin) #}
+{% if to_approve %}
+<div class="col">
+    <table class="table table-sm table-striped table-responsive mt-2">
+        <tr>
+            {% for key in to_approve[0].keys() %}
+            <th>{{ key }}</th>
+            {% endfor %}
+            <th></th><th></th>
+        </tr>
+        {% for i in range(to_approve|length) %}
+        <tr>
+            {% for key in to_approve[i].keys() %}
+            <td>{{ to_approve[i][key] }}</td>
+            {% endfor %}
+            <td><button class="btn btn-sm btn-outline-success">√ Approve</button></td>
+            <td><button class="btn btn-sm btn-outline-danger">× Decline</button></td>
+        </tr>
+        {% endfor %}
+        </tr>
+    </table>
+</div>
+{% endif %}
+
+{# SEARCH #}
 <div>
     <div class="row mt-2 justify-content-md-center">
-        <form class="form-inline">
+        <div class="col col-sm-4"></div>
+        <div class="col col-sm-4">
+            <form class="form-inline">
                 <input class="form-control" type="text" placeholder="Cell line (name, id...)" id="search">
                 <button type="button" class="btn btn-outline-primary ml-2" id="search_btn">Search</button>
-            <button type="button" class="btn btn-outline-danger ml-2 d-none" id="clear_search">Clear results</button>
-        </form>
+                <button type="button" class="btn btn-outline-danger ml-2 d-none" id="clear_search">Clear results</button>
+            </form>
+        </div>
     </div>
     <div id="search_results" class="mt-2">
     </div>
 </div>
+
 <div class="row h-100">
     <div id="towers" class="col col-sm-3 mt-4"></div>
     <div id="rack" class="col col-sm-4" data-series="{{ series }}"></div>
@@ -53,8 +83,8 @@
                 <tr class="to_approve d-none"><td>Previous comments:</td><td id="prev_comments"></td></tr>
             </tbody>
         </table>
-        <button id="save_changes" class="btn btn-primary btn-sm d-none" type="button">Save Changes</button>
-        <button id="discard_changes" class="btn btn-secondary btn-sm d-none" type="button">Discard Changes</button>
+        <button id="save_changes" class="btn btn-primary btn-sm d-none" type="button">Submit</button>
+        <button id="discard_changes" class="btn btn-secondary btn-sm d-none" type="button">Discard</button>
     </div>
 
     {# REMOVE cell line #}
@@ -80,7 +110,7 @@
 
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="remove_from_rack">Remove</button>
+                    <button type="button" class="btn btn-primary" id="remove_from_rack">Request</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                 </div>
             </div>

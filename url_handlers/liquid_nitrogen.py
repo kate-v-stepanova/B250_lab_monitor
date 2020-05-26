@@ -1,6 +1,6 @@
 import pandas as pd
-from flask import Blueprint, render_template, request, make_response
-from flask_login import login_required
+from flask import Blueprint, render_template, request, make_response, current_app
+from flask_login import login_required, current_user
 import json
 
 liquid_nitrogen = Blueprint('liquid_nitrogen', __name__)
@@ -95,6 +95,18 @@ def get_liquid_nitrogen():
             'value': key,
             'text': key,
         })
+
+    liquid_nitrogen_admins = current_app.config.get('LIQUID_NITROGEN_ADMINS')
+    if liquid_nitrogen_admins is None:
+        liquid_nitrogen_admins = []
+
+    if current_user.email in liquid_nitrogen_admins:
+        to_approve = to_approve[['tower', 'Rack', 'pos', 'cell_line', 'prev_cell_line', 'Comments', 'Date', 'Responsible person']]
+        to_approve_data = to_approve.to_dict('records')
+        print(to_approve_data)
+        return render_template('liquid_nitrogen.html', series=series, cell_lines_dropdown=cell_lines_dropdown,
+                               cell_lines=json.dumps(cell_lines).replace("""\xa0""", " "), to_approve=to_approve_data)
+
     return render_template('liquid_nitrogen.html', series=series, cell_lines=json.dumps(cell_lines).replace("""\xa0""", " "),
                            cell_lines_dropdown=cell_lines_dropdown)
 
@@ -194,8 +206,6 @@ def search():
 
     # search by ID or name
     found = cell_lines.loc[(cell_lines['ID'].str.upper().str.contains(to_search)) | (cell_lines['Cell line'].str.upper().str.contains(to_search))]
-    ids = found['ID'].tolist()
-
 
     results_df = None
 

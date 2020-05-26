@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block body %}
+<script src="{{ url_for('static', filename='javascript/user_details.js') }}"></script>
+  {% if is_admin %}
+    <div class="mt-5 ml-5">
+      <div class="row">
+        <div class="col col-sm-4">
+          <h5 class="ml-5">Registered Users</h5>
+            <table class="table">
+              <tbody>
+                {% for user in users %}
+                  <tr><td class="username">{{ user }}</td><td><button class="btn btn-sm btn-outline-secondary delete-user">×</button></td></tr>
+                {% endfor %}
+              <tr><td></td><td></td></tr> {# to make a bottom line #}
+              </tbody>
+            </table>
+            <button class="btn btn-sm btn-outline-primary" id="create_user">+ add user</button>
+          </div>
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}
