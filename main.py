@@ -40,8 +40,9 @@ app.register_blueprint(user_details)
 app.secret_key = 'super secret key'
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['REMEMBER_COOKIE_DURATION'] = timedelta(weeks=26)
+
 app.config['APP_ADMINS'] = ['e.stepanova@dkfz-heidelberg.de']
-app.config['LIQUID_NITROGEN_ADMINS'] = ['c.amayaramirez@dkfz-heidelberg.de', 'e.stepanova@dkfz-heidelberg.de'  ]
+app.config['LIQUID_NITROGEN_ADMINS'] = ['c.amayaramirez@dkfz-heidelberg.de']
 
 sess = Session(app)
 
