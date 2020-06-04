@@ -6,6 +6,7 @@ import json
 
 localhost = "172.22.24.88" # local
 remote_host = "172.22.25.100" # remote
+remote_host = "172.22.54.5" # windows
 home = "192.168.0.157"
 port = "6379"
 
@@ -28,12 +29,16 @@ def rows_from_range(row):
 @click.option('--remote/--local', default=False)
 @click.option('--host', '-h', 'host')
 @click.argument('filename')
-@click.argument('tower') # example: tower7
-def upload(remote, host, filename, tower):
+@click.argument('tower', required=False) # example: tower7
+def upload(remote, host, filename, tower=None):
     if os.path.isfile(filename):
         df = pd.read_csv(filename, sep=";")
         import pdb; pdb.set_trace()
-        df = df.drop(['Unnamed: 16', 'Unnamed: 4'], axis=1)
+        df = df.drop(['Unnamed: 4'], axis=1)
+        if tower is None:
+            towers = ['tower{}'.format(tower) for tower in df['Tower'].dropna().astype(int).unique().tolist()]
+        else:
+            towers = [tower]
         # df1 = df.drop(['Rack', 'Drawer', 'Position', 'passage no.', 'Unnamed: 16', 'Date', 'Responsible person',
         #               'Comments'], axis='columns')
         df1 = df.drop(['Rack', 'Position', 'Tower', 'Date', 'Responsible person', 'Comments'], axis='columns')
@@ -57,17 +62,18 @@ def upload(remote, host, filename, tower):
         df2['x1'] = x1.fillna(0).astype(int)
         df2['x2'] = x2.fillna(0).astype(int)
         df2['x'] = 0
-        df3 = pd.DataFrame(columns=df2.columns)
-        for i, row in df2.iterrows():
-            df3 = df3.append(rows_from_range(row))
-        df3 = df3.drop(['x1', 'x2', 'Position'], axis='columns')
-        df3['Rack'] = df3['Rack'].fillna(0)
-        df3['Rack'] = df3['Rack'].astype(int)
-        df3['pos'] = df3['y'].astype(str) + df3['x'].astype(str)
-        data = df3.to_dict('list')
-        data = json.dumps(data)
-        rdb.set(tower, data)
-        rdb.sadd('towers', tower)
+        for tower in towers:
+            df3 = pd.DataFrame(columns=df2.columns)
+            for i, row in df2.iterrows():
+                df3 = df3.append(rows_from_range(row))
+            df3 = df3.drop(['x1', 'x2', 'Position'], axis='columns')
+            df3['Rack'] = df3['Rack'].fillna(0)
+            df3['Rack'] = df3['Rack'].astype(int)
+            df3['pos'] = df3['y'].astype(str) + df3['x'].astype(str)
+            data = df3.to_dict('list')
+            data = json.dumps(data)
+            rdb.set(tower, data)
+            rdb.sadd('towers', tower)
 
     else:
         print("File does not exist? {}".format(filename))
