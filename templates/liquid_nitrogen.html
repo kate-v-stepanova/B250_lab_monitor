@@ -61,7 +61,7 @@
     <div id="cell_lines" class="col col-sm-5 mt-2" data-cell_lines="{{ cell_lines }}" data-dropdown="{{ cell_lines_dropdown }}">
         <div class="row ml-2"><p class="h5 mt-2"></p>
             <button id="erase" class="btn btn-outline-primary btn-sm d-none ml-4" data-toggle="modal" data-target="#confirm_erase">
-                Remove <i class="fas fa-eraser"></i></button></div>
+                Request <i class="fas fa-eraser"></i></button></div>
         <table class="table table-bordered mt-3 d-none" id="pos-details">
             <tbody>
                 <tr><td>Location</td><td id="location"></td></tr>
@@ -92,7 +92,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modal_title">This action cannot be undone!!</h5>
+                    <h5 class="modal-title" id="modal_title">Are you sure you want to request cell line from the selected position?</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                       <span aria-hidden="true">&times;</span>
                     </button>
@@ -103,7 +103,6 @@
                           <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    Are you sure you want to remove cell line from the selected position?
                     If yes, please enter your name: <input type="text" class="form-control" id="responsible">
 
                     <label>Enter comments: </label><textarea class="form-control" id="comments-1"></textarea>

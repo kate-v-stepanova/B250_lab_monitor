@@ -197,6 +197,9 @@ def search():
     if to_approve is not None:
         to_approve = json.loads(to_approve)
         to_approve = pd.DataFrame(to_approve)
+    else:
+        to_approve = pd.DataFrame(columns=['cell_line', 'prev_cell_line'])
+
 
     cell_lines = rdb.get('cell_lines')
     cell_lines = json.loads(cell_lines)
@@ -226,9 +229,9 @@ def search():
             results_df = df
         else:
             results_df = results_df.append(df, ignore_index=True)
-
     found2 = to_approve.loc[(to_approve['cell_line'].str.upper().str.contains(to_search)) |
                             (to_approve['prev_cell_line'].str.upper().str.contains(to_search))]
+
     found2 = pd.merge(found2, cell_lines, left_on='cell_line', right_on='ID')
     found2['status'] = 'to approve'
 
