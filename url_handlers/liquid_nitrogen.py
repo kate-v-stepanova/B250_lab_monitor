@@ -21,9 +21,10 @@ def get_liquid_nitrogen():
         to_approve = json.loads(to_approve)
         to_approve = pd.DataFrame(to_approve)
     else:
-        to_approve = pd.DataFrame(columns=['tower', 'Position', 'Rack', 'x', 'y', 'Responsible Person', 'Date', 'comments',
-                                           'prev_cell_line', 'prev_responsible', 'prev_comments', 'prev_date'])
+        to_approve = pd.DataFrame(columns=['tower', 'pos', 'Rack', 'x', 'y', 'Responsible person', 'Date', 'Comments', 'cell_line',
+                                           'prev_cell_line', 'prev_responsible', 'prev_comments', 'prev_date', 'status'])
 
+    to_approve = to_approve.loc[to_approve['status'] == 'pending']
     to_approve = to_approve.fillna('')
     for tower in towers:
         data = rdb.get(tower)
@@ -63,7 +64,7 @@ def get_liquid_nitrogen():
                     elif len(df1) != 0:
                         df1['pos'] = df1['y'].astype(str) + df1['x'].astype(str)
                         df1['y'] = y_pos.index(y)
-                        df1['x'] = df1['x'] - 1
+                        df1['x'] = df1['x'].astype(int) - 1
                         df1['color'] = '#F4796E' # red
                         df1['value'] = 1 # means confirmed
 
@@ -103,9 +104,8 @@ def get_liquid_nitrogen():
     if current_user.email in liquid_nitrogen_admins:
         to_approve = to_approve[['tower', 'Rack', 'pos', 'cell_line', 'prev_cell_line', 'Comments', 'Date', 'Responsible person']]
         to_approve_data = to_approve.to_dict('records')
-        print(to_approve_data)
         return render_template('liquid_nitrogen.html', series=series, cell_lines_dropdown=cell_lines_dropdown,
-                               cell_lines=json.dumps(cell_lines).replace("""\xa0""", " "), to_approve=to_approve_data)
+                               cell_lines=json.dumps(cell_lines).replace("""\xa0""", " "), to_approve=to_approve_data, admin=True)
 
     return render_template('liquid_nitrogen.html', series=series, cell_lines=json.dumps(cell_lines).replace("""\xa0""", " "),
                            cell_lines_dropdown=cell_lines_dropdown)
@@ -116,14 +116,19 @@ def get_liquid_nitrogen():
 def add_cell_line():
     from main import get_db
     data = request.get_json()
+    if 'status' not in data.keys():
+        data['status'] = 'pending'
     rdb = get_db()
     to_approve = rdb.get('to_approve')
     if to_approve is None:
         to_approve = pd.DataFrame(columns=['tower', 'pos', 'Rack', 'x', 'y', 'Responsible person', 'Date', 'Comments',
-                                           'cell_line', 'prev_cell_line', 'prev_responsible', 'prev_comments', 'prev_date'])
+                                           'cell_line', 'prev_cell_line', 'prev_responsible', 'prev_comments', 'prev_date', 'status'])
     else:
         to_approve = json.loads(to_approve)
         to_approve = pd.DataFrame(to_approve)
+        # to_approve['status'] = 'pending'
+
+    to_approve = to_approve.loc[to_approve['status'] == 'pending']
 
     tower = data.get('tower')
     tower_data = rdb.get(tower)
@@ -135,7 +140,7 @@ def add_cell_line():
                                           (tower_data['x'] == data.get('x'))]
         if len(current_pos_data) != 0:
             data['prev_cell_line'] = current_pos_data.iloc[0]['ID']
-            data['prev_responsible'] = current_pos_data.iloc[0]['']
+            data['prev_responsible'] = current_pos_data.iloc[0]['Responsible person']
 
     # if there is already something on that position, then ...
     to_overwrite = to_approve.loc[(to_approve['Rack'] == data.get('Rack')) & (to_approve['tower'] == data.get('tower')) &
@@ -244,6 +249,7 @@ def search():
     results_df = results_df.fillna('')
 
     results_df = results_df[['ID', 'Cell line', 'tower', 'Rack', 'pos', 'Responsible person', 'Date', 'status']]
+    results_df['Rack'] = results_df['Rack'].astype(int)
 
     html_result = '<table class="table table-hover table-sm" id="table_search"><tr>'
     for column in results_df.columns:
@@ -262,3 +268,79 @@ def search():
     html_result += '</table>'
 
     return make_response({'status': 'success', 'html_result': html_result}, 200)
+
+
+@liquid_nitrogen.route('/liquid_nitrogen/upload', methods=['POST'])
+@login_required
+def upload():
+    data = request.form.get('lq_file')
+    return make_response({'status': 'success'}, 200)
+
+
+@liquid_nitrogen.route('/liquid_nitrogen/approve_decline', methods=['POST'])
+@login_required
+def approve_decline():
+    from main import get_db
+    rdb = get_db()
+    data = request.get_data()
+    if data is None:
+        return make_response({'status': 'error', 'error': 'no data received'}, 200)
+    data = json.loads(data.decode('utf-8'))
+    action = data.get('action')
+
+    requests = rdb.get('to_approve')
+    if requests is None:
+        return make_response({'status': 'error', 'error': 'No records in the database'}, 200)
+    requests = json.loads(requests)
+    requests = pd.DataFrame(requests)
+    req = requests.loc[(requests['tower'] == data.get('tower')) & (requests['Rack'] == data.get('Rack')) &
+                       (requests['pos'] == data.get('pos'))]
+    if len(req) == 0:
+        return make_response({'status': 'error', 'error': 'Cant find a record in the database'}, 200)
+
+    tower_data = rdb.get(req['tower'].tolist()[0])
+    if tower_data is None:
+        tower_df = pd.DataFrame(columns=['ID', 'Rack', 'Date', 'Responsible person', 'Comments', 'pos', 'x', 'y'])
+    else:
+        tower_df = pd.DataFrame(json.loads(tower_data))
+
+    if action == 'approve':
+        requests.loc[req.index, 'status'] = 'approved'
+        rdb.set('to_approve', json.dumps(requests.to_dict('list')))
+
+        pos = tower_df.loc[(tower_df['Rack'] == data.get('Rack')) & (tower_df['pos'] == data.get('pos'))]
+        if len(pos) == 0:
+
+            # if added to a new position
+            if not req['prev_cell_line'].tolist()[0]:
+                to_append = req[['cell_line', 'Rack', 'Date', 'Responsible person', 'Comments', 'pos', 'x', 'y']]
+                to_append.columns = ['ID', 'Rack', 'Date', 'Responsible person', 'Comments', 'pos', 'x', 'y']
+                tower_df = tower_df.append(to_append, ignore_index=True)
+
+                rdb.set(data.get('tower'), json.dumps(tower_df.to_dict('list')))
+                return make_response({'status': 'success', 'info': 'Request has been approved'}, 200)
+
+            # if requested from a postion
+            else:
+                return make_response({'status': 'error', 'error': 'You cant request from a current positon, because it is empty'}, 200)
+
+        else: # len(pos) == 1:
+            # remove from pos
+            if not req['cell_line'].tolist()[0]:
+                tower_df = tower_df.drop(pos.index)
+                rdb.set(data.get('tower'), json.dumps(tower_df.to_dict('list')))
+                return make_response({'status': 'success', 'info': 'Request has been approved'}, 200)
+
+            else:
+                return make_response({'status': 'error', 'error': 'Some logic is wrong'}, 200)
+
+    elif action == 'decline':
+        requests.loc[req.index, 'status'] = 'declined'
+        rdb.set('to_approve', json.dumps(requests.to_dict('list')))
+        return make_response({'status': 'success', 'info': 'Request has been declined'}, 200)
+    else:
+        make_response({'status': 'error', 'error': 'Unknown action "{}"'.format(action)}, 200)
+
+    return make_response({'status': 'success'}, 200)
+
+

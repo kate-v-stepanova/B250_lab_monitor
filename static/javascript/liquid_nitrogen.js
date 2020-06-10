@@ -619,20 +619,49 @@ $(document).ready(function() {
     });
 
 
-    $("#table_search").on("click-cell.bs.table", function (field, value, row, $el) {
-        console.log('CLICK ROW');
-        console.log(field);
-    });
-
-    $("tr").on("click", function (field, value, row, $el) {
-        console.log('CLICK ROW');
-        console.log(field);
-    });
-
     $('#clear_search').on('click', function() {
         $('#search_results').empty();
         $('#search').val('');
         $('#clear_search').addClass('d-none');
+    });
+
+    $('.approve_btn, .decline_btn').on('click', function() {
+        var btn = this;
+        var url = window.location.href + "/approve_decline";
+        var tower = $(this).closest('tr').find('td.tower').text();
+        var rack = $(this).closest('tr').find('td.Rack').text();
+        var pos = $(this).closest('tr').find('td.pos').text();
+
+        var action = "";
+        if ($(this).hasClass('approve_btn')) {
+            action = 'approve';
+        } else if ($(this).hasClass('decline_btn')) {
+            action = 'decline';
+        }
+
+        var to_approve = {
+            'tower': tower,
+            'Rack': rack,
+            'pos': pos,
+            'action': action,
+        }
+        $.ajax({
+            type: "POST",
+            //the url where you want to sent the userName and password to
+            url: url,
+            dataType: 'json',
+            //json object to sent to the authentication url
+            data: JSON.stringify(to_approve),
+            contentType: 'application/json',
+        }).done(function(response) {
+            console.log(response)
+            console.log($(btn).closest('tr'));
+            $(btn).closest("tr").remove();
+        }).fail(function(response) {
+            console.log(response);
+            alert('Failed');
+
+        });
     });
 
 });

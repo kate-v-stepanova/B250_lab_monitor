@@ -14,6 +14,17 @@
 </div>
 {% endif %}
 
+{#
+{% if admin %}
+<div class="form-group">
+  <form action="{{ url_for('liquid_nitrogen.upload') }}" method="POST" enctype="multipart/form-data" id="import_form">
+    <label for="lq_file">Import data from .csv</label>
+    <input type="file" class="form-control-file" id="lq_file" name="lq_file">
+    <button type="submit" class="btn btn-sm btn-outline-primary" id="upload_btn">Upload</button>
+  </form>
+</div>
+{% endif %}
+#}
 
 {# REQUESTS TO APPROVE (only for admin) #}
 {% if to_approve %}
@@ -28,10 +39,10 @@
         {% for i in range(to_approve|length) %}
         <tr>
             {% for key in to_approve[i].keys() %}
-            <td>{{ to_approve[i][key] }}</td>
+            <td class="{{ key }}">{{ to_approve[i][key] }}</td>
             {% endfor %}
-            <td><button class="btn btn-sm btn-outline-success">√ Approve</button></td>
-            <td><button class="btn btn-sm btn-outline-danger">× Decline</button></td>
+            <td><button class="btn btn-sm btn-outline-success approve_btn">✓ Approve</button></td>
+            <td><button class="btn btn-sm btn-outline-danger decline_btn">× Decline</button></td>
         </tr>
         {% endfor %}
         </tr>
