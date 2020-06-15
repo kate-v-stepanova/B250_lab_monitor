@@ -371,7 +371,8 @@ $(document).ready(function() {
                 categories: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'],
                 title: {
                     text: ''
-                }
+                },
+                reversed: true
             },
             legend: false,
             exporting: {
