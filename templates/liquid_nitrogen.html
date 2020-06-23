@@ -34,15 +34,18 @@
             {% for key in to_approve[0].keys() %}
             <th>{{ key }}</th>
             {% endfor %}
-            <th></th><th></th>
+            <th></th><th></th><th></th>
         </tr>
         {% for i in range(to_approve|length) %}
         <tr>
             {% for key in to_approve[i].keys() %}
             <td class="{{ key }}">{{ to_approve[i][key] }}</td>
             {% endfor %}
+            {% if admin %}
             <td><button class="btn btn-sm btn-outline-success approve_btn">✓ Approve</button></td>
             <td><button class="btn btn-sm btn-outline-danger decline_btn">× Decline</button></td>
+            {% endif %}
+            <td><button class="btn btn-sm btn-outline-warning cancel_req">× Cancel request</button></td>
         </tr>
         {% endfor %}
         </tr>
@@ -114,7 +117,13 @@
                           <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    If yes, please enter your name: <input type="text" class="form-control" id="responsible">
+                    If yes, please enter your name:
+                    <select class="form-control" id="exampleFormControlSelect1">
+                      {% for user in users %}
+                        <option {% if user == current_user %}selected{% endif %}>{{ user }}</option>
+                      {% endfor %}
+
+                    </select>
 
                     <label>Enter comments: </label><textarea class="form-control" id="comments-1"></textarea>
 
@@ -147,7 +156,12 @@
                         </button>
                     </div>
                     <div class="form-group">
-                        <label>Enter your name: </label><input type="text" class="form-control" id="responsible-2">
+                        <label>Enter your name: </label>{#<input type="text" class="form-control" id="responsible-2">#}
+                        <select class="form-control" id="responsible-2">
+                            {% for user in users %}
+                            <option {% if user == current_user %}selected{% endif %}>{{ user }}</option>
+                            {% endfor %}
+                        </select>
                         <label>Enter comments: </label><textarea class="form-control" id="comments-2"></textarea>
                     </div>
                 </form>

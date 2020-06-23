@@ -101,14 +101,26 @@ def get_liquid_nitrogen():
     if liquid_nitrogen_admins is None:
         liquid_nitrogen_admins = []
 
+    users = rdb.hgetall('users')
+    users = [] if users is None else users.keys()
+    users = [user.decode('utf-8') for user in users]
+
+    to_approve = to_approve[
+        ['tower', 'Rack', 'pos', 'cell_line', 'prev_cell_line', 'Comments', 'Date', 'Responsible person']]
     if current_user.email in liquid_nitrogen_admins:
-        to_approve = to_approve[['tower', 'Rack', 'pos', 'cell_line', 'prev_cell_line', 'Comments', 'Date', 'Responsible person']]
         to_approve_data = to_approve.to_dict('records')
         return render_template('liquid_nitrogen.html', series=series, cell_lines_dropdown=cell_lines_dropdown,
-                               cell_lines=json.dumps(cell_lines).replace("""\xa0""", " "), to_approve=to_approve_data, admin=True)
+                               cell_lines=json.dumps(cell_lines).replace("""\xa0""", " "), to_approve=to_approve_data,
+                               admin=True, users=users, current_user=current_user.email)
+    else:
+        to_approve = to_approve.loc['Responsible person'] == current_user.email
+        to_approve_data = to_approve.to_dict('records')
+        return render_template('liquid_nitrogen.html', series=series, cell_lines_dropdown=cell_lines_dropdown,
+                               cell_lines=json.dumps(cell_lines).replace("""\xa0""", " "), to_approve=to_approve_data,
+                               admin=False, users=users, current_user=current_user.email)
 
-    return render_template('liquid_nitrogen.html', series=series, cell_lines=json.dumps(cell_lines).replace("""\xa0""", " "),
-                           cell_lines_dropdown=cell_lines_dropdown)
+    # return render_template('liquid_nitrogen.html', series=series, cell_lines=json.dumps(cell_lines).replace("""\xa0""", " "),
+    #                        cell_lines_dropdown=cell_lines_dropdown)
 
 
 @liquid_nitrogen.route('/liquid_nitrogen/update_rack', methods=['POST'])
@@ -338,6 +350,13 @@ def approve_decline():
         requests.loc[req.index, 'status'] = 'declined'
         rdb.set('to_approve', json.dumps(requests.to_dict('list')))
         return make_response({'status': 'success', 'info': 'Request has been declined'}, 200)
+    elif action == 'cancel':
+        requests = requests.drop(req.index)
+        if len(requests) == 0:
+            rdb.delete('to_approve')
+        else:
+            rdb.set('to_approve', json.dumps(requests.to_dict('list')))
+        return make_response({'status': 'success', 'info': 'Request has been cancelled'}, 200)
     else:
         make_response({'status': 'error', 'error': 'Unknown action "{}"'.format(action)}, 200)
 

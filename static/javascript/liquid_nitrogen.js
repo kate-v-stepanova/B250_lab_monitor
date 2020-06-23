@@ -626,7 +626,7 @@ $(document).ready(function() {
         $('#clear_search').addClass('d-none');
     });
 
-    $('.approve_btn, .decline_btn').on('click', function() {
+    $('.approve_btn, .decline_btn, .cancel_req').on('click', function() {
         var btn = this;
         var url = window.location.href + "/approve_decline";
         var tower = $(this).closest('tr').find('td.tower').text();
@@ -638,6 +638,8 @@ $(document).ready(function() {
             action = 'approve';
         } else if ($(this).hasClass('decline_btn')) {
             action = 'decline';
+        } else {
+            action = 'cancel';
         }
 
         var to_approve = {
@@ -648,7 +650,6 @@ $(document).ready(function() {
         }
         $.ajax({
             type: "POST",
-            //the url where you want to sent the userName and password to
             url: url,
             dataType: 'json',
             //json object to sent to the authentication url
