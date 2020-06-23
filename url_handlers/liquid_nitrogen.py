@@ -113,7 +113,7 @@ def get_liquid_nitrogen():
                                cell_lines=json.dumps(cell_lines).replace("""\xa0""", " "), to_approve=to_approve_data,
                                admin=True, users=users, current_user=current_user.email)
     else:
-        to_approve = to_approve.loc['Responsible person'] == current_user.email
+        to_approve = to_approve.loc[to_approve['Responsible person'] == current_user.email]
         to_approve_data = to_approve.to_dict('records')
         return render_template('liquid_nitrogen.html', series=series, cell_lines_dropdown=cell_lines_dropdown,
                                cell_lines=json.dumps(cell_lines).replace("""\xa0""", " "), to_approve=to_approve_data,
