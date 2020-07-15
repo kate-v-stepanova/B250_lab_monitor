@@ -37,7 +37,7 @@ $(document).ready(function() {
             if (cell_line != undefined) {
                 // then update fields
                 $('#cell_line').text(cell_line['Cell line']);
-                $('#cell_line_ID').text(cell_line)
+                $('#cell_line_ID').text(value);
                 $('#media').text(cell_line['Media (Freezing Medium)']);
                 $('#plasmid').text(cell_line['Transferred plasmid']);
                 $('#selection').text(cell_line['Selection']);
@@ -449,8 +449,6 @@ $(document).ready(function() {
                 $('#comments').text('');
             }
         }
-//        console.log(data);
-//        console.log(e.point.value);
 //        $('#pos-details').find('tr').removeClass('table-warning');
 
         if (e.point.value == 2 || e.point.value == '2') { // 2 means to confirm
@@ -584,7 +582,7 @@ $(document).ready(function() {
         }).done(function(response) {
             alert( "success" );
             // todo: update rack_series
-            console.log(rack_series[tower + '_Rack' + rack]);
+//            console.log(rack_series[tower + '_Rack' + rack]);
 //            rack_series[tower + '_Rack' + rack] = data;
         }).fail(function(response) {
             console.log(response);
@@ -594,9 +592,7 @@ $(document).ready(function() {
     });
 
     $('#search_btn').on('click', function(){
-        console.log('search');
         var to_search = $('#search').val();
-        console.log(to_search);
         if (to_search != '') {
             var url = window.location.href + "/search";
             $.ajax({
@@ -657,7 +653,7 @@ $(document).ready(function() {
             contentType: 'application/json',
         }).done(function(response) {
             console.log(response)
-            console.log($(btn).closest('tr'));
+//            console.log($(btn).closest('tr'));
             $(btn).closest("tr").remove();
         }).fail(function(response) {
             console.log(response);
