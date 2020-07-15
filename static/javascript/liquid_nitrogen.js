@@ -132,7 +132,6 @@ $(document).ready(function() {
         // close modal and clear input
         if (resp != "") {
             $('#modal-2').modal('hide');
-            $('#responsible-2').val('');
             $('#comments-2').val('');
         }
     });
@@ -155,7 +154,7 @@ $(document).ready(function() {
         show_cell_line_details(ee);
     });
 
-    Highcharts.chart('towers', {
+    var chart_towers = Highcharts.chart('towers', {
 //        colors: ['#058DC7', '#50B432', '#ED561B', '#DDDF00', '#24CBE5', '#64E572',
 //             '#FF9655', '#FFF263', '#6AF9C4'],
         colors: [Highcharts.getOptions().colors[0]],
@@ -234,12 +233,55 @@ $(document).ready(function() {
     var rack_series = $('#rack').attr('data-series');
     rack_series = rack_series.replace(/'/g, '"'); //");
     rack_series = JSON.parse(rack_series);
-
     var cell_lines = $('#cell_lines').attr('data-cell_lines');
     cell_lines = cell_lines.replace(/'/g, '"'); //");
     cell_lines = JSON.parse(cell_lines);
 
+    function load_chart_racks(rack_name, rack_data) {
+        Highcharts.chart('rack', {
+            chart: {
+                type: 'heatmap',
+                height: 450,
+                width: 430,
+            },
+            title: {
+                text: rack_name,
+            },
+            xAxis: {
+                categories: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+            },
+            yAxis: {
+                categories: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'],
+                title: {
+                    text: ''
+                },
+                reversed: true
+            },
+            legend: false,
+            exporting: {
+                enabled: false,
+            },
+            series: [{
+                 tooltip: {
+                    headerFormat: '',
+                    pointFormat: '<b>Rack{point.Rack}, {point.pos}</b><br>{point.ID}<br>(click to see details)'
+                },
+                borderWidth: 1,
+                data: rack_data,
+                events: {
+                    click: function(e){show_cell_line_details(e); $('#cell_line').attr('data-unchanged-val', e.point.ID);}
+                },
+                allowPointSelect: true,
+                states: {
+                    select: {
+                        color: "#098AB9"
+                    }
+                }
+            }],
+        });
+    };
     function showRackContent(e) {
+        var rack_name = this.name;
         var tower = e.point.category;
         $('#towers').attr('selected-tower', tower);
         var rack = this.name;
@@ -354,48 +396,7 @@ $(document).ready(function() {
         $('#save_changes').addClass('d-none');
         $('#discard_changes').addClass('d-none');
         $('#erase').addClass('d-none');
-
-        Highcharts.chart('rack', {
-            chart: {
-                type: 'heatmap',
-                height: 450,
-                width: 430,
-            },
-            title: {
-                text: this.name,
-            },
-            xAxis: {
-                categories: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
-            },
-            yAxis: {
-                categories: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'],
-                title: {
-                    text: ''
-                },
-                reversed: true
-            },
-            legend: false,
-            exporting: {
-                enabled: false,
-            },
-            series: [{
-                 tooltip: {
-                    headerFormat: '',
-                    pointFormat: '<b>Rack{point.Rack}, {point.pos}</b><br>{point.ID}<br>(click to see details)'
-                },
-                borderWidth: 1,
-                data: data,
-                events: {
-                    click: function(e){show_cell_line_details(e); $('#cell_line').attr('data-unchanged-val', e.point.ID);}
-                },
-                allowPointSelect: true,
-                states: {
-                    select: {
-                        color: "#098AB9"
-                    }
-                }
-            }],
-        });
+        load_chart_racks(rack_name, data);
     }
 
     function show_cell_line_details(e) {
@@ -422,7 +423,6 @@ $(document).ready(function() {
         } else {
             $('#erase').removeClass('d-none');
         }
-
 
         if (e.point.value == 0 || e.point.value == undefined || cell_line == '') {
             $('#cell_lines').find("td[id]").text('');
@@ -581,9 +581,18 @@ $(document).ready(function() {
             contentType: 'application/json',
         }).done(function(response) {
             alert( "success" );
-            // todo: update rack_series
-//            console.log(rack_series[tower + '_Rack' + rack]);
-//            rack_series[tower + '_Rack' + rack] = data;
+            // update rack_series
+            var i = parseInt(data['x']) -1 + parseInt(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].indexOf(data['y'])) * 10;
+            data['color'] = '#ffcc00';
+            data['value'] = 2;
+            data['x'] = parseInt(data['x']) - 1;
+            data['y'] = parseInt(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].indexOf(data['y']));
+            data['status'] = 'to_confirm';
+            data['ID'] = data['cell_line'];
+            var rack_name = 'Rack'+rack;
+            rack_series[tower + '_Rack' + rack][i] = data;
+            var rack_data = rack_series[tower + '_Rack' + rack];
+            load_chart_racks(rack_name, rack_data);
         }).fail(function(response) {
             console.log(response);
             alert(response);
