@@ -600,7 +600,7 @@ $(document).ready(function() {
         })
     });
 
-    $('#search_btn').on('click', function(){
+    function search_cell_line() {
         var to_search = $('#search').val();
         if (to_search != '') {
             var url = window.location.href + "/search";
@@ -622,7 +622,9 @@ $(document).ready(function() {
 
             })
         }
-    });
+    }
+
+    $('#search_btn').on('click', search_cell_line);
 
 
     $('#clear_search').on('click', function() {
@@ -690,6 +692,17 @@ $(document).ready(function() {
             alert('Failed');
 
         });
+    });
+
+    // disable form submission when pressing Enter
+    $(window).keydown(function(event){
+        if(event.keyCode == 13) {
+            event.preventDefault();
+            if (event.target.id == 'search') {
+                search_cell_line();
+            }
+            return false;
+        }
     });
 
 });
