@@ -125,7 +125,7 @@ def get_liquid_nitrogen():
 
 @liquid_nitrogen.route('/liquid_nitrogen/update_rack', methods=['POST'])
 @login_required
-def add_cell_line():
+def update_rack():
     from main import get_db
     data = request.get_json()
     if 'status' not in data.keys():
@@ -138,7 +138,6 @@ def add_cell_line():
     else:
         to_approve = json.loads(to_approve)
         to_approve = pd.DataFrame(to_approve)
-        # to_approve['status'] = 'pending'
 
     to_approve = to_approve.loc[to_approve['status'] == 'pending']
 

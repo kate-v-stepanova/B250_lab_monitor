@@ -123,7 +123,7 @@
                         </button>
                     </div>
                     If yes, please enter your name:
-                    <select class="form-control" id="exampleFormControlSelect1">
+                    <select class="form-control" id="responsible">
                       {% for user in users %}
                         <option {% if user == current_user %}selected{% endif %}>{{ user }}</option>
                       {% endfor %}
