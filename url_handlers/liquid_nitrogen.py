@@ -363,3 +363,53 @@ def approve_decline():
     return make_response({'status': 'success'}, 200)
 
 
+
+@liquid_nitrogen.route('/liquid_nitrogen/export_data', methods=['POST'])
+@login_required
+def export_data():
+    from main import get_db
+    rdb = get_db()
+    cell_lines = rdb.get('cell_lines')
+    cell_lines = json.loads(cell_lines)
+    cell_lines = pd.DataFrame(cell_lines)
+    cell_lines = cell_lines.fillna('')
+
+    to_approve = rdb.get('to_approve')
+    to_approve = json.loads(to_approve)
+    to_approve = pd.DataFrame(to_approve)
+    to_approve = to_approve.fillna('')
+    to_approve = pd.merge(to_approve, cell_lines, left_on='cell_line', right_on='ID')
+    to_approve = to_approve[['ID', 'Cell line', 'Rack', 'tower', 'pos', 'Media (Freezing Medium)', 'transfected plasmid',
+                             'selection', 'Typ', 'Date', 'Responsible person', 'Biosafety level S1/S2', 'Comments',
+                             'Mycoplasma checked', 'Source', 'status']]
+    to_approve.columns = ['ID', 'Cell line', 'Rack', 'Tower', 'Position', 'Media (Freezing Medium)', 'transfected plasmid',
+                             'selection', 'Typ', 'Date', 'Responsible person', 'Biosafety level S1/S2', 'Comments',
+                             'Mycoplasma checked', 'Source', 'status']
+
+    towers = [tower.decode('utf-8') for tower in rdb.smembers('towers')]
+    full_df = None
+    for tower in towers:
+        data = rdb.get(tower)
+
+        data = json.loads(data)
+        df = pd.DataFrame(data)
+        df = df.fillna('')
+        df['Tower'] = tower
+
+        if full_df is None:
+            full_df = df
+        else:
+            full_df = full_df.append(df)
+
+    full_df = pd.merge(full_df, cell_lines, on='ID')
+    full_df['Position'] = full_df['pos']
+    full_df = full_df.drop(['pos', 'x', 'y'], axis='columns')
+
+    full_df['status'] = 'confirmed'
+    full_df = full_df.append(to_approve, ignore_index=True)
+    full_df = full_df[['ID', 'Cell line', 'Rack', 'Tower', 'Position', 'Media (Freezing Medium)', 'transfected plasmid',
+                             'selection', 'Typ', 'Date', 'Responsible person', 'Biosafety level S1/S2', 'Comments',
+                             'Mycoplasma checked', 'Source', 'status']]
+    content = full_df.to_csv(sep=";", index=False)
+    return make_response({'status': 'success', 'csv_content': content}, 200)
+

@@ -5,6 +5,8 @@
 <script src="{{ url_for('static', filename='libraries/fontawesome.js') }}"></script>
 <script src="{{ url_for('static', filename='libraries/bootstrap-editable.min.js') }}"></script>
 <script src="{{ url_for('static', filename='javascript/liquid_nitrogen.js') }}"></script>
+<script src="{{ url_for('static', filename='libraries/FileSaver.js') }}"></script>
+
 {% if error %}
 <div class="alert alert-danger alert-dismissible fade show" role="alert" id="error">
     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -63,6 +65,9 @@
                 <button type="button" class="btn btn-outline-primary ml-2" id="search_btn">Search</button>
                 <button type="button" class="btn btn-outline-danger ml-2 d-none" id="clear_search">Clear results</button>
             </form>
+        </div>
+        <div class="col col-sm-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary ml-2" id="export_data">↓ Export data as .csv</button>
         </div>
     </div>
     <div id="search_results" class="mt-2">

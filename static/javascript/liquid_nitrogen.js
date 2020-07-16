@@ -662,8 +662,29 @@ $(document).ready(function() {
             contentType: 'application/json',
         }).done(function(response) {
             console.log(response)
-//            console.log($(btn).closest('tr'));
             $(btn).closest("tr").remove();
+        }).fail(function(response) {
+            console.log(response);
+            alert('Failed');
+
+        });
+    });
+
+    $('#export_data').on('click', function() {
+        var url = window.location.href + "/export_data";
+        $.ajax({
+            type: "POST",
+            url: url,
+            dataType: 'json',
+            //json object to sent to the authentication url
+            data: {},
+            contentType: 'application/json',
+        }).done(function(response) {
+            var csv_content = response['csv_content'];
+            var blob = new Blob([csv_content], {type: "text/plain;charset=utf-8"});
+            var now = new Date().toLocaleString().replace(/\//g, '-').replace(/\ /g, '_').replace(',', '');
+            var file_name = now + '_liquid_nitrogen.csv';
+            saveAs(blob, file_name)
         }).fail(function(response) {
             console.log(response);
             alert('Failed');
