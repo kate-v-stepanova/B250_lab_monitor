@@ -31,7 +31,7 @@
 {# REQUESTS TO APPROVE (only for admin) #}
 {% if to_approve %}
 <div class="col">
-    <table class="table table-sm table-striped table-responsive mt-2">
+    <table class="table table-sm table-striped table-responsive mt-2" id="requests_table">
         <tr>
             {% for key in to_approve[0].keys() %}
             <th>{{ key }}</th>
@@ -141,6 +141,41 @@
         </div>
     </div>
     {# END of remove #}
+    {# REMOVE cell line #}
+    <div id="confirm_erase-2" class="modal fade" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modal_title">Are you sure you want to request cell line from the selected position?</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger alert-dismissible fade show d-none" role="alert" id="error-1">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    If yes, please enter your name:
+                    <select class="form-control" id="responsible">
+                      {% for user in users %}
+                        <option {% if user == current_user %}selected{% endif %}>{{ user }}</option>
+                      {% endfor %}
+
+                    </select>
+
+                    <label>Enter comments: </label><textarea class="form-control" id="comments-1"></textarea>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="remove_from_rack-2">Request</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {# END of remove #}
 
     {# ASSIGN a cell line #}
     <div class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel"
@@ -243,6 +278,43 @@
         </div>
     </div>
     {# end of NEW CELL_LINE #}
+
+    {# CONFIRM REQUEST (from the search table) #}
+    <div class="modal" tabindex="-1" role="dialog" id="confirm_request_from_search">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Are you sure you want to request from the following position?</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+           <table class="table table-hover table-sm">
+               <tr><td><b>Cell Line ID:</b></td><td id="cell_line_id_search"></td></tr>
+               <tr><td><b>Cell line name:</b></td><td id="cell_line_name_search"></td></tr>
+               <tr><td><b>Tower:</b></td><td id="tower_search"></td></tr>
+               <tr><td><b>Rack:</b></td><td id="rack_search"></td></tr>
+               <tr><td><b>Position:</b></td><td id="pos_search"></td></tr>
+               <tr><td><b>Responsible:</b></td><td>
+                   <select class="form-control" id="responsible_search">
+                      {% for user in users %}
+                        <option {% if user == current_user %}selected{% endif %}>{{ user }}</option>
+                      {% endfor %}
+                    </select>
+               </td></tr>
+               <tr><td><b>Date:</b></td><td id="date_search"></td></tr>
+               <tr><td><b>Comments:</b></td><td><textarea class="form-control" id="comments_search"></textarea></td></tr>
+           </table>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="request_from_search">Request</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    {# end of CONFIRM REQUEST (from the search table) #}
 
 </div>
 {% endblock %}

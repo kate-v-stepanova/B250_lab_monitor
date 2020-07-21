@@ -23,9 +23,9 @@ def get_liquid_nitrogen():
     else:
         to_approve = pd.DataFrame(columns=['tower', 'pos', 'Rack', 'x', 'y', 'Responsible person', 'Date', 'Comments', 'cell_line',
                                            'prev_cell_line', 'prev_responsible', 'prev_comments', 'prev_date', 'status'])
-
     to_approve = to_approve.loc[to_approve['status'] == 'pending']
     to_approve = to_approve.fillna('')
+
     for tower in towers:
         data = rdb.get(tower)
         if data is None:
@@ -34,6 +34,7 @@ def get_liquid_nitrogen():
         df = pd.DataFrame(data)
         df = df.fillna('null')
         racks = df['Rack'].astype(str).unique()
+
         for rack in racks:
             rack_series = []
             for y in y_pos:
@@ -140,18 +141,19 @@ def update_rack():
         to_approve = pd.DataFrame(to_approve)
 
     to_approve = to_approve.loc[to_approve['status'] == 'pending']
-
     tower = data.get('tower')
     tower_data = rdb.get(tower)
 
     if tower_data is not None:
         tower_data = json.loads(tower_data)
         tower_data = pd.DataFrame(tower_data)
-        current_pos_data = tower_data.loc[(tower_data['Rack'] == data.get('Rack')) & (tower_data['y'] == data.get('y')) &
-                                          (tower_data['x'] == data.get('x'))]
+        current_pos_data = tower_data.loc[(tower_data['Rack'].astype(int) == int(data.get('Rack', 0))) & \
+                                          (tower_data['pos'] == data.get('pos'))]
         if len(current_pos_data) != 0:
             data['prev_cell_line'] = current_pos_data.iloc[0]['ID']
             data['prev_responsible'] = current_pos_data.iloc[0]['Responsible person']
+            data['x'] = current_pos_data.iloc[0]['x']
+            data['y'] = current_pos_data.iloc[0]['y']
 
     # if there is already something on that position, then ...
     to_overwrite = to_approve.loc[(to_approve['Rack'] == data.get('Rack')) & (to_approve['tower'] == data.get('tower')) &
@@ -216,16 +218,14 @@ def search():
     else:
         to_approve = pd.DataFrame(columns=['cell_line', 'prev_cell_line'])
 
-
     cell_lines = rdb.get('cell_lines')
     cell_lines = json.loads(cell_lines)
     cell_lines = pd.DataFrame(cell_lines)
     cell_lines = cell_lines.fillna('')
 
-
     # search by ID or name
     found = cell_lines.loc[(cell_lines['ID'].str.upper().str.contains(to_search)) | (cell_lines['Cell line'].str.upper().str.contains(to_search))]
-
+    cell_line_ids = found['ID'].tolist()
     results_df = None
 
     towers = [tower.decode('utf-8') for tower in rdb.smembers('towers')]
@@ -245,11 +245,16 @@ def search():
             results_df = df
         else:
             results_df = results_df.append(df, ignore_index=True)
-    found2 = to_approve.loc[(to_approve['cell_line'].str.upper().str.contains(to_search)) |
-                            (to_approve['prev_cell_line'].str.upper().str.contains(to_search))]
+
+    found2 = to_approve.loc[(to_approve['cell_line'].isin(cell_line_ids)) |
+                            (to_approve['prev_cell_line'].isin(cell_line_ids))]
+
+    empty = found2.loc[found2['cell_line'] == '']
+    found2.loc[empty.index, 'cell_line'] = found2.loc[empty.index, 'prev_cell_line']
 
     found2 = pd.merge(found2, cell_lines, left_on='cell_line', right_on='ID')
-    found2['status'] = 'to approve'
+    found2['status'] = 'pending'
+
 
     # results_df = results_df.loc[~results_df['ID'].isin(found2['ID'].tolist())]
     if results_df is not None:
@@ -262,19 +267,26 @@ def search():
     results_df = results_df[['ID', 'Cell line', 'tower', 'Rack', 'pos', 'Responsible person', 'Date', 'status']]
     results_df['Rack'] = results_df['Rack'].astype(int)
 
+    results_df = results_df.drop_duplicates(['tower', 'Rack', 'pos'], keep='last')
+
     html_result = '<table class="table table-hover table-sm" id="table_search"><tr>'
     for column in results_df.columns:
         html_result += '<th>{}</th>'.format(column)
 
-    html_result += '</tr>'
+    html_result += '<th></th></tr>'
 
     for index, row in results_df.iterrows():
-        if row['status'] == 'to approve':
-            html_result += '<tr class="table-warning">'
+        if row['status'] == 'pending':
+            html_result += '<tr class="table-warning" id="{}_{}_{}">'.format(row['tower'], row['Rack'], row['pos'])
         else:
-            html_result += '<tr>'
+            html_result += '<tr id="{}_{}_{}">'.format(row['tower'], row['Rack'], row['pos'])
         for column in results_df:
-            html_result += '<td>{}</td>'.format(row[column])
+            html_result += '<td class="{}">{}</td>'.format(column.replace(' ', '_'), row[column])
+        if row['status'] != 'pending':
+            html_result += '<td><button type="button" class="btn btn-sm btn-outline-secondary request_search" id="request_search">Request</button></td>'
+        else:
+            html_result += '<td></td>'
+
     html_result += '</tr>'
     html_result += '</table>'
 

@@ -413,19 +413,24 @@ $(document).ready(function() {
         $('#cell_lines').find('p.h5').text(rack + ', ' + y + x);
 
         var cell_line = e.point.ID;
-
         // if location is empty
         if (cell_line == undefined || cell_line == '') {
             if (!$('#erase').hasClass('d-none')) {
                 $('#erase').addClass('d-none');
             }
             $('#cell_line').attr('data-unchanged-val', '');
+            $('#responsible_name').text(e.point["Responsible person"]);
+            $('#date').text(e.point['Date']);
+            $('#comments').text(e.point['Comments']);
         } else {
             $('#erase').removeClass('d-none');
         }
 
         if (e.point.value == 0 || e.point.value == undefined || cell_line == '') {
             $('#cell_lines').find("td[id]").text('');
+            $('#responsible_name').text(e.point["Responsible person"]);
+            $('#date').text(e.point['Date']);
+            $('#comments').text(e.point['Comments']);
         } else {
             data = cell_lines[cell_line];
             $('#cell_line_ID').text(data['ID']);
@@ -624,7 +629,9 @@ $(document).ready(function() {
         }
     }
 
-    $('#search_btn').on('click', search_cell_line);
+    $('#search_btn').on('click', function() {
+        search_cell_line();
+    });
 
 
     $('#clear_search').on('click', function() {
@@ -633,7 +640,7 @@ $(document).ready(function() {
         $('#clear_search').addClass('d-none');
     });
 
-    $('.approve_btn, .decline_btn, .cancel_req').on('click', function() {
+    $(document).on('click', '.approve_btn, .decline_btn, .cancel_req', function() {
         var btn = this;
         var url = window.location.href + "/approve_decline";
         var tower = $(this).closest('tr').find('td.tower').text();
@@ -670,6 +677,7 @@ $(document).ready(function() {
             alert('Failed');
 
         });
+        $('tr#' + to_approve['tower'] + '_' + to_approve['Rack'] + '_' + to_approve['pos']).removeClass('table-warning').find('td.status').text('');
     });
 
     $('#export_data').on('click', function() {
@@ -703,6 +711,76 @@ $(document).ready(function() {
             }
             return false;
         }
+    });
+
+    // request cell line from search results
+    $(document).on('click', '#request_search', function(e) {
+        var cell_line_id = $(this).closest('tr').find('td.ID').text();
+        var cell_line_name = $(this).closest('tr').find('td.Cell_line').text();
+        var tower = $(this).closest('tr').find('td.tower').text();
+        var rack = $(this).closest('tr').find('td.Rack').text();
+        var pos = $(this).closest('tr').find('td.pos').text();
+        var today = get_today();
+        $('#confirm_request_from_search').modal('show');
+        $('#cell_line_id_search').text(cell_line_id);
+        $('#cell_line_name_search').text(cell_line_name);
+        $('#tower_search').text(tower);
+        $('#rack_search').text(rack);
+        $('#pos_search').text(pos);
+        $('#date_search').text(today);
+    });
+
+    $('#request_from_search').on('click', function(e) {
+        var url = window.location.href + "/update_rack";
+
+        var data = {
+            cell_line: '',
+            prev_cell_line: $('#cell_line_id_search').text(),
+            tower: $('#tower_search').text(),
+            Rack: $('#rack_search').text(),
+            pos: $('#pos_search').text(),
+            Date: $('#date_search').text(),
+            Comments: $('#comments_search').value,
+            'Responsible person': $('#responsible_search').val(),
+        };
+
+        $.ajax({
+            type: "POST",
+            //the url where you want to sent the userName and password to
+            url: url,
+            dataType: 'json',
+            //json object to sent to the authentication url
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+        }).done(function(response) {
+            alert( "success" );
+            // update rack_series
+            var i = parseInt(data['pos'][0]) -1 + parseInt(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].indexOf(data['pos'][1])) * 10;
+            data['color'] = '#ffcc00';
+            data['value'] = 2;
+            data['x'] = parseInt(data['pos'][0]) - 1;
+            data['y'] = parseInt(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].indexOf(data['pos'][1]));
+            data['status'] = 'pending';
+            data['ID'] = data['cell_line'];
+            var rack_name = 'Rack'+data['Rack'];
+            rack_series[data['tower'] + '_Rack' + data['Rack']][i] = data;
+            var rack_data = rack_series[data['tower'] + '_Rack' + data['Rack']];
+            $('tr#'+data['tower'] + '_' + data['Rack'] + '_' + data['pos']).addClass('table-warning');
+            $('tr#'+data['tower'] + '_' + data['Rack'] + '_' + data['pos']).find('td.status').text('pending');
+            $('tr#'+data['tower'] + '_' + data['Rack'] + '_' + data['pos']).find('td.Responsible_person').text(data['Responsible person']);
+            $('tr#'+data['tower'] + '_' + data['Rack'] + '_' + data['pos']).find('td.Date').text(data['Date']);
+            $('tr#'+data['tower'] + '_' + data['Rack'] + '_' + data['pos']).find('button.request_search').remove();
+            var new_request_html = "<tr><td class='tower'>" + data['tower'] + "</td><td class='Rack'>" + data['Rack'] + "</td>" +
+                "<td class='pos'>" + data['pos'] + "</td><td class='cell_line'></td><td class='prev_cell_line'>" + data['prev_cell_line'] +
+                "</td><td class='Comments'>" + data['Comments'] + "</td>" + "<td class='Date'>" + data['Date'] + "</td>" +
+                "<td class='Responsible person'>" + data['Responsible person'] + "</td><td></td><td></td>" +
+                "<td><button class='btn btn-sm btn-outline-warning cancel_req'>× Cancel request</button></td></tr>"
+            $('#requests_table').append(new_request_html);
+        }).fail(function(response) {
+            console.log(response);
+            alert(response);
+
+        })
     });
 
 });
