@@ -55,6 +55,43 @@
 </div>
 {% endif %}
 
+{# USER REQUESTS #}
+
+<div id="requests_container">
+<table class="table table-sm table-striped table-responsive mt-2 {% if user_requests is none %} d-none{% endif %}" id="user_requests">
+    <tr>tower	Rack	pos	cell_line	prev_cell_line	Comments	Date	Responsible person	status
+        <th>tower</th><th>Rack</th><th>pos</th><th>cell_line</th><th>prev_cell_line</th><th>Comments</th><th>Date</th>
+        <th>Responsible person</th><th>status</th><th></th>
+    </tr>
+    {% if user_requests %}
+    {% for i in range(user_requests|length) %}
+    <tr>
+        {% for key in user_requests[i].keys() %}
+        <td class="{{ key }}">
+            {% if user_requests[i][key] == 'approved' %}
+                <span class="badge badge-success">{{ user_requests[i][key] }}</span>
+            {% elif user_requests[i][key] == 'declined' %}
+                <span class="badge badge-danger">{{ user_requests[i][key] }}</span>
+            {% elif user_requests[i][key] == 'pending' %}
+                <span class="badge badge-warning">{{ user_requests[i][key] }}</span>
+            {% else %}
+                {{ user_requests[i][key] }}
+            {% endif %}
+        </td>
+        {% endfor %}
+        <td>
+            {% if user_requests[i]['status'] == 'pending' %}
+            <button class="btn btn-sm btn-outline-warning ml-2 cancel_req">× Cancel request</button>
+            {% endif %}
+        </td>
+
+    </tr>
+    {% endfor %}
+    {% endif %}
+</table>
+</div>
+{# end of USER REQUESTS #}
+
 {# SEARCH #}
 <div>
     <div class="row mt-2 justify-content-md-center">
@@ -233,12 +270,12 @@
                     </div>
                     <form>
                         <div class="form-group row mr-2 mb-0">
-                            <label for="new_cell_line_name" class="col-sm-4 col-form-label">Cell line:</label>
-                            <input type="text" id="new_cell_line_name" name="cell_line" class="col-sm-8 form-control">
+                            <label for="new_cell_line_id" class="col-sm-4 col-form-label">Cell line ID:</label>
+                            <input type="text" id="new_cell_line_id" name="cell_line_id" class="col-sm-8 form-control" disabled>
                         </div>
                         <div class="form-group row mr-2 mb-0">
-                            <label for="new_cell_line_id" class="col-sm-4 col-form-label">Cell line ID:</label>
-                            <input type="text" id="new_cell_line_id" name="cell_line_id" class="col-sm-8 form-control">
+                            <label for="new_cell_line_name" class="col-sm-4 col-form-label">Cell line:</label>
+                            <input type="text" id="new_cell_line_name" name="cell_line" class="col-sm-8 form-control">
                         </div>
                         <div class="form-group row mr-2 mb-0">
                             <label for="new_media" class="col-sm-4 col-form-label">Media (Freezing Medium):</label>
@@ -267,6 +304,10 @@
                         <div class="form-group row mr-2 mb-0">
                             <label for="new_source" class="col-sm-4 col-form-label">Source:</label>
                             <input type="text" id="new_source" name="source" class="col-sm-8 form-control">
+                        </div>
+                        <div class="form-group row mr-2 mb-0">
+                            <label for="tubes_available" class="col-sm-4 col-form-label">Tubes available:</label>
+                            <input type="number" step="1" min="0" value="1" id="tubes_available" name="tubes_available" class="col-sm-8 form-control">
                         </div>
                     </form>
                 </div>

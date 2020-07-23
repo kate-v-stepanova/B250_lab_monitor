@@ -23,8 +23,17 @@ def get_liquid_nitrogen():
     else:
         to_approve = pd.DataFrame(columns=['tower', 'pos', 'Rack', 'x', 'y', 'Responsible person', 'Date', 'Comments', 'cell_line',
                                            'prev_cell_line', 'prev_responsible', 'prev_comments', 'prev_date', 'status'])
-    to_approve = to_approve.loc[to_approve['status'] == 'pending']
+
     to_approve = to_approve.fillna('')
+
+    user_requests = to_approve.loc[to_approve['Responsible person'] == current_user.email]
+    user_requests = user_requests[['tower', 'Rack', 'pos', 'cell_line', 'prev_cell_line', 'Comments', 'Date', 'Responsible person', 'status']]
+    user_requests = user_requests[::-1] # reverse order
+    if len(user_requests) > 10:
+        user_requests = user_requests[:10]
+
+
+    to_approve = to_approve.loc[to_approve['status'] == 'pending']
 
     for tower in towers:
         data = rdb.get(tower)
@@ -88,6 +97,12 @@ def get_liquid_nitrogen():
 
     cell_lines = json.loads(cell_lines)
     cell_lines = pd.DataFrame(cell_lines)
+    cell_lines['tubes_available'] = cell_lines['tubes_available'].fillna(0)
+
+    available_cell_lines = cell_lines.loc[cell_lines['tubes_available'] != 0]
+    available_cell_lines = available_cell_lines[['ID', 'Cell line', 'tubes_available']]
+    available_cell_lines = available_cell_lines.to_dict('index')
+
     cell_lines = cell_lines.fillna('')
     cell_lines.index = cell_lines['ID']
     cell_lines = cell_lines.to_dict('index')
@@ -112,12 +127,12 @@ def get_liquid_nitrogen():
         to_approve_data = to_approve.to_dict('records')
         return render_template('liquid_nitrogen.html', series=series, cell_lines_dropdown=cell_lines_dropdown,
                                cell_lines=json.dumps(cell_lines).replace("""\xa0""", " "), to_approve=to_approve_data,
-                               admin=True, users=users, current_user=current_user.email)
+                               admin=True, users=users, current_user=current_user.email, available_cell_lines=available_cell_lines)
     else:
-        to_approve = to_approve.loc[to_approve['Responsible person'] == current_user.email]
-        to_approve_data = to_approve.to_dict('records')
+
+        user_requests = user_requests.to_dict('records')
         return render_template('liquid_nitrogen.html', series=series, cell_lines_dropdown=cell_lines_dropdown,
-                               cell_lines=json.dumps(cell_lines).replace("""\xa0""", " "), to_approve=to_approve_data,
+                               cell_lines=json.dumps(cell_lines).replace("""\xa0""", " "), user_requests=user_requests,
                                admin=False, users=users, current_user=current_user.email)
 
     # return render_template('liquid_nitrogen.html', series=series, cell_lines=json.dumps(cell_lines).replace("""\xa0""", " "),
@@ -185,6 +200,7 @@ def create_cell_line():
         df = pd.DataFrame(cell_lines)
     else:
         df = pd.DataFrame(columns=new_cell_line.keys())
+    df['tubes_available'] = df['tubes_available'].fillna(0)
     # if cell line already exists - name not unique
     if len(df.loc[df['Cell line'] == new_cell_line.get('Cell line')]) != 0:
         return make_response({'status': 'error', 'error': 'Cell line {} already exists'.format(new_cell_line.get('Cell line'))}, 200)

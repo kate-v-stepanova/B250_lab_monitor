@@ -70,6 +70,7 @@ $(document).ready(function() {
             'Biosafety Level': $('#new_biosafety').val(),
             'Mycoplasma checked': $('#new_mycoplasma').val(),
             'Source': $('#new_source').val(),
+            'tubes_available': $('#tubes_available').val(),
         }
         var url = window.location.href + "/create_cell_line";
         $.ajax({
@@ -103,6 +104,9 @@ $(document).ready(function() {
                 cell_lines[new_ID] = data;
                 cell_lines_dropdown.push({'value': new_ID, 'text': new_ID});
                 $('#modal-2').modal();
+
+                // clear modal fields
+                $('#new_cell_line').find('div.form-group').find('input').val('');
             }
         }).fail(function(response) {
             alert(response['responseJSON']['error']);
@@ -598,6 +602,13 @@ $(document).ready(function() {
             rack_series[tower + '_Rack' + rack][i] = data;
             var rack_data = rack_series[tower + '_Rack' + rack];
             load_chart_racks(rack_name, rack_data);
+            var new_tr = "<tr><td class='tower'>" + data['tower'] + "</td><td class='Rack'>" + data['Rack'] + "</td>" +
+            "<td class='pos'>" + data['pos'] + "</td><td class='cell_line'>" + data['ID'] + "</td>" +
+            "<td class='prev_cell_line'>" + data['prev_cell_line'] + "</td><td class='Comments'>" + data['Comments'] + "</td>" +
+            "<td class='Date'>" + data['Date'] + "</td><td class='Responsible person'>" + data['Responsible person'] + "</td>" +
+            "<td class='status'><span class='badge badge-warning'>pending</span></td>" +
+            "<td><button class='btn btn-sm btn-outline-warning ml-2 cancel_req'>× Cancel request</button></td>";
+            $('#user_requests').find('tr:last').after(new_tr);
         }).fail(function(response) {
             console.log(response);
             alert(response);
@@ -675,7 +686,6 @@ $(document).ready(function() {
         }).fail(function(response) {
             console.log(response);
             alert('Failed');
-
         });
         $('tr#' + to_approve['tower'] + '_' + to_approve['Rack'] + '_' + to_approve['pos']).removeClass('table-warning').find('td.status').text('');
     });
@@ -740,7 +750,7 @@ $(document).ready(function() {
             Rack: $('#rack_search').text(),
             pos: $('#pos_search').text(),
             Date: $('#date_search').text(),
-            Comments: $('#comments_search').value,
+            Comments: $('#comments_search').val(),
             'Responsible person': $('#responsible_search').val(),
         };
 
@@ -770,12 +780,14 @@ $(document).ready(function() {
             $('tr#'+data['tower'] + '_' + data['Rack'] + '_' + data['pos']).find('td.Responsible_person').text(data['Responsible person']);
             $('tr#'+data['tower'] + '_' + data['Rack'] + '_' + data['pos']).find('td.Date').text(data['Date']);
             $('tr#'+data['tower'] + '_' + data['Rack'] + '_' + data['pos']).find('button.request_search').remove();
-            var new_request_html = "<tr><td class='tower'>" + data['tower'] + "</td><td class='Rack'>" + data['Rack'] + "</td>" +
-                "<td class='pos'>" + data['pos'] + "</td><td class='cell_line'></td><td class='prev_cell_line'>" + data['prev_cell_line'] +
-                "</td><td class='Comments'>" + data['Comments'] + "</td>" + "<td class='Date'>" + data['Date'] + "</td>" +
-                "<td class='Responsible person'>" + data['Responsible person'] + "</td><td></td><td></td>" +
-                "<td><button class='btn btn-sm btn-outline-warning cancel_req'>× Cancel request</button></td></tr>"
-            $('#requests_table').append(new_request_html);
+            var new_tr = "<tr><td class='tower'>" + data['tower'] + "</td><td class='Rack'>" + data['Rack'] + "</td>" +
+            "<td class='pos'>" + data['pos'] + "</td><td class='cell_line'>" + data['ID'] + "</td>" +
+            "<td class='prev_cell_line'>" + data['prev_cell_line'] + "</td><td class='Comments'>" + data['Comments'] + "</td>" +
+            "<td class='Date'>" + data['Date'] + "</td><td class='Responsible person'>" + data['Responsible person'] + "</td>" +
+            "<td class='status'><span class='badge badge-warning'>pending</span></td>" +
+            "<td><button class='btn btn-sm btn-outline-warning ml-2 cancel_req'>× Cancel request</button></td>";
+            $('#user_requests').find('tr:last').after(new_tr);
+
         }).fail(function(response) {
             console.log(response);
             alert(response);
@@ -783,4 +795,15 @@ $(document).ready(function() {
         })
     });
 
+    // increment cell line ID
+    $('#new_cell_line').on('show.bs.modal', function() {
+        var data_drop_down = $('#cell_lines').attr('data-dropdown').replace(/'/g, '"'); //");
+        data_drop_down = JSON.parse(data_drop_down);
+        var last_val = data_drop_down[data_drop_down.length-1];
+        last_val = last_val['value'];
+        var new_val = last_val.replace('FLP', '');
+        new_val = parseInt(new_val) + 1;
+        new_val = last_val.replace(new_val -1, new_val);
+        $('#new_cell_line_id').val(new_val);
+    });
 });
