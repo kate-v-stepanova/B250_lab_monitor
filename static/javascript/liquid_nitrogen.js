@@ -24,6 +24,14 @@ $(document).ready(function() {
         // show modal -> to enter responsible name and comments
         // after entering, click OK and call $('#modal-ok').on('click') function
         if (value == 'add_new') {
+            // increment ID
+            var last_val = cell_lines_dropdown[cell_lines_dropdown.length-1];
+            last_val = last_val['value'];
+            var new_val = last_val.replace('FLP', '');
+            new_val = parseInt(new_val) + 1;
+            new_val = last_val.replace(new_val -1, new_val);
+            $('#new_cell_line_id').val(new_val);
+            // show modal
             $('#new_cell_line').modal();
             /*
                 // here will be processed modal inputs
@@ -50,6 +58,7 @@ $(document).ready(function() {
             }
         }
     }
+
 
     $('#cell_line_ID').editable({
         type: 'select',
@@ -86,27 +95,43 @@ $(document).ready(function() {
                 alert(response['error']);
             } else {
                 alert('Successfully created');
-                // then update fields
-                $('#cell_line_ID').text(new_ID);
-                $('#cell_line').text(data['Cell line']).addClass('font-weight-bold');
-                $('#media').text(data['Media (Freezing Medium)']).addClass('font-weight-bold');
-                $('#plasmid').text(data['Transferred plasmid']).addClass('font-weight-bold');
-                $('#selection').text(data['Selection']).addClass('font-weight-bold');
-                $('#type').text(data['Typ']).addClass('font-weight-bold');
-                $('#biosafety').text(data['Biosafety Level']).addClass('font-weight-bold');
-                $('#mycoplasma').text(data['Mycoplasma checked']).addClass('font-weight-bold');
-                $('#source').text(data['Source']).addClass('font-weight-bold');
-                // mark with bold (updated values)
-                $('#cell_line_ID').addClass('font-weight-bold').addClass('font-weight-bold');
-                value = $('#new_cell_line_id').val();
+//                // then update fields
+//                $('#cell_line_ID').text(new_ID);
+//                $('#cell_line').text(data['Cell line']).addClass('font-weight-bold');
+//                $('#media').text(data['Media (Freezing Medium)']).addClass('font-weight-bold');
+//                $('#plasmid').text(data['Transferred plasmid']).addClass('font-weight-bold');
+//                $('#selection').text(data['Selection']).addClass('font-weight-bold');
+//                $('#type').text(data['Typ']).addClass('font-weight-bold');
+//                $('#biosafety').text(data['Biosafety Level']).addClass('font-weight-bold');
+//                $('#mycoplasma').text(data['Mycoplasma checked']).addClass('font-weight-bold');
+//                $('#source').text(data['Source']).addClass('font-weight-bold');
+//                // mark with bold (updated values)
+//                $('#cell_line_ID').addClass('font-weight-bold').addClass('font-weight-bold');
+//                value = $('#new_cell_line_id').val();
                 $('#new_cell_line').modal('hide');
                 // add cell line to a list
                 cell_lines[new_ID] = data;
                 cell_lines_dropdown.push({'value': new_ID, 'text': new_ID});
-                $('#modal-2').modal();
+
+                // update editable select
+                $('#cell_line_ID').editable('option', 'source', cell_lines_dropdown);
+
+                // update table
+                if ($('#' + new_ID).length != 0) {
+                    $('#' + new_ID).find('td.Cell_line').text(data['Cell line']);
+                    $('#' + new_ID).find('td.tubes_available').text(data['tubes_available']);
+                } else {
+                    $('#avaiable_cell_lines').append("<tr id='" + new_ID + "'><td class='ID'>" + new_ID + "</td><td class='Cell_line'>" +
+                    data['Cell line'] + "</td><td class='tubes_available'>" + data['tubes_available'] + "</td>" +
+                    "<td><button class='btn btn-sm btn-outline-primary edit_cell_line'>✎ Edit</button></td>" +
+                    "<td><button class='btn btn-sm btn-outline-danger del_cell_line'>× Delete</button></td>");
+                }
 
                 // clear modal fields
                 $('#new_cell_line').find('div.form-group').find('input').val('');
+
+                // update cell_lines
+                cell_lines[new_ID] = data;
             }
         }).fail(function(response) {
             alert(response['responseJSON']['error']);
@@ -507,10 +532,10 @@ $(document).ready(function() {
                 if (comments != "") {
                     $('#comments').addClass('font-weight-bold');
                 }
-                $('#confirm_erase').modal('hide');
+                $('#confirm_request').modal('hide');
             }
         } else {
-            $('#confirm_erase').modal('hide');
+            $('#confirm_request').modal('hide');
         }
     });
 
@@ -609,6 +634,9 @@ $(document).ready(function() {
             "<td class='status'><span class='badge badge-warning'>pending</span></td>" +
             "<td><button class='btn btn-sm btn-outline-warning ml-2 cancel_req'>× Cancel request</button></td>";
             $('#user_requests').find('tr:last').after(new_tr);
+            if ($('#user_requests').hasClass('d-none')) {
+                $('#user_requests').removeClass('d-none');
+            }
         }).fail(function(response) {
             console.log(response);
             alert(response);
@@ -780,6 +808,7 @@ $(document).ready(function() {
             $('tr#'+data['tower'] + '_' + data['Rack'] + '_' + data['pos']).find('td.Responsible_person').text(data['Responsible person']);
             $('tr#'+data['tower'] + '_' + data['Rack'] + '_' + data['pos']).find('td.Date').text(data['Date']);
             $('tr#'+data['tower'] + '_' + data['Rack'] + '_' + data['pos']).find('button.request_search').remove();
+            // add row in requests table
             var new_tr = "<tr><td class='tower'>" + data['tower'] + "</td><td class='Rack'>" + data['Rack'] + "</td>" +
             "<td class='pos'>" + data['pos'] + "</td><td class='cell_line'>" + data['ID'] + "</td>" +
             "<td class='prev_cell_line'>" + data['prev_cell_line'] + "</td><td class='Comments'>" + data['Comments'] + "</td>" +
@@ -787,23 +816,112 @@ $(document).ready(function() {
             "<td class='status'><span class='badge badge-warning'>pending</span></td>" +
             "<td><button class='btn btn-sm btn-outline-warning ml-2 cancel_req'>× Cancel request</button></td>";
             $('#user_requests').find('tr:last').after(new_tr);
+            // make it visible
+            if ($('#user_requests').hasClass('d-none')){
+                $('#user_requests').removeClass('d-none');
+            }
 
         }).fail(function(response) {
             console.log(response);
             alert(response);
-
-        })
+        });
     });
 
-    // increment cell line ID
-    $('#new_cell_line').on('show.bs.modal', function() {
-        var data_drop_down = $('#cell_lines').attr('data-dropdown').replace(/'/g, '"'); //");
-        data_drop_down = JSON.parse(data_drop_down);
-        var last_val = data_drop_down[data_drop_down.length-1];
+    $('#add_new_cell_line').on('click', function() {
+        // increment ID
+        var last_val = cell_lines_dropdown[cell_lines_dropdown.length-1];
         last_val = last_val['value'];
         var new_val = last_val.replace('FLP', '');
         new_val = parseInt(new_val) + 1;
         new_val = last_val.replace(new_val -1, new_val);
         $('#new_cell_line_id').val(new_val);
+        // show modal
+        $('#new_cell_line').modal();
     });
+
+    $(document).on('click', '.edit_cell_line', function() {
+        // get ID
+        var cell_line_id = $(this).closest('tr').find('td.ID').text();
+        var cell_line_data = cell_lines[cell_line_id];
+        // fill in the inputs
+        $('#new_cell_line_id').val(cell_line_id);
+        $('#new_cell_line_name').val(cell_line_data['Cell line']);
+        $('#new_media').val(cell_line_data['Media (Freezing Medium)']);
+        $('#new_plasmid').val(cell_line_data['transfected plasmid']);
+        $('#new_selection').val(cell_line_data['selection']);
+        $('#new_type').val(cell_line_data['Typ']);
+        $('#new_biosafety').val(cell_line_data['Biosafety level S1/S2']);
+        $('#new_mycoplasma').val(cell_line_data['Mycoplasma checked']);
+        $('#new_source').val(cell_line_data['Source']);
+        $('#tubes_available').val(cell_line_data['tubes_available']);
+
+        // show modal
+        $('#new_cell_line').modal();
+    });
+
+    // click "Delete" btn in the table
+    $(document).on('click', '.del_cell_line', function() {
+        var cell_line_id = $(this).closest('tr').find('td.ID').text();
+        data = {'cell_line_id': cell_line_id};
+        var url = window.location.href + "/get_cell_line_info";
+        $.ajax({
+            type: "POST",
+            url: url,
+            dataType: 'json',
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+        }).done(function(response) {
+            console.log(response);
+            var results = response['results'];
+            if (results.length != 0) {
+                for (i = 0; i < results.length; i++) {
+                    var row = results[i];
+                    var html = "<tr><td>" + row['tower'] + "</td><td>" + row['Rack'] + "</td>" + "<td>" + row['pos'] + "</td>";
+                    if (row['status'] == 'pending') {
+                        html += "<td><span class='badge badge-warning'>pending</span></td>"
+                    } else if (row['status'] == 'approved') {
+                        html += "<td><span class='badge badge-info'>approved</span></td>"
+                    } else if (row['status'] == 'declined') {
+                        html += "<td><span class='badge badge-danger'>declined</span></td>"
+                    }
+                    $('#cell_line_positions').append(html);
+                }
+                $('#cell_line_positions').removeClass('d-none');
+            }
+            $('#confirm_delete').modal();
+            $('#delete_cell_line').removeClass('d-none');
+            $('#cancel_delete').text('Cancel');
+            $('#error-2').addClass('d-none');
+            $('#cell_line_to_delete').text(cell_line_id);
+        }).fail(function(response) {
+            console.log(response);
+        });
+    });
+
+    // modal confirm delete
+    $('#delete_cell_line').on('click', function() {
+        var cell_line_id = $('#cell_line_to_delete').text();
+        var url = window.location.href + "/delete_cell_line";
+        var data = {'cell_line_id': cell_line_id};
+        $.ajax({
+            type: "POST",
+            url: url,
+            dataType: 'json',
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+        }).done(function(response) {
+            console.log(response);
+            var info = response['info'];
+            $('#error-2').text(info);
+            $('#error-2').removeClass('d-none');
+            $('#error-2').removeClass('alert-danger').removeClass('alert-success');
+            $('#error-2').addClass('alert-success');
+            $('#delete_cell_line').addClass('d-none');
+            $('#cancel_delete').text('Close');
+            // remove from the table
+            $('#' + cell_line_id).remove();
+        }).fail(function(response) {
+            console.log(response);
+        });
+    })
 });

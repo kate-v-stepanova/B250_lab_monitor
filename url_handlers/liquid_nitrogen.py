@@ -32,9 +32,7 @@ def get_liquid_nitrogen():
     if len(user_requests) > 10:
         user_requests = user_requests[:10]
 
-
     to_approve = to_approve.loc[to_approve['status'] == 'pending']
-
     for tower in towers:
         data = rdb.get(tower)
         if data is None:
@@ -101,7 +99,7 @@ def get_liquid_nitrogen():
 
     available_cell_lines = cell_lines.loc[cell_lines['tubes_available'] != 0]
     available_cell_lines = available_cell_lines[['ID', 'Cell line', 'tubes_available']]
-    available_cell_lines = available_cell_lines.to_dict('index')
+    available_cell_lines = available_cell_lines.to_dict('records')
 
     cell_lines = cell_lines.fillna('')
     cell_lines.index = cell_lines['ID']
@@ -125,9 +123,12 @@ def get_liquid_nitrogen():
         ['tower', 'Rack', 'pos', 'cell_line', 'prev_cell_line', 'Comments', 'Date', 'Responsible person']]
     if current_user.email in liquid_nitrogen_admins:
         to_approve_data = to_approve.to_dict('records')
+        user_requests = user_requests.to_dict('records')
+
         return render_template('liquid_nitrogen.html', series=series, cell_lines_dropdown=cell_lines_dropdown,
                                cell_lines=json.dumps(cell_lines).replace("""\xa0""", " "), to_approve=to_approve_data,
-                               admin=True, users=users, current_user=current_user.email, available_cell_lines=available_cell_lines)
+                               admin=True, users=users, current_user=current_user.email, available_cell_lines=available_cell_lines,
+                               user_requests=user_requests)
     else:
 
         user_requests = user_requests.to_dict('records')
@@ -201,14 +202,19 @@ def create_cell_line():
     else:
         df = pd.DataFrame(columns=new_cell_line.keys())
     df['tubes_available'] = df['tubes_available'].fillna(0)
-    # if cell line already exists - name not unique
-    if len(df.loc[df['Cell line'] == new_cell_line.get('Cell line')]) != 0:
-        return make_response({'status': 'error', 'error': 'Cell line {} already exists'.format(new_cell_line.get('Cell line'))}, 200)
-    # ID not unique
-    if len(df.loc[df['ID'] == new_cell_line.get('ID')]) != 0:
-        return make_response({'status': 'error', 'error': 'Cell line {} already exists'.format(new_cell_line.get('ID'))}, 200)
 
-    df = df.append(new_cell_line, ignore_index=True)
+    # todo: later
+    # # if name exists but id is different
+    # if len(df.loc[df['Cell line'] == new_cell_line.get('Cell line')]) != 0:
+    #     existing = df.loc[df['Cell line'] == new_cell_line.get('Cell line')]
+    #     if new_cell_line.get('ID')
+
+    # if exists - overwrite
+    if len(df.loc[df['ID'] == new_cell_line.get('ID')]) != 0:
+        for key in new_cell_line.keys():
+            df.loc[df['ID'] == new_cell_line.get('ID')][key] = new_cell_line[key]
+    else:
+        df = df.append(new_cell_line, ignore_index=True)
     try:
         rdb.set('cell_lines', json.dumps(df.to_dict('list')))
     except Exception as e:
@@ -440,3 +446,96 @@ def export_data():
     content = full_df.to_csv(sep=";", index=False)
     return make_response({'status': 'success', 'csv_content': content}, 200)
 
+
+@liquid_nitrogen.route('/liquid_nitrogen/get_cell_line_info', methods=['POST'])
+@login_required
+def get_cell_line_info():
+    from main import get_db
+    rdb = get_db()
+    data = request.get_data()
+    if data is None:
+        return make_response({'status': 'error', 'error': 'no data received'}, 200)
+    data = json.loads(data.decode('utf-8'))
+
+    cell_line_id = data.get('cell_line_id')
+    to_approve = rdb.get('to_approve')
+    if to_approve is not None:
+        to_approve = json.loads(to_approve)
+        to_approve = pd.DataFrame(to_approve)
+    else:
+        to_approve = pd.DataFrame(columns=['tower', 'pos', 'Rack', 'x', 'y', 'Responsible person', 'Date', 'Comments',
+                       'cell_line', 'prev_cell_line', 'prev_responsible', 'prev_comments', 'prev_date', 'status'])
+    results = None
+    found = to_approve.loc[(to_approve['cell_line'] == cell_line_id) | (to_approve['prev_cell_line'] == cell_line_id)]
+    if len(found) != 0:
+        found = found[['tower', 'Rack', 'pos', 'status']]
+        results = found.to_dict('records')
+
+    towers = [tower.decode('utf-8') for tower in rdb.smembers('towers')]
+    for tower in towers:
+        data = rdb.get(tower)
+        if data is None:
+            continue
+        data = json.loads(data)
+        df = pd.DataFrame(data)
+        found2 = df.loc[df['ID'] == cell_line_id]
+        if len(found2) != 0:
+            found2['tower'] = tower
+            found2 = found2[['tower', 'Rack', 'pos', 'status']]
+            if results is None:
+                results = found2.to_dict('records')
+            else:
+                results.append(found2.to_dict('records'))
+    if results is None:
+        results = []
+    return make_response({'status': 'success', 'results': results}, 200)
+
+
+@liquid_nitrogen.route('/liquid_nitrogen/delete_cell_line', methods=['POST'])
+@login_required
+def delete_cell_line():
+    from main import get_db
+    rdb = get_db()
+    data = request.get_data()
+    if data is None:
+        return make_response({'status': 'error', 'error': 'no data received'}, 200)
+    data = json.loads(data.decode('utf-8'))
+    cell_line_id = data.get('cell_line_id')
+    print(cell_line_id)
+
+    to_approve = rdb.get('to_approve')
+
+    if to_approve is not None:
+        to_approve = json.loads(to_approve)
+        to_approve = pd.DataFrame(to_approve)
+    else:
+        to_approve = pd.DataFrame(columns=['tower', 'pos', 'Rack', 'x', 'y', 'Responsible person', 'Date', 'Comments',
+                       'cell_line', 'prev_cell_line', 'prev_responsible', 'prev_comments', 'prev_date', 'status'])
+
+    found = to_approve.loc[to_approve['cell_line'] == cell_line_id]
+    to_approve = to_approve.drop(found.index)
+    rdb.set('to_approve', json.dumps(to_approve.to_dict('list')))
+
+    towers = [tower.decode('utf-8') for tower in rdb.smembers('towers')]
+    for tower in towers:
+        data = rdb.get(tower)
+        if data is None:
+            continue
+        data = json.loads(data)
+        df = pd.DataFrame(data)
+        found = df.loc[df['ID'] == cell_line_id]
+        if len(found) != 0:
+            df = df.drop(found.index)
+            rdb.set(tower, json.dumps(df.to_dict('list')))
+
+    cell_lines = rdb.get('cell_lines')
+
+    if cell_lines is not None:
+        cell_lines = rdb.get('cell_lines')
+        cell_lines = json.loads(cell_lines)
+        cell_lines = pd.DataFrame(cell_lines)
+        found = cell_lines.loc[cell_lines['ID'] == cell_line_id]
+        cell_lines = cell_lines.drop(found.index)
+        rdb.set('cell_lines', json.dumps(cell_lines.to_dict('list')))
+
+    return make_response({'status': 'success', 'info': 'Cell line has been removed from the DB. All associated positions have been cleared'}, 200)
