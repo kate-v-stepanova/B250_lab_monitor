@@ -97,7 +97,7 @@ def get_liquid_nitrogen():
     cell_lines = pd.DataFrame(cell_lines)
     cell_lines['tubes_available'] = cell_lines['tubes_available'].fillna(0)
 
-    available_cell_lines = cell_lines.loc[cell_lines['tubes_available'] != 0]
+    available_cell_lines = cell_lines.loc[cell_lines['tubes_available'].astype(int) != 0]
     available_cell_lines = available_cell_lines[['ID', 'Cell line', 'tubes_available']]
     available_cell_lines = available_cell_lines.to_dict('records')
 
@@ -134,7 +134,7 @@ def get_liquid_nitrogen():
         user_requests = user_requests.to_dict('records')
         return render_template('liquid_nitrogen.html', series=series, cell_lines_dropdown=cell_lines_dropdown,
                                cell_lines=json.dumps(cell_lines).replace("""\xa0""", " "), user_requests=user_requests,
-                               admin=False, users=users, current_user=current_user.email)
+                               admin=False, users=users, current_user=current_user.email, available_cell_lines=available_cell_lines)
 
     # return render_template('liquid_nitrogen.html', series=series, cell_lines=json.dumps(cell_lines).replace("""\xa0""", " "),
     #                        cell_lines_dropdown=cell_lines_dropdown)
@@ -202,7 +202,6 @@ def create_cell_line():
     else:
         df = pd.DataFrame(columns=new_cell_line.keys())
     df['tubes_available'] = df['tubes_available'].fillna(0)
-
     # todo: later
     # # if name exists but id is different
     # if len(df.loc[df['Cell line'] == new_cell_line.get('Cell line')]) != 0:
