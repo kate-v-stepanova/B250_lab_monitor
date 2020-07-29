@@ -426,6 +426,9 @@ $(document).ready(function() {
         $('#discard_changes').addClass('d-none');
         $('#erase').addClass('d-none');
         load_chart_racks(rack_name, data);
+        if ($('#export_rack').hasClass('d-none')) {
+            $('#export_rack').removeClass('d-none');
+        }
     }
 
     function show_cell_line_details(e) {
@@ -935,5 +938,44 @@ $(document).ready(function() {
         }).fail(function(response) {
             console.log(response);
         });
-    })
+    });
+
+    // export Rack data
+    $('#export_rack').on('click', function() {
+        var tower = $('#towers').attr('selected-tower');
+        var rack = $('#rack').find('.highcharts-title').text();
+        var rack_data = rack_series[tower + '_' + rack];
+        var content = ";"
+        // header
+        for (i=1; i<=10; i++){
+            content += i+';';
+        }
+        content += "\n";
+        for (i=0; i<10; i++) {
+            for (j=-1; j<10; j++) {
+                // labels A, B, C, etc
+                if (j==-1) {
+                    content += ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'][i] + ';'
+                // cell lines
+                } else {
+                    var cell_line_id = rack_data[i * 10 + j]['ID'];
+                    if (cell_line_id == undefined) {
+                        cell_line_id = "";
+                    } else if (String(rack_data[i*10 + j]['value']) != '1') {
+
+                        if (rack_data[i*10 + j]['prev_cell_line'] != undefined) {
+                            cell_line_id += rack_data[i*10 + j]['prev_cell_line'] + "(not approved)"
+                        }
+                    }
+                    content += cell_line_id + ';';
+                }
+            }
+            content += "\n";
+        }
+
+//        var csv_content = response['csv_content'];
+        var blob = new Blob([content], {type: "text/plain;charset=utf-8"});
+        var file_name = tower + "_" + rack + '.csv';
+        saveAs(blob, file_name)
+    });
 });
