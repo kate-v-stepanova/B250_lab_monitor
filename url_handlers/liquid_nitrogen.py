@@ -349,10 +349,8 @@ def approve_decline():
         tower_df = pd.DataFrame(json.loads(tower_data))
 
     if action == 'approve':
-        requests.loc[req.index, 'status'] = 'approved'
-        rdb.set('to_approve', json.dumps(requests.to_dict('list')))
 
-        pos = tower_df.loc[(tower_df['Rack'] == data.get('Rack')) & (tower_df['pos'] == data.get('pos'))]
+        pos = tower_df.loc[(tower_df['Rack'].astype(str) == str(data.get('Rack', '0'))) & (tower_df['pos'] == data.get('pos'))]
         if len(pos) == 0:
 
             # if added to a new position
@@ -362,6 +360,9 @@ def approve_decline():
                 tower_df = tower_df.append(to_append, ignore_index=True)
 
                 rdb.set(data.get('tower'), json.dumps(tower_df.to_dict('list')))
+
+                requests.loc[req.index, 'status'] = 'approved'
+                rdb.set('to_approve', json.dumps(requests.to_dict('list')))
                 return make_response({'status': 'success', 'info': 'Request has been approved'}, 200)
 
             # if requested from a postion
@@ -373,6 +374,9 @@ def approve_decline():
             if not req['cell_line'].tolist()[0]:
                 tower_df = tower_df.drop(pos.index)
                 rdb.set(data.get('tower'), json.dumps(tower_df.to_dict('list')))
+                # change status
+                requests.loc[req.index, 'status'] = 'approved'
+                rdb.set('to_approve', json.dumps(requests.to_dict('list')))
                 return make_response({'status': 'success', 'info': 'Request has been approved'}, 200)
 
             else:
@@ -415,8 +419,8 @@ def export_data():
                              'selection', 'Typ', 'Date', 'Responsible person', 'Biosafety level S1/S2', 'Comments',
                              'Mycoplasma checked', 'Source', 'status']]
     to_approve.columns = ['ID', 'Cell line', 'Rack', 'Tower', 'Position', 'Media (Freezing Medium)', 'transfected plasmid',
-                             'selection', 'Typ', 'Date', 'Responsible person', 'Biosafety level S1/S2', 'Comments',
-                             'Mycoplasma checked', 'Source', 'status']
+                          'selection', 'Typ', 'Date', 'Responsible person', 'Biosafety level S1/S2', 'Comments',
+                          'Mycoplasma checked', 'Source', 'status']
 
     towers = [tower.decode('utf-8') for tower in rdb.smembers('towers')]
     full_df = None

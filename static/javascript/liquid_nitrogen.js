@@ -627,6 +627,7 @@ $(document).ready(function() {
             rack_series[tower + '_Rack' + rack][i] = data;
             var rack_data = rack_series[tower + '_Rack' + rack];
             load_chart_racks(rack_name, rack_data);
+            // update my requests
             var new_tr = "<tr><td class='tower'>" + data['tower'] + "</td><td class='Rack'>" + data['Rack'] + "</td>" +
             "<td class='pos'>" + data['pos'] + "</td><td class='cell_line'>" + data['ID'] + "</td>" +
             "<td class='prev_cell_line'>" + data['prev_cell_line'] + "</td><td class='Comments'>" + data['Comments'] + "</td>" +
@@ -636,6 +637,17 @@ $(document).ready(function() {
             $('#user_requests').find('tr:last').after(new_tr);
             if ($('#user_requests').hasClass('d-none')) {
                 $('#user_requests').removeClass('d-none');
+            }
+            // update pending requests
+            var new_tr2 = '<tr><td class="tower">' + data['tower'] + '</td><td class="Rack">' + data['Rack'] + '</td>' +
+                '<td class="pos">' + data['pos'] + '</td><td class="cell_line">' + data['ID'] + '</td>' +
+                '<td class="prev_cell_line">' + data['prev_cell_line'] + '</td><td class="Comments">' + data['Comments'] +
+                '</td><td class="Date">' + data['Date'] + '</td><td class="Responsible person">' + data['Responsible person'] +
+                '</td><td><button class="btn btn-sm btn-outline-success approve_btn">✓ Approve</button></td>' +
+                '<td><button class="btn btn-sm btn-outline-danger decline_btn">× Decline</button></td></tr>';
+            $('#requests_table').find('tr:last').after(new_tr2);
+            if ($('#requests_table').hasClass('d-none')) {
+                $('#requests_table').removeClass('d-none');
             }
         }).fail(function(response) {
             console.log(response);
