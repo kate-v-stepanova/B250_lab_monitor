@@ -131,7 +131,7 @@ $(document).ready(function() {
                     $('#' + new_ID).find('td.Cell_line').text(data['Cell line']);
                     $('#' + new_ID).find('td.tubes_available').text(data['tubes_available']);
                 } else {
-                    $('#avaiable_cell_lines').append("<tr id='" + new_ID + "'><td class='ID'>" + new_ID + "</td><td class='Cell_line'>" +
+                    $('#available_cell_lines').append("<tr id='" + new_ID + "'><td class='ID'>" + new_ID + "</td><td class='Cell_line'>" +
                     data['Cell line'] + "</td><td class='tubes_available'>" + data['tubes_available'] + "</td>" +
                     "<td><button class='btn btn-sm btn-outline-primary edit_cell_line'>✎ Edit</button></td>" +
                     "<td><button class='btn btn-sm btn-outline-danger del_cell_line'>× Delete</button></td>");
@@ -308,7 +308,14 @@ $(document).ready(function() {
                 borderWidth: 1,
                 data: rack_data,
                 events: {
-                    click: function(e){show_cell_line_details(e); $('#cell_line').attr('data-unchanged-val', e.point.ID);}
+                    click: function(e){
+                        if (e.point.pos == "J10" || (e.point.options.x == 9 && e.point.options.y == 9)) {
+                            e.preventDefault();
+                            alert('J10 is disabled');
+                        } else {
+                            show_cell_line_details(e); $('#cell_line').attr('data-unchanged-val', e.point.ID);
+                        }
+                    }
                 },
                 allowPointSelect: true,
                 states: {
@@ -615,7 +622,6 @@ $(document).ready(function() {
             prev_date: prev_date,
         }
 
-
         // add or remove
         var url = window.location.href + "/update_rack";
         $.ajax({
@@ -628,6 +634,16 @@ $(document).ready(function() {
             contentType: 'application/json',
         }).done(function(response) {
             alert( "success" );
+            // update number of available tubes
+            if (prev_cell_line != cell_line) {
+                if ($('#available_cell_lines').find('tr#' + cell_line).length != 0) {
+                    var tubes = $('#available_cell_lines').find('tr#' + cell_line).find('td.tubes_available').text();
+                    var new_tubes = parseInt(tubes) - 1
+                    $('#available_cell_lines').find('tr#' + cell_line).find('td.tubes_available').text(new_tubes);
+                    cell_lines[cell_line]['available_tubes'] = new_tubes;
+                }
+            }
+
             // update rack_series
             var i = parseInt(data['x']) -1 + parseInt(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].indexOf(data['y'])) * 10;
             data['color'] = '#ffcc00';
@@ -710,6 +726,7 @@ $(document).ready(function() {
         var tower = $(this).closest('tr').find('td.tower').text();
         var rack = $(this).closest('tr').find('td.Rack').text();
         var pos = $(this).closest('tr').find('td.pos').text();
+        var cell_line_id = $(this).closest('tr').find('td.cell_line').text();
 
         var action = "";
         if ($(this).hasClass('approve_btn')) {
@@ -725,6 +742,7 @@ $(document).ready(function() {
             'Rack': rack,
             'pos': pos,
             'action': action,
+            'cell_line_id': cell_line_id,
         }
         $.ajax({
             type: "POST",
@@ -736,6 +754,15 @@ $(document).ready(function() {
         }).done(function(response) {
             console.log(response)
             $(btn).closest("tr").remove();
+            // if request to add a cell line to a new position has been declined
+            // update the number of tubes
+            if (action == 'decline' && to_approve['cell_line_id'] != '') {
+                var tr = $('#available_cell_lines').find('tr#' + cell_line_id);
+                var tubes = tr.find('td.tubes_available').text();
+                tr.find('td.tubes_available').text(parseInt(tubes) + 1);
+                var tubes = cell_lines[cell_line_id]['tubes_available'];
+                cell_lines[cell_line_id]['tubes_available'] = parseInt(tubes) + 1;
+            }
         }).fail(function(response) {
             console.log(response);
             alert('Failed');

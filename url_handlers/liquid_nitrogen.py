@@ -175,10 +175,26 @@ def update_rack():
     to_overwrite = to_approve.loc[(to_approve['Rack'] == data.get('Rack')) & (to_approve['tower'] == data.get('tower')) &
                                   (to_approve['pos'] == data.get('pos'))]
     # ... then drop it and ...
+    change_tubes = True
     if len(to_overwrite) != 0:
         to_approve = to_approve.drop(to_overwrite.index)
+        # .. check if we need to change the number of tubes ...
+        if to_overwrite['cell_line'].tolist() in [data.get('cell_line')] and data.get('cell_line') != '':
+            change_tubes = False
     # ... and add the new data
     to_approve = to_approve.append(data, ignore_index=True)
+
+    # if a tube is placed on an empty location
+    if data['prev_cell_line'] == '' and change_tubes:
+        # change number of available tubes
+        cell_lines = rdb.get('cell_lines')
+        cell_lines = json.loads(cell_lines)
+        cell_lines = pd.DataFrame(cell_lines)
+        # todo: check if there is a request on that position - then do not reduce the number of tubes - done
+        cur_cell_line = cell_lines.loc[cell_lines['ID'] == data['cell_line']]
+        cell_lines.loc[cell_lines['ID'] == data['cell_line'], 'tubes_available'] = \
+            cur_cell_line['tubes_available'].astype(int) - 1
+        rdb.set('cell_lines', json.dumps(cell_lines.to_dict('list')))
 
     # save to db
     try:
@@ -385,6 +401,14 @@ def approve_decline():
     elif action == 'decline':
         requests.loc[req.index, 'status'] = 'declined'
         rdb.set('to_approve', json.dumps(requests.to_dict('list')))
+        # update number of available tubes
+        cell_lines = rdb.get('cell_lines')
+        cell_lines = json.loads(cell_lines)
+        cell_df = pd.DataFrame(cell_lines)
+        curr_cell_line = cell_df.loc[cell_df['ID'] == data.get('cell_line_id')]
+        cell_df.loc[cell_df['ID'] == data.get('cell_line_id'), 'tubes_available'] = \
+            curr_cell_line['tubes_available'].astype(int) + 1
+        rdb.set('cell_lines', json.dumps(cell_df.to_dict('list')))
         return make_response({'status': 'success', 'info': 'Request has been declined'}, 200)
     elif action == 'cancel':
         requests = requests.drop(req.index)
