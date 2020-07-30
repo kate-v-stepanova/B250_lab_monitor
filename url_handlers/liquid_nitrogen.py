@@ -211,7 +211,7 @@ def create_cell_line():
     # if exists - overwrite
     if len(df.loc[df['ID'] == new_cell_line.get('ID')]) != 0:
         for key in new_cell_line.keys():
-            df.loc[df['ID'] == new_cell_line.get('ID')][key] = new_cell_line[key]
+            df.loc[df['ID'] == new_cell_line.get('ID'), key] = new_cell_line[key]
     else:
         df = df.append(new_cell_line, ignore_index=True)
     try:

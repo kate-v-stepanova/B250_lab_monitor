@@ -94,7 +94,7 @@ $(document).ready(function() {
             if (response['status'] == 'error') {
                 alert(response['error']);
             } else {
-                alert('Successfully created');
+                alert('Successfully created/updated');
 //                // then update fields
 //                $('#cell_line_ID').text(new_ID);
 //                $('#cell_line').text(data['Cell line']).addClass('font-weight-bold');
