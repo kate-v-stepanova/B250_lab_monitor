@@ -6,11 +6,21 @@ $(document).ready(function() {
         type:  'textarea',
         emptytext: '',
     });
-    $('#responsible_name').editable({
-        emptytext: '',
-    });
+
     $('#date').editable({
         emptytext: '',
+    });
+
+    var responsibles = $('#responsibles').attr('data-responsibles');
+    responsibles = responsibles.replace(/'/g, '"'); //");
+    responsibles = JSON.parse(responsibles);
+    $('#responsibles').remove();
+
+    $('#responsible_name').editable({
+        emptytext: '',
+        type: 'select',
+        value: $('#responsible_name').text(),
+        source: responsibles,
     });
 
     var cell_lines_dropdown = $('#cell_lines').attr('data-dropdown');
@@ -424,7 +434,7 @@ $(document).ready(function() {
         $('#cell_lines').find('p').addClass('d-none');
         $('#save_changes').addClass('d-none');
         $('#discard_changes').addClass('d-none');
-        $('#erase').addClass('d-none');
+        $('#rack_buttons').addClass('d-none');
         load_chart_racks(rack_name, data);
         if ($('#export_rack').hasClass('d-none')) {
             $('#export_rack').removeClass('d-none');
@@ -447,15 +457,15 @@ $(document).ready(function() {
         var cell_line = e.point.ID;
         // if location is empty
         if (cell_line == undefined || cell_line == '') {
-            if (!$('#erase').hasClass('d-none')) {
-                $('#erase').addClass('d-none');
+            if (!$('#rack_buttons').hasClass('d-none')) {
+                $('#rack_buttons').addClass('d-none');
             }
             $('#cell_line').attr('data-unchanged-val', '');
             $('#responsible_name').text(e.point["Responsible person"]);
             $('#date').text(e.point['Date']);
             $('#comments').text(e.point['Comments']);
         } else {
-            $('#erase').removeClass('d-none');
+            $('#rack_buttons').removeClass('d-none');
         }
 
         if (e.point.value == 0 || e.point.value == undefined || cell_line == '') {
@@ -978,4 +988,30 @@ $(document).ready(function() {
         var file_name = tower + "_" + rack + '.csv';
         saveAs(blob, file_name)
     });
+
+
+    $(document).on('click', '#edit_info', function() {
+        // get ID
+        var cell_line_id = $('#pos-details').find('td#cell_line_ID').text();
+        var cell_line_data = cell_lines[cell_line_id];
+        // fill in the inputs
+        $('#new_cell_line_id').val(cell_line_id);
+        $('#new_cell_line_name').val(cell_line_data['Cell line']);
+        $('#new_media').val(cell_line_data['Media (Freezing Medium)']);
+        $('#new_plasmid').val(cell_line_data['transfected plasmid']);
+        $('#new_selection').val(cell_line_data['selection']);
+        $('#new_type').val(cell_line_data['Typ']);
+        $('#new_biosafety').val(cell_line_data['Biosafety level S1/S2']);
+        $('#new_mycoplasma').val(cell_line_data['Mycoplasma checked']);
+        $('#new_source').val(cell_line_data['Source']);
+        $('#tubes_available').val(cell_line_data['tubes_available']);
+
+        // show modal
+        $('#new_cell_line').modal();
+    });
+
+    $("body").tooltip({
+        selector: '[data-title]'
+    });
+
 });
