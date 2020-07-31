@@ -259,9 +259,13 @@
                         </button>
                     </div>
                     <form>
-                        <div class="form-group row mr-2 mb-0">
+                        <div class="input-group row">
                             <label for="new_cell_line_id" class="col-sm-4 col-form-label">Cell line ID:</label>
-                            <input type="text" id="new_cell_line_id" name="cell_line_id" class="col-sm-8 form-control" disabled>
+                            <input class="form-control ml-1 col-sm-8" type="text" id="new_cell_line_id" name="cell_line_id" disabled aria-describedby="basic-addon1">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-success d-none" type="button" id="ok_id">✓</button>
+                                <button class="btn btn-outline-secondary" type="button" id="enable_id">✎</button>
+                            </div>
                         </div>
                         <div class="form-group row mr-2 mb-0">
                             <label for="new_cell_line_name" class="col-sm-4 col-form-label">Cell line:</label>

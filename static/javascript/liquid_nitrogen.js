@@ -1041,4 +1041,42 @@ $(document).ready(function() {
         selector: '[data-title]'
     });
 
+    // enable edit of cell line ID
+    $('#enable_id').on('click', function() {
+        alert('If you enter ID which already exists, this will OVERWRITE the existing cell line!')
+        $('#ok_id').removeClass('d-none');
+        $('#enable_id').prop('disabled', true);
+        $('#new_cell_line_id').prop('disabled', false);
+    });
+
+    // disable edit of cell line ID
+    $('#ok_id').on('click', function() {
+        $('#ok_id').addClass('d-none');
+        $('#enable_id').prop('disabled', false);
+        $('#new_cell_line_id').prop('disabled', true);
+    });
+
+
+    // edit cell line from search table
+    $(document).on('click', '#edit_search', function() {
+        // get ID
+        var cell_line_id = $(this).closest('tr').find('td.ID').text();
+        console.log(cell_line_id);
+        var cell_line_data = cell_lines[cell_line_id];
+        // fill in the inputs
+        $('#new_cell_line_id').val(cell_line_id);
+        $('#new_cell_line_name').val(cell_line_data['Cell line']);
+        $('#new_media').val(cell_line_data['Media (Freezing Medium)']);
+        $('#new_plasmid').val(cell_line_data['transfected plasmid']);
+        $('#new_selection').val(cell_line_data['selection']);
+        $('#new_type').val(cell_line_data['Typ']);
+        $('#new_biosafety').val(cell_line_data['Biosafety level S1/S2']);
+        $('#new_mycoplasma').val(cell_line_data['Mycoplasma checked']);
+        $('#new_source').val(cell_line_data['Source']);
+        $('#tubes_available').val(cell_line_data['tubes_available']);
+
+        // show modal
+        $('#new_cell_line').modal();
+    });
+
 });

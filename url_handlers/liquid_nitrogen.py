@@ -310,7 +310,7 @@ def search():
     for column in results_df.columns:
         html_result += '<th>{}</th>'.format(column)
 
-    html_result += '<th></th></tr>'
+    html_result += '<th></th><th></th></tr>'
 
     for index, row in results_df.iterrows():
         if row['status'] == 'pending':
@@ -318,7 +318,20 @@ def search():
         else:
             html_result += '<tr id="{}_{}_{}">'.format(row['tower'], row['Rack'], row['pos'])
         for column in results_df:
-            html_result += '<td class="{}">{}</td>'.format(column.replace(' ', '_'), row[column])
+            if column == 'status':
+                span_class = ''
+                if row['status'] == 'pending':
+                    span_class = 'badge badge-warning'
+                elif row['status'] == 'approved' or row['status'] == 'confirmed':
+                    span_class = 'badge badge-success'
+                elif row['status'] == 'declined':
+                    span_class = 'badge badge-danger'
+                html_result += '<td class="{}"><span class="{}">{}</span></td>'.format(column.replace(' ', '_'),
+                                                                                       span_class, row[column])
+            else:
+                html_result += '<td class="{}">{}</td>'.format(column.replace(' ', '_'), row[column])
+
+        html_result += '<td><button type="button" class="btn btn-sm btn-outline-primary" id="edit_search">Edit</button></td>'
         if row['status'] != 'pending':
             html_result += '<td><button type="button" class="btn btn-sm btn-outline-secondary request_search" id="request_search">Request</button></td>'
         else:
@@ -387,16 +400,12 @@ def approve_decline():
 
         else: # len(pos) == 1:
             # remove from pos
-            if not req['cell_line'].tolist()[0]:
-                tower_df = tower_df.drop(pos.index)
-                rdb.set(data.get('tower'), json.dumps(tower_df.to_dict('list')))
-                # change status
-                requests.loc[req.index, 'status'] = 'approved'
-                rdb.set('to_approve', json.dumps(requests.to_dict('list')))
-                return make_response({'status': 'success', 'info': 'Request has been approved'}, 200)
-
-            else:
-                return make_response({'status': 'error', 'error': 'Some logic is wrong'}, 200)
+            tower_df = tower_df.drop(pos.index)
+            rdb.set(data.get('tower'), json.dumps(tower_df.to_dict('list')))
+            # change status
+            requests.loc[req.index, 'status'] = 'approved'
+            rdb.set('to_approve', json.dumps(requests.to_dict('list')))
+            return make_response({'status': 'success', 'info': 'Request has been approved'}, 200)
 
     elif action == 'decline':
         requests.loc[req.index, 'status'] = 'declined'
