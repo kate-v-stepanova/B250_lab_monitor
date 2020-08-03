@@ -72,7 +72,7 @@
         {% for key in to_approve[0].keys() %}
         <th>{{ key }}</th>
         {% endfor %}
-        <th></th><th></th><th></th>
+        {% if admin %}<th></th><th></th>{% endif %}
     </tr>
     {% for i in range(to_approve|length) %}
     <tr>

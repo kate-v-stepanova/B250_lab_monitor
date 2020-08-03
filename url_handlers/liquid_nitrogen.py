@@ -121,8 +121,8 @@ def get_liquid_nitrogen():
 
     to_approve = to_approve[
         ['tower', 'Rack', 'pos', 'cell_line', 'prev_cell_line', 'Comments', 'Date', 'Responsible person']]
+    to_approve_data = to_approve.to_dict('records')
     if current_user.email in liquid_nitrogen_admins:
-        to_approve_data = to_approve.to_dict('records')
         user_requests = user_requests.to_dict('records')
 
         return render_template('liquid_nitrogen.html', series=series, cell_lines_dropdown=cell_lines_dropdown,
@@ -132,7 +132,7 @@ def get_liquid_nitrogen():
     else:
 
         user_requests = user_requests.to_dict('records')
-        return render_template('liquid_nitrogen.html', series=series, cell_lines_dropdown=cell_lines_dropdown,
+        return render_template('liquid_nitrogen.html', series=series, cell_lines_dropdown=cell_lines_dropdown, to_approve=to_approve_data,
                                cell_lines=json.dumps(cell_lines).replace("""\xa0""", " "), user_requests=user_requests,
                                admin=False, users=users, current_user=current_user.email, available_cell_lines=available_cell_lines)
 
