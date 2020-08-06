@@ -889,6 +889,16 @@ $(document).ready(function() {
         $('#new_cell_line_id').val(new_val);
         // show modal
         $('#new_cell_line').modal();
+        // clear all inputs
+        $('#new_cell_line_name').val('');
+        $('#new_media').val('');
+        $('#new_plasmid').val('');
+        $('#new_selection').val('');
+        $('#new_type').val('');
+        $('#new_biosafety').val('');
+        $('#new_mycoplasma').val('');
+        $('#new_source').val('');
+        $('#tubes_available').val(1);
     });
 
     $(document).on('click', '.edit_cell_line', function() {
