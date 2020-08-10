@@ -436,6 +436,7 @@ $(document).ready(function() {
             {'x': 8, 'y': 9, 'value': 0, 'color': '#FFFFFF'},
             {'x': 9, 'y': 9, 'value': 0, 'color': '#FFFFFF'},
             ]
+            rack_series[key] = data;
         }
         $('#cell_lines').find('table').addClass('d-none');
         $('#cell_lines').find('p').addClass('d-none');
@@ -723,10 +724,10 @@ $(document).ready(function() {
     $(document).on('click', '.approve_btn, .decline_btn, .cancel_req', function() {
         var btn = this;
         var url = window.location.href + "/approve_decline";
-        var tower = $(this).closest('tr').find('td.tower').text();
-        var rack = $(this).closest('tr').find('td.Rack').text();
-        var pos = $(this).closest('tr').find('td.pos').text();
-        var cell_line_id = $(this).closest('tr').find('td.cell_line').text();
+        var tower = $(this).closest('tr').find('td.tower').text().trim();
+        var rack = $(this).closest('tr').find('td.Rack').text().trim();
+        var pos = $(this).closest('tr').find('td.pos').text().trim();
+        var cell_line_id = $(this).closest('tr').find('td.cell_line').text().trim();
 
         var action = "";
         if ($(this).hasClass('approve_btn')) {
@@ -743,7 +744,7 @@ $(document).ready(function() {
             'pos': pos,
             'action': action,
             'cell_line_id': cell_line_id,
-        }
+        };
         $.ajax({
             type: "POST",
             url: url,
