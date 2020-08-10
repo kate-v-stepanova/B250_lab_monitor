@@ -25,6 +25,7 @@ def get_liquid_nitrogen():
                                            'prev_cell_line', 'prev_responsible', 'prev_comments', 'prev_date', 'status'])
 
     to_approve = to_approve.fillna('')
+    towers = set(towers + to_approve['tower'].tolist())
 
     user_requests = to_approve.loc[to_approve['Responsible person'] == current_user.email]
     user_requests = user_requests[['tower', 'Rack', 'pos', 'cell_line', 'prev_cell_line', 'Comments', 'Date', 'Responsible person', 'status']]
@@ -35,13 +36,14 @@ def get_liquid_nitrogen():
     to_approve = to_approve.loc[to_approve['status'] == 'pending']
     for tower in towers:
         data = rdb.get(tower)
-        if data is None:
-            return render_template('liquid_nitrogen.html', error='No data found')
-        data = json.loads(data)
-        df = pd.DataFrame(data)
-        df = df.fillna('null')
-        racks = df['Rack'].astype(str).unique()
-
+        if data is not None:
+            data = json.loads(data)
+            df = pd.DataFrame(data)
+            df = df.fillna('null')
+            racks = set(list(df['Rack'].astype(str).unique()) + list(to_approve.loc[to_approve['tower'] == tower, 'Rack'].astype(str).unique()))
+        else:
+            racks = to_approve['Rack'].astype(str).unique()
+            df = pd.DataFrame(columns=['Comments', 'Date', 'ID', 'Rack', 'Responsible person', 'pos', 'x', 'y'])
         for rack in racks:
             rack_series = []
             for y in y_pos:
@@ -49,7 +51,6 @@ def get_liquid_nitrogen():
                     approved = to_approve.loc[(to_approve['tower'] == tower) & (to_approve['Rack'].astype(str) == rack) &
                                               (to_approve['y'] == y) & (to_approve['x'].astype(int) == x)]
                     df1 = df.loc[(df['Rack'].astype(str) == rack) & (df['y'] == y) & (df['x'].astype(int) == x)]
-
                     if len(approved) != 0:
                         rack_series.append({
                             'pos': '{}{}'.format(y, x),
