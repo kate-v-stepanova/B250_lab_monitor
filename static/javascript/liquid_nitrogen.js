@@ -757,7 +757,7 @@ $(document).ready(function() {
             $(btn).closest("tr").remove();
             // if request to add a cell line to a new position has been declined
             // update the number of tubes
-            if (action == 'decline' && to_approve['cell_line_id'] != '') {
+            if ((action == 'decline' || action == 'cancel') && to_approve['cell_line_id'] != '') {
                 var tr = $('#available_cell_lines').find('tr#' + cell_line_id);
                 var tubes = tr.find('td.tubes_available').text();
                 tr.find('td.tubes_available').text(parseInt(tubes) + 1);

@@ -421,6 +421,16 @@ def approve_decline():
         rdb.set('cell_lines', json.dumps(cell_df.to_dict('list')))
         return make_response({'status': 'success', 'info': 'Request has been declined'}, 200)
     elif action == 'cancel':
+        # update number of available tubes
+        cell_lines = rdb.get('cell_lines')
+        cell_lines = json.loads(cell_lines)
+        cell_df = pd.DataFrame(cell_lines)
+        curr_cell_line = cell_df.loc[cell_df['ID'] == data.get('cell_line_id')]
+        cell_df.loc[cell_df['ID'] == data.get('cell_line_id'), 'tubes_available'] = \
+            curr_cell_line['tubes_available'].astype(int) + 1
+        rdb.set('cell_lines', json.dumps(cell_df.to_dict('list')))
+
+        # remove from requests
         requests = requests.drop(req.index)
         if len(requests) == 0:
             rdb.delete('to_approve')
