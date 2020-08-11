@@ -93,10 +93,10 @@ def get_project_info(project_id):
                 'link': "{}translational_efficiency/{}".format(request.url_root, project_id)
             })
 
-        analysis_list.append({
-            'name': "Transcriptome alignment",
-            'link': "{}alignments/{}".format(request.url_root, project_id)
-        })
+            # analysis_list.append({
+            #     'name': "Transcriptome alignment",
+            #     'link': "{}alignments/{}".format(request.url_root, project_id)
+            # })
 
         analysis_info = rdb.get('{}_analysis_info'.format(project_id))
         if analysis_info is not None:
