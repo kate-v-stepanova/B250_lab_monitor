@@ -21,6 +21,8 @@ def get_project_info(project_id):
         if rdb_data is not None:
             samples_info = json.loads(rdb_data.decode('utf-8'))
 
+        print(samples_info)
+
         # BASIC STATS
         available_stats = []
         bc_split_stats = rdb.get('bc_split_{}'.format(project_id))
@@ -93,10 +95,24 @@ def get_project_info(project_id):
                 'link': "{}translational_efficiency/{}".format(request.url_root, project_id)
             })
 
-            # analysis_list.append({
-            #     'name': "Transcriptome alignment",
-            #     'link': "{}alignments/{}".format(request.url_root, project_id)
-            # })
+        # analysis_list.append({
+        #     'name': "Transcriptome alignment",
+        #     'link': "{}alignments/{}".format(request.url_root, project_id)
+        # })
+        bam_types = rdb.smembers('bam_types_{}'.format(project_id))
+        if bam_types is not None:
+            bam_types = [bam_type.decode('utf-8') for bam_type in bam_types]
+            alignment = rdb.exists('alignment__{}__{}__{}'.format(project_id, bam_types[0], samples_info[0].get('sample')))
+            if alignment:
+                analysis_list.append({'name': 'Reads distribution', 'link': '{}reads_distribution/{}'.format(
+                    request.url_root, project_id)})
+                analysis_list.append({'name': 'Cumulative reads', 'link': '{}cumulative_reads/{}'.format(
+                    request.url_root, project_id)})
+
+            density = rdb.exists('density__{}__{}__{}'.format(project_id, bam_types[0], samples_info[0].get('sample')))
+            if density:
+                analysis_list.append({'name': 'Density plot', 'link': '{}density_plot/{}'.format(
+                    request.url_root, project_id)})
 
         analysis_info = rdb.get('{}_analysis_info'.format(project_id))
         if analysis_info is not None:
