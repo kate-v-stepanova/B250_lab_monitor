@@ -1,6 +1,6 @@
 {% extends 'layout.html' %}
 {% block body %}
-<script src="{{ url_for('static', filename='javascript/alignments.js') }}"></script>
+<script src="{{ url_for('static', filename='javascript/cumulative_reads.js') }}"></script>
 <!-- Include Choices CSS -->
 <link rel="stylesheet" href="{{ url_for('static', filename='libraries/choices.min.css') }}">
 <!-- Include Choices JavaScript -->
@@ -22,7 +22,7 @@
 {% endif %}
 
 {# project_id, samples, bam_type, gene_name, subplots for each sample / all samples in one plot #}
-
+<h3 class="text-center mt-2">Cumulative reads</h3>
 <form action="" method="POST">
   <ul class="list-group mt-4">
     <li class="list-group-item">

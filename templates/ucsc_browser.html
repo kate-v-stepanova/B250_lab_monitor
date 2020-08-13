@@ -1,0 +1,140 @@
+{% extends 'layout.html' %}
+{% block body %}
+<script src="{{ url_for('static', filename='javascript/ucsc_browser.js') }}"></script>
+<!-- Include Choices CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='libraries/choices.min.css') }}">
+<!-- Include Choices JavaScript -->
+<script src="{{ url_for('static', filename='libraries/choices.min.js') }}"></script>
+
+{# bootstrap multiselect #}
+<link rel="stylesheet" href="{{ url_for('static', filename='libraries/bootstrap-select.css') }}" />
+<script src="{{ url_for('static', filename='libraries/bootstrap-select.min.js') }}"></script>
+
+
+{# ERROR MESSAGE #}
+{% if error %}
+<div class="alert alert-danger mt-2" role="alert" id="error_div">
+  <div class="row">
+    <div class="col col-xs-10" id="error_messages">{% for err in error.split('___') %}<p>{{ err }}</p>{% endfor %}</div>
+    <div class="col col-sm-2"><span class="close" aria-label="Close"> &times;</span></div>
+  </div>
+</div>
+{% endif %}
+
+{# project_id, samples, bam_type, gene_name, subplots for each sample / all samples in one plot #}
+<h3 class="text-center mt-2">Reads distribution</h3>
+<form action="" method="POST">
+  <ul class="list-group mt-4">
+    <li class="list-group-item">
+      {# Selected GENE #}
+      <div class="row mt-2">
+        <div class="col col-sm-2 mt-2">
+          <label>Enter gene name: </label>
+        </div>
+        <div class="col col-sm-10">
+            <select id="genes" class="selectpicker" data-live-search="true" name="gene">
+              {% if not selected_gene %}
+              <option value="" selected></option>
+              {% endif %}
+              {% for gene in genes %}
+              <option {% if gene.decode('utf-8') == selected_gene %}selected{% endif %} value="{{ gene.decode('utf-8') }}">
+                {{ gene.decode('utf-8') }}</option>
+              {% endfor %}
+            </select>
+        </div>
+      </div>
+
+      {# Selected SAMPLES #}
+      <div class="row mt-2">
+        <div class="col col-sm-2 mt-2">
+          <label>Select samples: </label>
+        </div>
+        <div class="col col-sm-10">
+            <select multiple id="selected_samples" class="choices" data-type="select-multiple" name="selected_samples">
+              {% for sample in samples %}
+                <option name="{{ sample }}" value="{{ sample }}"
+                        {% if sample in selected_samples %}selected{% endif %}>{{ sample }}</option>
+              {% endfor %}
+            </select>
+        </div>
+      </div>
+
+      {# BAM TYPE #}
+      <div class="row mt-2">
+        <div class="col col-sm-2 mt-2">
+          <label>Select bam type: </label>
+        </div>
+        <div class="col col-sm-10">
+            <select id="bam_type" name="bam_type" class="form-control">
+              {% for bam in bam_types %}
+                <option name="{{ bam.decode('utf-8') }}" value="{{ bam.decode('utf-8') }}"
+                        {% if bam == bam_type or bam_types | length == 1 %}selected{% endif %}>{{ bam.decode('utf-8') }}</option>
+              {% endfor %}
+            </select>
+        </div>
+      </div>
+
+      {# NORMALIZATION #}
+      <div class="row mt-2">
+        <div class="col col-sm-2 mt-2">
+          <label>Normalization method: </label>
+        </div>
+        <div class="col col-sm-10">
+          <select id="normalization" name="normalization" class="form-control">
+            <option name="raw_counts" value="raw_counts" {% if normalization == 'raw_counts' %}selected{% endif %}>Raw counts</option>
+            <option name="tpm" value="tpm"{% if normalization == 'tpm' %}selected{% endif %}>TPM</option>
+            <option name="cpm" value="cpm" {% if normalization == 'cpm' %}selected{% endif %}>CPM</option>
+            <option name="rpkm" value="rpkm" {% if normalization == 'rpkm' %}selected{% endif %}>RPKM</option>
+          </select>
+        </div>
+      </div>
+      {# end of NORMALIZATION #}
+
+      {# SUBPLOTS or ALL samples in ONE plot #}
+      <div class="row mt-2">
+        <div class="col">
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="subplots" id="one_plot" value="one_plot"
+                   {% if one_plot == "one_plot" %}checked{% endif %}>
+            <label class="form-check-label" for="one_plot">
+             Show all samples in one plot
+            </label>
+
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="subplots" id="subplots" value="subplots"
+                    {% if one_plot == "subplots" %}checked{% endif %}>
+            <label class="form-check-label" for="subplots">
+              Create a separate subplot for each sample
+            </label>
+          </div>
+        </div>
+      </div>
+
+      {# SUBMIT button #}
+      <button class="btn btn-outline-primary mt-4" type="submit" id="plot_button">Make plot</button>
+    </li>
+  </ul>
+</form>
+
+{# PLOTS #}
+{% if series %}
+<ul class="list-group">
+  <li class="list-group-item">
+    <div id="plot" data-series="{{ series }}" data-gene="{{ selected_gene }}" data-one_plot="{{ one_plot }}">
+    {% if one_plot != 'one_plot' %}
+      {% for serie in series %}
+        <ul class="list-group">
+          <li class="list-group-item">
+            <div id="plot_{{ serie.get('name') }}">
+            </div>
+          </li>
+        </ul>
+      {% endfor %}
+    {% endif %}
+    </div>
+  </li>
+</ul>
+{% endif %}
+
+{% endblock %}
