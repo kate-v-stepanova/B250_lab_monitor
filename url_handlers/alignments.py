@@ -36,13 +36,16 @@ def get_cumulative_reads(project_id):
     selected_samples = request.form.getlist('selected_samples')
     bam_type = request.form.get('bam_type')
     if bam_type is None:
-        bam_type = 'hq_unique'
+        bam_type = 'all_unique'
+
+    normalization = request.form.get('normalization', 'raw_counts')
 
     trans = pd.read_msgpack(trans)
     trans = trans.loc[trans['gene_name'] == selected_gene]
 
     series = []
     error = ""
+    warning = ""
     for sample in selected_samples:
         rdb_data = rdb.get('alignment__{}__{}__{}'.format(project_id, bam_type, sample))
         if rdb_data is None:
@@ -77,6 +80,38 @@ def get_cumulative_reads(project_id):
         df1 = df1.loc[~df1.index.isin(ind)]
         df1.loc[df1['pos'] == df1['pos'].max(), 'counts'] = df1['counts'].max()
 
+
+        if normalization != 'raw_counts':
+            counts_data = rdb.get('counts_{}_{}_{}'.format(project_id, bam_type, sample))
+            if counts_data is None:
+                # upload counts with:
+                # 1. /icgc/dkfzlsdf/analysis/OE0532/software/diricore_subset/1_get_seq_from_bam.sh 18927 all_unique
+                # 2. /icgc/dkfzlsdf/analysis/OE0532/software/scripts/normalize_counts.py 18927 all_unique
+                # 3. python /icgc/dkfzlsdf/analysis/OE0532/software/scripts/upload_counts.py 18927 all_unique /icgc/dkfzlsdf/analysis/OE0532/18927/analysis/input/metadata/density_plot_top150.txt
+                warning += 'Normalized counts are not found in DB. Showing raw counts. Sample: {}'.format(sample)
+                # don't skip anyway -> will showing raw counts
+            else:
+                counts_data = counts_data.decode('utf-8')
+                counts_data = json.loads(counts_data)
+                counts_df = pd.DataFrame(counts_data)
+                counts_df = counts_df.loc[counts_df['gene_name'] == selected_gene]
+                counts = counts_df['counts'].astype(int).sum() # counts for 1 gene only
+
+                # raw counts divide by norm_counts -> to see how many tpm/cpm/rpkm in 1 raw count
+                norm_factor = 1
+                if normalization == 'tpm':
+                    norm_factor = counts_df['tpm'].astype(float).sum()
+                elif normalization == 'cpm':
+                    norm_factor = counts_df['cpm'].astype(float).sum()
+                elif normalization == 'rpkm':
+                    norm_factor = counts_df['rpkm'].astype(float).sum()
+                else:
+                    warning += 'Normalization method not found: <b>{}</b>. Showing raw counts. Sample: {}'.format(normalization, sample)
+                # and now we multiply this number by the real number of reads in each position
+                df1['norm_counts'] = df1['counts'] / norm_factor
+                df1['norm_counts'] = df1['norm_counts'].round(3)
+                df1 = df1.drop('counts', axis=1)
+
         df1.columns = ['x', 'y']
         series.append({'name': sample, 'data': df1.to_dict('records'), 'turboThreshold': len(df1)})
 
@@ -85,7 +120,8 @@ def get_cumulative_reads(project_id):
                                selected_gene=selected_gene, bam_type=bam_type, selected_samples=selected_samples,
                                error=error, genes=list_of_genes)
     return render_template("cumulative_reads.html", samples=list_of_samples, bam_types=bam_types, selected_gene=selected_gene,
-                           bam_type=bam_type, selected_samples=selected_samples, series=series, genes=list_of_genes)
+                           bam_type=bam_type, selected_samples=selected_samples, series=series, genes=list_of_genes,
+                           normalization=normalization, error=warning)
 
 
 @alignments.route('/reads_distribution/<project_id>', methods=['GET', 'POST'])
@@ -187,6 +223,7 @@ def get_reads(project_id):
                     warning += 'Normalization method not found: <b>{}</b>. Showing raw counts. Sample: {}'.format(normalization, sample)
                 # and now we multiply this number by the real number of reads in each position
                 df1['norm_counts'] = df1['counts'] / norm_factor
+                df1['norm_counts'] = df1['norm_counts'].round(3)
                 df1 = df1.drop('counts', axis=1)
         df1.columns = ['x', 'y']
         series.append({'name': sample, 'data': df1.to_dict('records'), 'turboThreshold': len(df1)})
@@ -299,6 +336,7 @@ def get_density_plot(project_id):
                     warning += 'Normalization method not found: <b>{}</b>. Showing raw counts. Sample: {}'.format(normalization, sample)
                 # and now we multiply this number by the real number of reads in each position
                 df1['norm_counts'] = df1['counts'] / norm_factor
+                df1['norm_counts'] = df1['norm_counts'].round(3)
                 df1 = df1.drop('counts', axis=1)
         df1.columns = ['x', 'y']
         series.append({'name': sample, 'data': df1.to_dict('records'), 'turboThreshold': len(df1)})

@@ -75,6 +75,23 @@
         </div>
       </div>
 
+
+      {# NORMALIZATION #}
+      <div class="row mt-2">
+        <div class="col col-sm-2 mt-2">
+          <label>Normalization method: </label>
+        </div>
+        <div class="col col-sm-10">
+          <select id="normalization" name="normalization" class="form-control">
+            <option name="raw_counts" value="raw_counts" {% if normalization == 'raw_counts' %}selected{% endif %}>Raw counts</option>
+            <option name="tpm" value="tpm"{% if normalization == 'tpm' %}selected{% endif %}>TPM</option>
+            <option name="cpm" value="cpm" {% if normalization == 'cpm' %}selected{% endif %}>CPM</option>
+            <option name="rpkm" value="rpkm" {% if normalization == 'rpkm' %}selected{% endif %}>RPKM</option>
+          </select>
+        </div>
+      </div>
+      {# end of NORMALIZATION #}
+
       {# SUBPLOTS or ALL samples in ONE plot #}
       <div class="row mt-2">
         <div class="col">
@@ -104,7 +121,7 @@
 {% if series %}
 <ul class="list-group">
   <li class="list-group-item">
-    <div id="plot" data-series="{{ series }}" data-gene="{{ selected_gene }}">
+    <div id="plot" data-series="{{ series }}" data-gene="{{ selected_gene }}" data-normalization="{{ normalization }}">
     </div>
   </li>
 </ul>
