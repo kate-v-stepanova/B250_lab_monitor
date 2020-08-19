@@ -30,13 +30,14 @@
 #}
 
 {# USER REQUESTS #}
+
+{% if user_requests %}
 <h3>My requests</h3>
 <table class="table table-sm table-striped table-responsive mt-2 {% if not user_requests %} d-none{% endif %}" id="user_requests">
     <tr>
         <th>tower</th><th>Rack</th><th>pos</th><th>cell_line</th><th>prev_cell_line</th><th>Comments</th><th>Date</th>
         <th>Responsible person</th><th>status</th><th></th>
     </tr>
-    {% if user_requests %}
     {% for i in range(user_requests|length) %}
     <tr>
         {% for key in user_requests[i].keys() %}
@@ -60,8 +61,8 @@
 
     </tr>
     {% endfor %}
-    {% endif %}
 </table>
+{% endif %}
 {# end of USER REQUESTS #}
 
 {# REQUESTS TO APPROVE (only for admin) #}
@@ -90,17 +91,15 @@
 {% endif %}
 
 
-
 {# AVAILABLE CELL LINES #}
 <h3>Available cell lines</h3>
 {% if available_cell_lines %}
 <table class="table table-sm table-striped table-responsive mt-2" id="available_cell_lines">
-    <tr><th>ID</th><th>Cell line</th><th>Tubes available</th><th></th><th></th></tr>
+    <tr><th>ID</th><th>Cell line</th><th></th><th></th></tr>
     {% for row in available_cell_lines %}
     <tr id="{{ row['ID'] }}">
         <td class="ID">{{ row['ID'] }}</td>
         <td class="Cell_line">{{ row['Cell line'] }}</td>
-        <td class="tubes_available">{{ row['tubes_available'] }}</td>
         <td><button class="btn btn-sm btn-outline-primary edit_cell_line">✎ Edit</button></td>
         <td><button class="btn btn-sm btn-outline-danger del_cell_line">× Delete</button></td>
     </tr>

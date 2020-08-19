@@ -78,75 +78,85 @@ $(document).ready(function() {
     });
 
     $('#create_new').on('click', function(e) {
-        var new_ID = $('#new_cell_line_id').val()
-        var data = {
-            'ID': new_ID,
-            'Cell line': $('#new_cell_line_name').val(),
-            'Media (Freezing Medium)': $('#new_media').val(),
-            'Transferred plasmid': $('#new_plasmid').val(),
-            'Selection': $('#new_selection').val(),
-            'Typ': $('#new_type').val(),
-            'Biosafety Level': $('#new_biosafety').val(),
-            'Mycoplasma checked': $('#new_mycoplasma').val(),
-            'Source': $('#new_source').val(),
-            'tubes_available': $('#tubes_available').val(),
+        var new_ID = $('#new_cell_line_id').val();
+//        $('#new_cell_line').find('form').valid();
+        var new_cell_line_name = $('#new_cell_line_name').val();
+        var new_media = $('#new_media').val();
+        var new_biosafety = $('#new_biosafety').val();
+        var new_type = $('#new_type').val();
+        var show_alert = false;
+        if (new_cell_line_name == '') {
+            $('#new_cell_line_name').addClass('is-invalid');
+            show_alert = true;
         }
-        var url = window.location.href + "/create_cell_line";
-        $.ajax({
-            type: "POST",
-            //the url where you want to sent the userName and password to
-            url: url,
-            dataType: 'json',
-            //json object to sent to the authentication url
-            data: JSON.stringify(data),
-            contentType: 'application/json',
-        }).done(function(response) {
-            if (response['status'] == 'error') {
-                alert(response['error']);
-            } else {
-                alert('Successfully created/updated');
-//                // then update fields
-//                $('#cell_line_ID').text(new_ID);
-//                $('#cell_line').text(data['Cell line']).addClass('font-weight-bold');
-//                $('#media').text(data['Media (Freezing Medium)']).addClass('font-weight-bold');
-//                $('#plasmid').text(data['Transferred plasmid']).addClass('font-weight-bold');
-//                $('#selection').text(data['Selection']).addClass('font-weight-bold');
-//                $('#type').text(data['Typ']).addClass('font-weight-bold');
-//                $('#biosafety').text(data['Biosafety Level']).addClass('font-weight-bold');
-//                $('#mycoplasma').text(data['Mycoplasma checked']).addClass('font-weight-bold');
-//                $('#source').text(data['Source']).addClass('font-weight-bold');
-//                // mark with bold (updated values)
-//                $('#cell_line_ID').addClass('font-weight-bold').addClass('font-weight-bold');
-//                value = $('#new_cell_line_id').val();
-                $('#new_cell_line').modal('hide');
-                // add cell line to a list
-                cell_lines[new_ID] = data;
-                cell_lines_dropdown.push({'value': new_ID, 'text': new_ID});
-
-                // update editable select
-                $('#cell_line_ID').editable('option', 'source', cell_lines_dropdown);
-
-                // update table
-                if ($('#' + new_ID).length != 0) {
-                    $('#' + new_ID).find('td.Cell_line').text(data['Cell line']);
-                    $('#' + new_ID).find('td.tubes_available').text(data['tubes_available']);
-                } else {
-                    $('#available_cell_lines').append("<tr id='" + new_ID + "'><td class='ID'>" + new_ID + "</td><td class='Cell_line'>" +
-                    data['Cell line'] + "</td><td class='tubes_available'>" + data['tubes_available'] + "</td>" +
-                    "<td><button class='btn btn-sm btn-outline-primary edit_cell_line'>✎ Edit</button></td>" +
-                    "<td><button class='btn btn-sm btn-outline-danger del_cell_line'>× Delete</button></td>");
-                }
-
-                // clear modal fields
-                $('#new_cell_line').find('div.form-group').find('input').val('');
-
-                // update cell_lines
-                cell_lines[new_ID] = data;
+        if (new_media == '') {
+            $('#new_media').addClass('is-invalid');
+            show_alert = true;
+        }
+        if (new_biosafety == '') {
+            $('#new_biosafety').addClass('is-invalid');
+            show_alert = true;
+        }
+        if (new_type == '') {
+            $('#new_type').addClass('is-invalid');
+            show_alert = true;
+        }
+        if (show_alert) {
+            alert('Fill in all required fields');
+        } else {
+            var data = {
+                'ID': new_ID,
+                'Cell line': new_cell_line_name,
+                'Media (Freezing Medium)': new_media,
+                'Transferred plasmid': $('#new_plasmid').val(),
+                'Selection': $('#new_selection').val(),
+                'Typ': new_type,
+                'Biosafety Level': new_biosafety,
+                'Mycoplasma checked': $('#new_mycoplasma').val(),
+                'Source': $('#new_source').val(),
             }
-        }).fail(function(response) {
-            alert(response['responseJSON']['error']);
-        });
+            var url = window.location.href + "/create_cell_line";
+            $.ajax({
+                type: "POST",
+                //the url where you want to sent the userName and password to
+                url: url,
+                dataType: 'json',
+                //json object to sent to the authentication url
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+            }).done(function(response) {
+                if (response['status'] == 'error') {
+                    alert(response['error']);
+                } else {
+                    alert('Successfully created/updated');
+                    $('#new_cell_line').modal('hide');
+                    // add cell line to a list
+                    cell_lines[new_ID] = data;
+                    cell_lines_dropdown.push({'value': new_ID, 'text': new_ID});
 
+                    // update editable select
+                    $('#cell_line_ID').editable('option', 'source', cell_lines_dropdown);
+
+                    // update table
+                    if ($('#' + new_ID).length != 0) {
+                        $('#' + new_ID).find('td.Cell_line').text(data['Cell line']);
+                    } else {
+                        $('#available_cell_lines').append("<tr id='" + new_ID + "'><td class='ID'>" + new_ID +
+                        "</td><td class='Cell_line'>" + data['Cell line'] + "</td>" +
+                        "<td><button class='btn btn-sm btn-outline-primary edit_cell_line'>✎ Edit</button></td>" +
+                        "<td><button class='btn btn-sm btn-outline-danger del_cell_line'>× Delete</button></td>");
+                    }
+
+                    // clear modal fields
+                    $('#new_cell_line').find('div.form-group').find('input').val('');
+
+                    // update cell_lines
+                    cell_lines[new_ID] = data;
+                }
+            }).fail(function(response) {
+                alert(response['responseJSON']['error']);
+            });
+        }
     });
 
     $('#modal-ok').on('click', function(e) {
@@ -635,15 +645,6 @@ $(document).ready(function() {
             contentType: 'application/json',
         }).done(function(response) {
             alert( "success" );
-            // update number of available tubes
-            if (prev_cell_line != cell_line) {
-                if ($('#available_cell_lines').find('tr#' + cell_line).length != 0) {
-                    var tubes = $('#available_cell_lines').find('tr#' + cell_line).find('td.tubes_available').text();
-                    var new_tubes = parseInt(tubes) - 1
-                    $('#available_cell_lines').find('tr#' + cell_line).find('td.tubes_available').text(new_tubes);
-                    cell_lines[cell_line]['available_tubes'] = new_tubes;
-                }
-            }
 
             // update rack_series
             var i = parseInt(data['x']) -1 + parseInt(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].indexOf(data['y'])) * 10;
@@ -755,15 +756,6 @@ $(document).ready(function() {
         }).done(function(response) {
             console.log(response)
             $(btn).closest("tr").remove();
-            // if request to add a cell line to a new position has been declined
-            // update the number of tubes
-            if ((action == 'decline' || action == 'cancel') && to_approve['cell_line_id'] != '') {
-                var tr = $('#available_cell_lines').find('tr#' + cell_line_id);
-                var tubes = tr.find('td.tubes_available').text();
-                tr.find('td.tubes_available').text(parseInt(tubes) + 1);
-                var tubes = cell_lines[cell_line_id]['tubes_available'];
-                cell_lines[cell_line_id]['tubes_available'] = parseInt(tubes) + 1;
-            }
         }).fail(function(response) {
             console.log(response);
             alert('Failed');
@@ -899,7 +891,8 @@ $(document).ready(function() {
         $('#new_biosafety').val('');
         $('#new_mycoplasma').val('');
         $('#new_source').val('');
-        $('#tubes_available').val(1);
+        // clear errors
+        $('#new_cell_line').find('form').find('input').removeClass('is-invalid');
     });
 
     $(document).on('click', '.edit_cell_line', function() {
@@ -916,10 +909,10 @@ $(document).ready(function() {
         $('#new_biosafety').val(cell_line_data['Biosafety level S1/S2']);
         $('#new_mycoplasma').val(cell_line_data['Mycoplasma checked']);
         $('#new_source').val(cell_line_data['Source']);
-        $('#tubes_available').val(cell_line_data['tubes_available']);
-
         // show modal
         $('#new_cell_line').modal();
+        // clear errors
+        $('#new_cell_line').find('form').find('input').removeClass('is-invalid');
     });
 
     // click "Delete" btn in the table
@@ -1042,10 +1035,12 @@ $(document).ready(function() {
         $('#new_biosafety').val(cell_line_data['Biosafety level S1/S2']);
         $('#new_mycoplasma').val(cell_line_data['Mycoplasma checked']);
         $('#new_source').val(cell_line_data['Source']);
-        $('#tubes_available').val(cell_line_data['tubes_available']);
 
         // show modal
         $('#new_cell_line').modal();
+
+        // clear errors
+        $('#new_cell_line').find('form').find('input').removeClass('is-invalid');
     });
 
     $("body").tooltip({
@@ -1084,10 +1079,11 @@ $(document).ready(function() {
         $('#new_biosafety').val(cell_line_data['Biosafety level S1/S2']);
         $('#new_mycoplasma').val(cell_line_data['Mycoplasma checked']);
         $('#new_source').val(cell_line_data['Source']);
-        $('#tubes_available').val(cell_line_data['tubes_available']);
 
         // show modal
         $('#new_cell_line').modal();
-    });
 
+        // clear errors
+        $('#new_cell_line').find('form').find('input').removeClass('is-invalid');
+    });
 });
