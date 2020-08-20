@@ -315,6 +315,10 @@ $(document).ready(function() {
                                 if (selected[i].ID != undefined) {
                                     all_empty = false;
                                 }
+                                // if we deselect -> deselect all previous
+                                if (e.point.x == selected[i].x && e.point.y == selected[i].y) {
+                                    all_empty = false;
+                                }
                             }
                             // if not, deselect everything
                             if (!all_empty) {
@@ -344,8 +348,8 @@ $(document).ready(function() {
                                     var pos = selected[i].pos;
                                     if (pos == undefined) {
                                         var x = selected[i].x + 1;
-                                        var y = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'][selected.y];
-                                        pos = '<span class="badge badge-primary">' + x + y + '</span>';
+                                        var y = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'][selected[i].y];
+                                        pos = '<span class="badge badge-primary">' + y + x + '</span>';
                                     } else {
                                         pos = '<span class="badge badge-primary">' + pos + '</span>';
                                     }
