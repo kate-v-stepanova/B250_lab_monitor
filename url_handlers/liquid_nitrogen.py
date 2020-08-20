@@ -31,17 +31,17 @@ def get_liquid_nitrogen():
     user_requests = user_requests[::-1] # reverse order
     if len(user_requests) > 10:
         user_requests = user_requests[:10]
-
     to_approve = to_approve.loc[to_approve['status'] == 'pending']
     for tower in towers:
         data = rdb.get(tower)
+        racks = []
         if data is not None:
             data = json.loads(data)
             df = pd.DataFrame(data)
             df = df.fillna('null')
-            racks = set(list(df['Rack'].astype(str).unique()) + list(to_approve.loc[to_approve['tower'] == tower, 'Rack'].astype(str).unique()))
+            racks += set(list(df['Rack'].astype(str).unique()) + list(to_approve.loc[to_approve['tower'] == tower, 'Rack'].astype(str).unique()))
         else:
-            racks = to_approve['Rack'].astype(str).unique()
+            racks += to_approve['Rack'].astype(str).unique()
             df = pd.DataFrame(columns=['Comments', 'Date', 'ID', 'Rack', 'Responsible person', 'pos', 'x', 'y'])
         for rack in racks:
             rack_series = []
@@ -174,7 +174,7 @@ def update_rack():
     for pos in (data.get('pos')):
         cur_data = data
         cur_data['pos'] = pos
-        cur_data['y'] = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].index(pos[0])
+        cur_data['y'] = pos[0]
         cur_data['x'] = int(pos[1:])
         if tower_data is not None:
             current_pos_data = tower_data.loc[(tower_data['Rack'].astype(int) == int(data.get('Rack', 0))) & \
@@ -534,7 +534,6 @@ def delete_cell_line():
         return make_response({'status': 'error', 'error': 'no data received'}, 200)
     data = json.loads(data.decode('utf-8'))
     cell_line_id = data.get('cell_line_id')
-    print(cell_line_id)
 
     to_approve = rdb.get('to_approve')
 

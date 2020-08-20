@@ -32,8 +32,8 @@
 {# USER REQUESTS #}
 
 
-<h3 {% if not user_requests %} class="d-none" %}>My requests</h3>
-<table class="table table-sm table-striped table-responsive mt-2 {% if not user_requests %} d-none{% endif %}" id="user_requests">
+<h3>My requests</h3>
+<table class="table table-sm table-striped table-responsive mt-2" id="user_requests">
     <tr>
         <th>tower</th><th>Rack</th><th>pos</th><th>cell_line</th><th>prev_cell_line</th><th>Comments</th><th>Date</th>
         <th>Responsible person</th><th>status</th><th></th>
@@ -62,13 +62,12 @@
     </tr>
     {% endfor %}
 </table>
-{% endif %}
 {# end of USER REQUESTS #}
 
-{# REQUESTS TO APPROVE (only for admin) #}
+{# REQUESTS TO APPROVE #}
 {% if to_approve %}
 <h3>Pending requests</h3>
-<table class="table table-sm table-striped table-responsive mt-2" id="requests_table">
+<table class="table table-sm table-striped table-responsive mt-2" id="requests_table" data-admin="{{ admin }}">
     <tr>
         {% for key in to_approve[0].keys() %}
         <th>{{ key }}</th>

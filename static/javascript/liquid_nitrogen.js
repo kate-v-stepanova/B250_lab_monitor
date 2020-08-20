@@ -309,6 +309,7 @@ $(document).ready(function() {
                             // for MULTI select
                             // get selected positions
                             selected = rack_chart.getSelectedPoints();
+
                             // check if all selected are empty
                             var all_empty = true;
                             for (i=0; i<selected.length; i++) {
@@ -660,18 +661,16 @@ $(document).ready(function() {
         var location = $('#location').html();
         var rack = $('#location').find('span.rack').text();
         var pos = $('#location').find('span.badge');
-        if (pos != undefined) {
+        if (pos.length != 0) {
             pos = $('#location').find('span.badge').map(function() {
                 return $(this).text();
             }).get();
-        }
-        if (rack == undefined || pos == undefined) {
-            rack = location.split(', ')[0];
-            pos = [location.split(', ')[1]];
+        } else {
+            rack = $('#location').text().split(', ')[0];
+            pos = [$('#location').text().split(', ')[1]];
         }
         rack = rack.replace('Rack', '');
         var prev_cell_line = $('#cell_line').attr('data-unchanged-val');
-
         var cell_line = $('#cell_line_ID').text();
         var responsible = $('#responsible_name').text();
         var date = $('#date').text();
@@ -709,17 +708,28 @@ $(document).ready(function() {
             contentType: 'application/json',
         }).done(function(response) {
             alert( "success" );
-
             // update rack_series
-            var i = parseInt(data['x']) -1 + parseInt(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].indexOf(data['y'])) * 10;
-            data['color'] = '#ffcc00';
-            data['value'] = 2;
-            data['x'] = parseInt(data['x']) - 1;
-            data['y'] = parseInt(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].indexOf(data['y']));
-            data['status'] = 'to_confirm';
-            data['ID'] = data['cell_line'];
             var rack_name = 'Rack'+rack;
-            rack_series[tower + '_Rack' + rack][i] = data;
+            for (i=0; i<pos.length;i++) {
+                var y = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].indexOf(pos[i][0]);
+                var x = parseInt(pos[i].substring(1)) - 1; // pos[i][1:]
+                var cur_data = {
+                    'x': x,
+                    'y': y,
+                    'pos': pos[i],
+                    'color': '#ffcc00',
+                    'value': 2,
+                    'status': 'to_confirm',
+                    'ID': data['cell_line'],
+                    'Comments': comments,
+                    'Date': date,
+                    'Responsible person': responsible,
+                    'tower': tower,
+                    'Rack': rack_name,
+                };
+                var k = x + y * 10;
+                rack_series[tower + '_Rack' + rack][k] = cur_data;
+            }
             var rack_data = rack_series[tower + '_Rack' + rack];
             load_chart_racks(rack_name, rack_data);
             // update my requests
@@ -741,8 +751,12 @@ $(document).ready(function() {
                     '<td class="pos">' + pos[i] + '</td><td class="cell_line">' + data['ID'] + '</td>' +
                     '<td class="prev_cell_line">' + data['prev_cell_line'] + '</td><td class="Comments">' + data['Comments'] +
                     '</td><td class="Date">' + data['Date'] + '</td><td class="Responsible person">' + data['Responsible person'] +
-                    '</td><td><button class="btn btn-sm btn-outline-success approve_btn">✓ Approve</button></td>' +
+                    '</td>';
+                if ($('#requests_table').attr('data-admin') == 'True') {
+                    new_tr2 += '<td><button class="btn btn-sm btn-outline-success approve_btn">✓ Approve</button></td>' +
                     '<td><button class="btn btn-sm btn-outline-danger decline_btn">× Decline</button></td></tr>';
+                }
+
                 $('#requests_table').find('tr:last').after(new_tr2);
             }
             if ($('#requests_table').hasClass('d-none')) {
@@ -1135,7 +1149,6 @@ $(document).ready(function() {
     $(document).on('click', '#edit_search', function() {
         // get ID
         var cell_line_id = $(this).closest('tr').find('td.ID').text();
-        console.log(cell_line_id);
         var cell_line_data = cell_lines[cell_line_id];
         // fill in the inputs
         $('#new_cell_line_id').val(cell_line_id);
