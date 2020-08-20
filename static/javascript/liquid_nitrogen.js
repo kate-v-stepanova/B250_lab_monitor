@@ -185,24 +185,6 @@ $(document).ready(function() {
         }
     });
 
-
-    $('#modal-cancel').on('click', function(e) {
-        // load previous values
-        var prev_val = $('#cell_line').attr('data-unchanged-val');
-        var val = 1;
-        if (prev_val == "" || prev_val == undefined) {
-            val = 0;
-        }
-        var location = $('#location').text(); // Rack3, B9
-
-        var rack = location.split(', ')[0].replace('Rack', '');
-        var pos = location.split(', ')[1];
-        var x = pos.substr(1) - 1;
-        var y = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].indexOf(pos[0]);
-        var ee = {point: {ID: prev_val, value: val, Rack: rack, pos: pos, x: x, y: y}};
-        show_cell_line_details(ee);
-    });
-
     var chart_towers = Highcharts.chart('towers', {
 //        colors: ['#058DC7', '#50B432', '#ED561B', '#DDDF00', '#24CBE5', '#64E572',
 //             '#FF9655', '#FFF263', '#6AF9C4'],
@@ -286,8 +268,9 @@ $(document).ready(function() {
     cell_lines = cell_lines.replace(/'/g, '"'); //");
     cell_lines = JSON.parse(cell_lines);
 
+    var rack_chart;
     function load_chart_racks(rack_name, rack_data) {
-        Highcharts.chart('rack', {
+        rack_chart = Highcharts.chart('rack', {
             chart: {
                 type: 'heatmap',
                 height: 450,
@@ -323,7 +306,56 @@ $(document).ready(function() {
                             e.preventDefault();
                             alert('J10 is disabled');
                         } else {
+                            // for MULTI select
+                            // get selected positions
+                            selected = rack_chart.getSelectedPoints();
+                            // check if all selected are empty
+                            var all_empty = true;
+                            for (i=0; i<selected.length; i++) {
+                                if (selected[i].ID != undefined) {
+                                    all_empty = false;
+                                }
+                            }
+                            // if not, deselect everything
+                            if (!all_empty) {
+                                for (i=0; i<selected.length; i++) {
+                                    selected[i].select(false);
+                                }
+                            }
+
+                             // if current pos not empty -> show content and unselect everything
+                            if (e.point.ID != undefined) {
+                                // show_cell_line_details(e); $('#cell_line').attr('data-unchanged-val', e.point.ID);
+                                for (i=0; i<selected.length; i++) {
+                                    selected[i].select(false);
+                                }
+                            }
+                            // anyway show content
                             show_cell_line_details(e); $('#cell_line').attr('data-unchanged-val', e.point.ID);
+
+                            // update header (show all selected positions)
+                            selected = rack_chart.getSelectedPoints();
+                            selected.push(e.point);
+                            if (selected.length > 1) {
+                                $('#location').empty();
+                                var all_pos = [];
+                                for (i=0; i<selected.length; i++) {
+                                    // add all locations to the title
+                                    var pos = selected[i].pos;
+                                    if (pos == undefined) {
+                                        var x = selected[i].x + 1;
+                                        var y = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'][selected.y];
+                                        pos = '<span class="badge badge-primary">' + x + y + '</span>';
+                                    } else {
+                                        pos = '<span class="badge badge-primary">' + pos + '</span>';
+                                    }
+                                    all_pos.push(pos);
+                                }
+                                var rack = $('#rack').find('text.highcharts-title tspan').text();
+                                var title = "<span class='rack'>" + rack + '</span> ' + all_pos.join(' ')
+                                $('#cell_lines').find('p.h5').text(title);
+                                $('#location').append(title);
+                            }
                         }
                     }
                 },
@@ -582,26 +614,58 @@ $(document).ready(function() {
         return today;
     }
 
-    $('#discard_changes').on('click', function(e) {
+    // discard assign of a cell line to a position
+    function discard_changes() {
+
+        // load previous values
         var cell_line = $('#cell_line').attr('data-unchanged-val');
         var val = 1;
         if (cell_line == "" || cell_line == undefined) {
             val = 0;
         }
-        var location = $('#location').text();
-        var rack = location.split(', ')[0].replace('Rack', '');
-        var pos = location.split(', ')[1];
-        var x = pos.substr(1) - 1;
-        var y = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].indexOf(pos[0]);
-        var ee = {point: {ID: cell_line, value: val, Rack: rack, pos: pos, x: x, y:y}};
-        show_cell_line_details(ee);
+        // if multiple positions are selected
+        var location = $('#location').html();
+        var rack = $('#location').find('span.rack').text();
+        var pos = $('#location').find('span.badge').text();
+        // if single position is selected, then no span elements -> Rack7, C3
+        if (rack == undefined || pos == undefined) {
+            rack = location.split(', ')[0].replace('Rack', '');
+            pos = location.split(', ')[1];
+            var x = pos.substr(1) - 1;
+            var y = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].indexOf(pos[0]);
+            var ee = {point: {ID: cell_line, value: val, Rack: rack, pos: pos, x: x, y:y}};
+            show_cell_line_details(ee);
+        } else {
+            $('#pos-details').find('tr td:nth-child(2)').text(''); // clear second column
+            $('#location').append(location);
+        }
+    }
+
+    $('#modal-cancel').on('click', function(e) {
+        discard_changes();
+    });
+
+    $('#discard_changes').on('click', function(e) {
+        discard_changes();
     });
 
     $('#save_changes').on('click', function(){
         var tower = $('#towers').attr('selected-tower');
-        var location = $('#location').text();
-        var rack = location.split(', ')[0].replace('Rack', '');
-        var pos = location.split(', ')[1];
+
+        // if multiple positions are selected
+        var location = $('#location').html();
+        var rack = $('#location').find('span.rack').text();
+        var pos = $('#location').find('span.badge');
+        if (pos != undefined) {
+            pos = $('#location').find('span.badge').map(function() {
+                return $(this).text();
+            }).get();
+        }
+        if (rack == undefined || pos == undefined) {
+            rack = location.split(', ')[0];
+            pos = [location.split(', ')[1]];
+        }
+        rack = rack.replace('Rack', '');
         var prev_cell_line = $('#cell_line').attr('data-unchanged-val');
 
         var cell_line = $('#cell_line_ID').text();
@@ -615,14 +679,10 @@ $(document).ready(function() {
         var prev_resp = prev_data['Responsible person'];
         var prev_comments = prev_data['Comments'];
         var prev_date = prev_data['Date'];
-        var x = pos.substr(1);
-        var y = pos[0];
         data = {
             tower: tower,
             Rack: rack,
             pos: pos,
-            x: x,
-            y: y,
             prev_cell_line: prev_cell_line,
             cell_line: cell_line,
             'Responsible person': responsible,
@@ -659,24 +719,28 @@ $(document).ready(function() {
             var rack_data = rack_series[tower + '_Rack' + rack];
             load_chart_racks(rack_name, rack_data);
             // update my requests
-            var new_tr = "<tr><td class='tower'>" + data['tower'] + "</td><td class='Rack'>" + data['Rack'] + "</td>" +
-            "<td class='pos'>" + data['pos'] + "</td><td class='cell_line'>" + data['ID'] + "</td>" +
-            "<td class='prev_cell_line'>" + data['prev_cell_line'] + "</td><td class='Comments'>" + data['Comments'] + "</td>" +
-            "<td class='Date'>" + data['Date'] + "</td><td class='Responsible person'>" + data['Responsible person'] + "</td>" +
-            "<td class='status'><span class='badge badge-warning'>pending</span></td>" +
-            "<td><button class='btn btn-sm btn-outline-warning ml-2 cancel_req'>× Cancel request</button></td>";
-            $('#user_requests').find('tr:last').after(new_tr);
+            for (i=0; i<pos.length; i++) {
+                var new_tr = "<tr><td class='tower'>" + data['tower'] + "</td><td class='Rack'>" + data['Rack'] + "</td>" +
+                "<td class='pos'>" + pos[i] + "</td><td class='cell_line'>" + data['ID'] + "</td>" +
+                "<td class='prev_cell_line'>" + data['prev_cell_line'] + "</td><td class='Comments'>" + data['Comments'] + "</td>" +
+                "<td class='Date'>" + data['Date'] + "</td><td class='Responsible person'>" + data['Responsible person'] + "</td>" +
+                "<td class='status'><span class='badge badge-warning'>pending</span></td>" +
+                "<td><button class='btn btn-sm btn-outline-warning ml-2 cancel_req'>× Cancel request</button></td>";
+                $('#user_requests').find('tr:last').after(new_tr);
+            }
             if ($('#user_requests').hasClass('d-none')) {
                 $('#user_requests').removeClass('d-none');
             }
             // update pending requests
-            var new_tr2 = '<tr><td class="tower">' + data['tower'] + '</td><td class="Rack">' + data['Rack'] + '</td>' +
-                '<td class="pos">' + data['pos'] + '</td><td class="cell_line">' + data['ID'] + '</td>' +
-                '<td class="prev_cell_line">' + data['prev_cell_line'] + '</td><td class="Comments">' + data['Comments'] +
-                '</td><td class="Date">' + data['Date'] + '</td><td class="Responsible person">' + data['Responsible person'] +
-                '</td><td><button class="btn btn-sm btn-outline-success approve_btn">✓ Approve</button></td>' +
-                '<td><button class="btn btn-sm btn-outline-danger decline_btn">× Decline</button></td></tr>';
-            $('#requests_table').find('tr:last').after(new_tr2);
+            for (i=0; i<pos.length; i++) {
+                var new_tr2 = '<tr><td class="tower">' + data['tower'] + '</td><td class="Rack">' + data['Rack'] + '</td>' +
+                    '<td class="pos">' + pos[i] + '</td><td class="cell_line">' + data['ID'] + '</td>' +
+                    '<td class="prev_cell_line">' + data['prev_cell_line'] + '</td><td class="Comments">' + data['Comments'] +
+                    '</td><td class="Date">' + data['Date'] + '</td><td class="Responsible person">' + data['Responsible person'] +
+                    '</td><td><button class="btn btn-sm btn-outline-success approve_btn">✓ Approve</button></td>' +
+                    '<td><button class="btn btn-sm btn-outline-danger decline_btn">× Decline</button></td></tr>';
+                $('#requests_table').find('tr:last').after(new_tr2);
+            }
             if ($('#requests_table').hasClass('d-none')) {
                 $('#requests_table').removeClass('d-none');
             }

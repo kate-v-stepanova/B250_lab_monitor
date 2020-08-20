@@ -23,7 +23,6 @@ def get_liquid_nitrogen():
     else:
         to_approve = pd.DataFrame(columns=['tower', 'pos', 'Rack', 'x', 'y', 'Responsible person', 'Date', 'Comments', 'cell_line',
                                            'prev_cell_line', 'prev_responsible', 'prev_comments', 'prev_date', 'status'])
-
     to_approve = to_approve.fillna('')
     towers = set(towers + to_approve['tower'].tolist())
 
@@ -164,39 +163,27 @@ def update_rack():
     if tower_data is not None:
         tower_data = json.loads(tower_data)
         tower_data = pd.DataFrame(tower_data)
-        current_pos_data = tower_data.loc[(tower_data['Rack'].astype(int) == int(data.get('Rack', 0))) & \
-                                          (tower_data['pos'] == data.get('pos'))]
-        if len(current_pos_data) != 0:
-            data['prev_cell_line'] = current_pos_data.iloc[0]['ID']
-            data['prev_responsible'] = current_pos_data.iloc[0]['Responsible person']
-            data['x'] = current_pos_data.iloc[0]['x']
-            data['y'] = current_pos_data.iloc[0]['y']
 
-    # if there is already something on that position, then ...
+    # if there is already something on that positions, then ...
     to_overwrite = to_approve.loc[(to_approve['Rack'] == data.get('Rack')) & (to_approve['tower'] == data.get('tower')) &
-                                  (to_approve['pos'] == data.get('pos'))]
+                                  (to_approve['pos'].isin(data.get('pos')))]
     # ... then drop it and ...
-    change_tubes = True
     if len(to_overwrite) != 0:
         to_approve = to_approve.drop(to_overwrite.index)
-        # .. check if we need to change the number of tubes ...
-        if to_overwrite['cell_line'].tolist() in [data.get('cell_line')] and data.get('cell_line') != '':
-            change_tubes = False
     # ... and add the new data
-    to_approve = to_approve.append(data, ignore_index=True)
+    for pos in (data.get('pos')):
+        cur_data = data
+        cur_data['pos'] = pos
+        cur_data['y'] = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].index(pos[0])
+        cur_data['x'] = int(pos[1:])
+        if tower_data is not None:
+            current_pos_data = tower_data.loc[(tower_data['Rack'].astype(int) == int(data.get('Rack', 0))) & \
+                                              (tower_data['pos'] == pos)]
+            if len(current_pos_data) != 0:
+                cur_data['prev_cell_line'] = current_pos_data.iloc[0]['ID']
+                cur_data['prev_responsible'] = current_pos_data.iloc[0]['Responsible person']
 
-    # if a tube is placed on an empty location
-    if data['prev_cell_line'] == '' and change_tubes:
-        # change number of available tubes
-        cell_lines = rdb.get('cell_lines')
-        cell_lines = json.loads(cell_lines)
-        cell_lines = pd.DataFrame(cell_lines)
-        # todo: check if there is a request on that position - then do not reduce the number of tubes - done
-        cur_cell_line = cell_lines.loc[cell_lines['ID'] == data['cell_line']]
-        cell_lines.loc[cell_lines['ID'] == data['cell_line'], 'tubes_available'] = \
-            cur_cell_line['tubes_available'].astype(int) - 1
-        rdb.set('cell_lines', json.dumps(cell_lines.to_dict('list')))
-
+        to_approve = to_approve.append(cur_data, ignore_index=True)
     # save to db
     try:
         rdb.set('to_approve', json.dumps(to_approve.to_dict('list')))
@@ -441,7 +428,6 @@ def approve_decline():
         make_response({'status': 'error', 'error': 'Unknown action "{}"'.format(action)}, 200)
 
     return make_response({'status': 'success'}, 200)
-
 
 
 @liquid_nitrogen.route('/liquid_nitrogen/export_data', methods=['POST'])
