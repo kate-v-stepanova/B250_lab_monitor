@@ -735,7 +735,7 @@ $(document).ready(function() {
             // update my requests
             for (i=0; i<pos.length; i++) {
                 var new_tr = "<tr><td class='tower'>" + data['tower'] + "</td><td class='Rack'>" + data['Rack'] + "</td>" +
-                "<td class='pos'>" + pos[i] + "</td><td class='cell_line'>" + data['ID'] + "</td>" +
+                "<td class='pos'>" + pos[i] + "</td><td class='cell_line'>" + data['cell_line'] + "</td>" +
                 "<td class='prev_cell_line'>" + data['prev_cell_line'] + "</td><td class='Comments'>" + data['Comments'] + "</td>" +
                 "<td class='Date'>" + data['Date'] + "</td><td class='Responsible person'>" + data['Responsible person'] + "</td>" +
                 "<td class='status'><span class='badge badge-warning'>pending</span></td>" +
@@ -748,7 +748,7 @@ $(document).ready(function() {
             // update pending requests
             for (i=0; i<pos.length; i++) {
                 var new_tr2 = '<tr><td class="tower">' + data['tower'] + '</td><td class="Rack">' + data['Rack'] + '</td>' +
-                    '<td class="pos">' + pos[i] + '</td><td class="cell_line">' + data['ID'] + '</td>' +
+                    '<td class="pos">' + pos[i] + '</td><td class="cell_line">' + data['cell_line'] + '</td>' +
                     '<td class="prev_cell_line">' + data['prev_cell_line'] + '</td><td class="Comments">' + data['Comments'] +
                     '</td><td class="Date">' + data['Date'] + '</td><td class="Responsible person">' + data['Responsible person'] +
                     '</td>';
