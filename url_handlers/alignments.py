@@ -63,23 +63,28 @@ def get_cumulative_reads(project_id):
         if len(df) == 0:
             error += "No reads in CDS for sample {}___".format(sample)
 
-        df['dup'] = 1
-        df['dup'] = df.groupby(['seq'])['dup'].transform('sum')
+        # only consider CDS
         df['start'] = df['start'] - df['5utr_len']
+        df['dup'] = 1
+        # remove duplicated sequences and sum their number
+        df['dup'] = df.groupby(['seq'])['dup'].transform('sum')
+
+        # new df -> length of transcript
         df1 = pd.DataFrame()
         df1['pos'] = [i for i in range(1, trans['cds_len'].iloc[0] + 1)]
         df1['counts'] = 0
-
+        
+        # assign total #reads in each position
         total = 0
         df = df.sort_values(by="start")
         for i, row in df.iterrows():
             total += row['dup']
             df1.loc[df1['pos'] == row['start'], 'counts'] = total
 
-        ind = df1.loc[(df1['pos'] != 1) & (df1['pos'] != df1['pos'].max()) & (df1['counts'] == 0)].index
-        df1 = df1.loc[~df1.index.isin(ind)]
-        df1.loc[df1['pos'] == df1['pos'].max(), 'counts'] = df1['counts'].max()
-
+        # include last pos of transcript -> 100%
+        df1.loc[df1['pos'] == trans['cds_len'].iloc[0], 'counts'] = total
+        # remove positions with 0 counts
+        df1 = df1.drop(df1.loc[df1['counts'] == 0].index)
 
         if normalization != 'raw_counts':
             counts_data = rdb.get('counts_{}_{}_{}'.format(project_id, bam_type, sample))
@@ -95,7 +100,6 @@ def get_cumulative_reads(project_id):
                 counts_data = json.loads(counts_data)
                 counts_df = pd.DataFrame(counts_data)
                 counts_df = counts_df.loc[counts_df['gene_name'] == selected_gene]
-                counts = counts_df['counts'].astype(int).sum() # counts for 1 gene only
 
                 # raw counts divide by norm_counts -> to see how many tpm/cpm/rpkm in 1 raw count
                 norm_factor = 1
@@ -105,8 +109,11 @@ def get_cumulative_reads(project_id):
                     norm_factor = counts_df['cpm'].astype(float).sum()
                 elif normalization == 'rpkm':
                     norm_factor = counts_df['rpkm'].astype(float).sum()
+                elif normalization == 'percent':
+                    norm_factor = df1['counts'].astype(int).max() * 0.01 # counts for 1 gene only
                 else:
-                    warning += 'Normalization method not found: <b>{}</b>. Showing raw counts. Sample: {}'.format(normalization, sample)
+                    warning += 'Normalization method not found: {}. Showing raw counts.'.format(normalization)
+
                 # and now we multiply this number by the real number of reads in each position
                 df1['norm_counts'] = df1['counts'] / norm_factor
                 df1['norm_counts'] = df1['norm_counts'].round(3)
@@ -295,7 +302,6 @@ def get_density_plot(project_id):
             error += "No reads in selected gene for sample {}___".format(sample)
             continue
 
-
         df['start'] = df['start'] - df['5utr_len']
 
         # df1 has length of selected transcript length
@@ -322,7 +328,6 @@ def get_density_plot(project_id):
                 counts_data = json.loads(counts_data)
                 counts_df = pd.DataFrame(counts_data)
                 counts_df = counts_df.loc[counts_df['gene_name'] == selected_gene]
-                counts = counts_df['counts'].astype(int).sum() # counts for 1 gene only
 
                 # raw counts divide by norm_counts -> to see how many tpm/cpm/rpkm in 1 raw count
                 norm_factor = 1
