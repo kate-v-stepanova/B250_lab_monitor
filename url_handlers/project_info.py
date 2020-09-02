@@ -21,8 +21,6 @@ def get_project_info(project_id):
         if rdb_data is not None:
             samples_info = json.loads(rdb_data.decode('utf-8'))
 
-        print(samples_info)
-
         # BASIC STATS
         available_stats = []
         bc_split_stats = rdb.get('bc_split_{}'.format(project_id))
@@ -100,7 +98,7 @@ def get_project_info(project_id):
         #     'link': "{}alignments/{}".format(request.url_root, project_id)
         # })
         bam_types = rdb.smembers('bam_types_{}'.format(project_id))
-        if bam_types is not None:
+        if bam_types:
             bam_types = [bam_type.decode('utf-8') for bam_type in bam_types]
             alignment = rdb.exists('alignment__{}__{}__{}'.format(project_id, bam_types[0], samples_info[0].get('sample')))
             if alignment:
