@@ -21,6 +21,7 @@ from url_handlers.ribo_diff import ribo_diff
 from url_handlers.alignments import alignments
 from url_handlers.liquid_nitrogen import liquid_nitrogen
 from url_handlers.user_details import user_details
+from url_handlers.volcano_plot import volcano_plot
 
 app = Flask(__name__)
 
@@ -36,6 +37,7 @@ app.register_blueprint(ribo_diff)
 app.register_blueprint(alignments)
 app.register_blueprint(liquid_nitrogen)
 app.register_blueprint(user_details)
+app.register_blueprint(volcano_plot)
 
 app.secret_key = 'super secret key'
 app.config['SESSION_TYPE'] = 'filesystem'
@@ -62,9 +64,9 @@ def connect_db():
     """ connects to redis database """
 #    redis_store = FlaskRedis(health_check_interval=30)
 #    redis_store.init_app(app)
-#     ip = "172.22.54.5" # hz
-    ip = "172.22.24.88" # localhost
-    ip = "192.168.0.157" # home
+    ip = "172.22.54.5" # hz
+    # ip = "172.22.24.88" # localhost
+    # ip = "192.168.0.157" # home
     #redis_store = redis.StrictRedis(host="172.22.25.100", health_check_interval=30)
     redis_store = redis.StrictRedis(host=ip, health_check_interval=30)
 
