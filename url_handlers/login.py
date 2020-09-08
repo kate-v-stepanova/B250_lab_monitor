@@ -59,13 +59,10 @@ def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-        print(email, password)
         user = User.get_user(email, password)
-        print(user)
         if user is not None:
             login_user(user, remember=True)
             if not user.activated:
-                print(user.activated)
                 return render_template('user_details.html', error_message='Your account is not activated. To activate your account, please change the password')
             else:
                 return redirect('/')
