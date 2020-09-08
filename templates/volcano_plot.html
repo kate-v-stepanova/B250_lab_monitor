@@ -42,14 +42,16 @@
 
 
 {# error messages #}
-<div class="alert alert-danger mt-2 d-none" role="alert" id="error_div">
+<div class="alert alert-danger mt-2 {% if not error %}d-none{% endif %}" role="alert" id="error_div">
   <div class="row">
-    <div class="col col-xs-10" id="error_messages"></div>
+    <div class="col col-xs-10" id="error_messages">{{ error }}</div>
     <div class="col col-sm-2"><span class="close" aria-label="Close"> &times;</span></div>
   </div>
 </div>
 
+{% if plot_series %}
 <div id="volcano_plot" class="col-sm-12" data-plot-series="{{ plot_series }}" data-genes="{{ genes }}" data-left-line="{{ left }}"
     data-right-line="{{ right }}" data-bottom-line="{{ bottom }}">
 </div>
+{% endif %}
 {% endblock %}

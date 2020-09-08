@@ -74,12 +74,21 @@ def get_project_info(project_id):
                 'link': "{}reads_per_position/{}".format(request.url_root, project_id)
             })
 
-        ma_plot = rdb.smembers("contrasts_{}".format(project_id))
-        if ma_plot:
-            analysis_list.append({
-                'name': "MA plot",
-                'link': "{}ma_plot/{}".format(request.url_root, project_id)
-            })
+        contrasts = rdb.smembers("contrasts_{}".format(project_id))
+        if contrasts:
+            contrasts = [c.decode('utf-8') for c in contrasts]
+            ma_plot = rdb.get('ma_plot_all_{}_{}'.format(project_id, contrasts[0]))
+            if ma_plot:
+                analysis_list.append({
+                    'name': "MA plot",
+                    'link': "{}ma_plot/{}".format(request.url_root, project_id)
+                })
+            volcano_plot = rdb.get('volcano_{}_{}'.format(project_id, contrasts[0]))
+            if volcano_plot:
+                analysis_list.append({
+                    'name': 'Volcano plot',
+                    'link': '{}volcano_plot/{}'.format(request.url_root, project_id)
+                })
         heatmap = rdb.exists("cpm_coding_{}".format(project_id))
         if heatmap:
             analysis_list.append({
