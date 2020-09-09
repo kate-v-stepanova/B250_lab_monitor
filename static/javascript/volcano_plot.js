@@ -92,9 +92,13 @@ $(document).ready(function() {
                             } else {
                                 log_10 = this.y
                             }
+                            var series_name = '';
+                            if (this.series.name == 'ASP' || this.series.name == 'PRO') {
+                                series_name = '<br><b>Gene type: </b>' + this.series.name + ' top200';
+                            }
                             return '<b>gene: ' + this.gene + '</b><br>' +
                             '<b>-log10(pval):</b>' + this.x + '<br><b>log2(fc):</b> ' + log_10 +'<br>' +
-                                '<b>pvalue:</b>' + this.pvalue + '<br><b>fc:</b> ' + this.fc;
+                                '<b>pvalue:</b>' + this.pvalue + '<br><b>fc:</b> ' + this.fc + series_name;
                         },
                     }
                 }
