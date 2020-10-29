@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template
 from flask_login import login_required
 import pandas as pd
+import json
 
 reads_per_position = Blueprint('reads_per_position', __name__)
 
@@ -20,16 +21,21 @@ def get_reads_per_position(project_id):
     plot_names = []
     plot_series = {}
     categories = {}
-    gene_lengths = {
-        'RNA18S5': 1869,
-        'RNA28S5': 5070,
-        'RNA5-8S5': 153,
-    }
+
+    gene_lengths = rdb.get('{}_rrna_genes'.format(project_id))
+    if gene_lengths is not None:
+        gene_lengths = json.loads(gene_lengths)
+    else:
+        gene_lengths = {
+            'RNA18S5': 1869,
+            'RNA28S5': 5070,
+            'RNA5-8S5': 153,
+        }
 
     genes = gene_lengths.keys()
     samples = df.get('sample').unique()
     for gene in genes:
-        gene_length = gene_lengths.get(gene)
+        gene_length = int(gene_lengths.get(gene))
         for sample in samples:
             current_df = df.loc[(df['gene'] == gene) & (df['sample'] == sample)]
             if current_df.empty:
@@ -46,7 +52,7 @@ def get_reads_per_position(project_id):
                 position = row['start']
                 series_df.loc[position, 'x'] = position
                 series_df.loc[position, 'y'] = row['counts']
-                series_df.loc[position, 'reads_info'] = row['reads_info'].replace(',', '<br> • ')
+                series_df.loc[position, 'reads_info'] = row['reads_info'].replace(',', '<br> • ').replace('. ', '<br> • ')
             plot_series[plot_name] = {
                 'name': plot_name,
                 'data': series_df.to_dict('records')
