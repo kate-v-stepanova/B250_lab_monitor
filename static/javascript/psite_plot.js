@@ -1,7 +1,6 @@
 $(document).ready(function() {
     // initializing constants and removing attributes from html elements
     var PLOT_SERIES = $('#psite_plot').attr('data-plot-series');
-    console.log(PLOT_SERIES);
     if (PLOT_SERIES != undefined) {
         PLOT_SERIES = PLOT_SERIES.replace(/'/g, '"'); //");
         PLOT_SERIES = PLOT_SERIES.replace(/"null"/g, null);
@@ -19,8 +18,6 @@ $(document).ready(function() {
         var max_fc = $('#psite_plot').attr('data-max');
         var middle_val = $('#psite_plot').attr('data-max');
 
-        console.log(min_fc);
-        console.log(max_fc);
         // removing attributes
         $('#psite_plot').removeAttr('data-plot-series');
 
@@ -71,7 +68,6 @@ $(document).ready(function() {
 
             legend: {
                 enabled: false,
-//                align: 'bottom',
                 layout: 'horizontal',
                 margin: 15,
                 verticalAlign: 'bottom',
@@ -92,7 +88,6 @@ $(document).ready(function() {
             },
             series: [{
                 pointPadding: 1,
-//                nullColor: '#d3d3d3',
                 nullColor: 'white',
                 data: PLOT_SERIES
             }]

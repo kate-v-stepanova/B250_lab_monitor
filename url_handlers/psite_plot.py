@@ -51,13 +51,17 @@ def get_psite_plot(project_id):
         a_df = a_df.groupby('Aa').sum().reset_index()
         e_df = e_df.groupby('Aa').sum().reset_index()
 
-    p_df['value'] = p_df['{}_norm'.format(s1)] / p_df['{}_norm'.format(s2)]
+    # calculating fc as (sample - control) / control
+    p_df['value'] = p_df['{}_norm'.format(s1)] - p_df['{}_norm'.format(s2)]
+    p_df['value'] = p_df['value'] / p_df['{}_norm'.format(s2)]
     p_df['value'] = p_df['value'].apply(lambda x: math.log2(x)).round(7)
 
-    a_df['value'] = a_df['{}_norm'.format(s1)] / a_df['{}_norm'.format(s2)]
+    a_df['value'] = a_df['{}_norm'.format(s1)] - a_df['{}_norm'.format(s2)]
+    a_df['value'] = a_df['value'] / a_df['{}_norm'.format(s2)]
     a_df['value'] = a_df['value'].apply(lambda x: math.log2(x)).round(7)
 
     e_df['value'] = e_df['{}_norm'.format(s1)] / e_df['{}_norm'.format(s2)]
+    e_df['value'] = e_df['value'] / e_df['{}_norm'.format(s2)]
     e_df['value'] = e_df['value'].apply(lambda x: math.log2(x)).round(7)
 
     min_fc = min(p_df['value'].min(), a_df['value'].min(), e_df['value'].min())
