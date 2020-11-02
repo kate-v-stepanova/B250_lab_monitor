@@ -41,7 +41,7 @@ def get_psite_plot(project_id):
     # group by codon of by amino acid
     group_by_aa = request.form.get('group_by_codon') != 'codon'
 
-    cols = ['codon', 'Aa', s1, s2, '{}_norm'.format(s1), '{}_norm'.format(s2)]
+    cols = ['codon', 'Aa', s1, s2, 'norm_{}'.format(s1), 'norm_{}'.format(s2)]
 
     p_df = p_df[cols].round(7)
     a_df = a_df[cols].round(7)
@@ -52,16 +52,16 @@ def get_psite_plot(project_id):
         e_df = e_df.groupby('Aa').sum().reset_index()
 
     # calculating fc as (sample - control) / control
-    p_df['value'] = p_df['{}_norm'.format(s1)] - p_df['{}_norm'.format(s2)]
-    p_df['value'] = p_df['value'] / p_df['{}_norm'.format(s2)]
+    p_df['value'] = p_df['norm_{}'.format(s1)] - p_df['norm_{}'.format(s2)]
+    p_df['value'] = p_df['value'] / p_df['norm_{}'.format(s2)]
     p_df['value'] = p_df['value'].apply(lambda x: math.log2(x)).round(7)
 
-    a_df['value'] = a_df['{}_norm'.format(s1)] - a_df['{}_norm'.format(s2)]
-    a_df['value'] = a_df['value'] / a_df['{}_norm'.format(s2)]
+    a_df['value'] = a_df['norm_{}'.format(s1)] - a_df['norm_{}'.format(s2)]
+    a_df['value'] = a_df['value'] / a_df['norm_{}'.format(s2)]
     a_df['value'] = a_df['value'].apply(lambda x: math.log2(x)).round(7)
 
-    e_df['value'] = e_df['{}_norm'.format(s1)] / e_df['{}_norm'.format(s2)]
-    e_df['value'] = e_df['value'] / e_df['{}_norm'.format(s2)]
+    e_df['value'] = e_df['norm_{}'.format(s1)] / e_df['norm_{}'.format(s2)]
+    e_df['value'] = e_df['value'] / e_df['norm_{}'.format(s2)]
     e_df['value'] = e_df['value'].apply(lambda x: math.log2(x)).round(7)
 
     min_fc = min(p_df['value'].min(), a_df['value'].min(), e_df['value'].min())
@@ -133,7 +133,7 @@ def get_psite_plot(project_id):
 
             if len(cur_p) == 0:
                 plot_series += [{'x': i, 'y': 0, 'codon': codon, 'Aa': aa,
-                                 s1: 0, s2: 0, '{}_norm'.format(s1): 0, '{}_norm'.format(s2): 0, 'site': 'P'}]
+                                 s1: 0, s2: 0, 'norm_{}'.format(s1): 0, 'norm_{}'.format(s2): 0, 'site': 'P'}]
             else:
                 cur_p['x'] = i
                 cur_p['y'] = 0
@@ -142,7 +142,7 @@ def get_psite_plot(project_id):
 
             if len(cur_a) == 0:
                 plot_series += [{'x': i, 'y': 0, 'codon': codon, 'Aa': aa,
-                                 s1: 0, s2: 0, '{}_norm'.format(s1): 0, '{}_norm'.format(s2): 0, 'site': 'P'}]
+                                 s1: 0, s2: 0, 'norm_{}'.format(s1): 0, 'norm_{}'.format(s2): 0, 'site': 'P'}]
             else:
                 cur_a['x'] = i
                 cur_a['y'] = 1
@@ -151,7 +151,7 @@ def get_psite_plot(project_id):
 
             if len(cur_e) == 0:
                 plot_series += [{'x': i, 'y': 0, 'codon': codon, 'Aa': aa,
-                                 s1: 0, s2: 0, '{}_norm'.format(s1): 0, '{}_norm'.format(s2): 0, 'site': 'P'}]
+                                 s1: 0, s2: 0, 'norm_{}'.format(s1): 0, 'norm_{}'.format(s2): 0, 'site': 'P'}]
             else:
                 cur_e['x'] = i
                 cur_e['y'] = 2
