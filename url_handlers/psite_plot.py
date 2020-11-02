@@ -41,39 +41,40 @@ def get_psite_plot(project_id):
     # group by codon of by amino acid
     group_by_aa = request.form.get('group_by_codon') != 'codon'
 
-    cols = ['codon', 'Aa', s1, s2, 'norm_{}'.format(s1), 'norm_{}'.format(s2)]
-
-    p_df = p_df[cols].round(7)
-    a_df = a_df[cols].round(7)
-    e_df = e_df[cols].round(7)
     if group_by_aa:
         p_df = p_df.groupby('Aa').sum().reset_index()
         a_df = a_df.groupby('Aa').sum().reset_index()
         e_df = e_df.groupby('Aa').sum().reset_index()
 
+    cols = ['Aa', s1, s2, 'norm_{}'.format(s1), 'norm_{}'.format(s2)]
+    if not group_by_aa:
+        cols = cols + ['codon']
+
+    p_df = p_df[cols].round(3)
+    a_df = a_df[cols].round(3)
+    e_df = e_df[cols].round(3)
+
     # calculating fc as (sample - control) / control
     p_df['value'] = p_df['norm_{}'.format(s1)] - p_df['norm_{}'.format(s2)]
     p_df['value'] = p_df['value'] / p_df['norm_{}'.format(s2)]
-    p_df['value'] = p_df['value'].apply(lambda x: math.log2(x)).round(7)
 
     a_df['value'] = a_df['norm_{}'.format(s1)] - a_df['norm_{}'.format(s2)]
     a_df['value'] = a_df['value'] / a_df['norm_{}'.format(s2)]
-    a_df['value'] = a_df['value'].apply(lambda x: math.log2(x)).round(7)
 
-    e_df['value'] = e_df['norm_{}'.format(s1)] / e_df['norm_{}'.format(s2)]
+    e_df['value'] = e_df['norm_{}'.format(s1)] - e_df['norm_{}'.format(s2)]
     e_df['value'] = e_df['value'] / e_df['norm_{}'.format(s2)]
-    e_df['value'] = e_df['value'].apply(lambda x: math.log2(x)).round(7)
 
+    p_df['value'] = p_df['value'].round(3)
+    a_df['value'] = a_df['value'].round(3)
+    e_df['value'] = e_df['value'].round(3)
+ 
     min_fc = min(p_df['value'].min(), a_df['value'].min(), e_df['value'].min())
     max_fc = max(p_df['value'].max(), a_df['value'].max(), e_df['value'].max())
 
-    middle_val = abs(max_fc / min_fc)
-    if abs(max_fc) < abs(min_fc):
-        # positive
-        middle_val = -1 * middle_val
-
     max_fc = max(abs(min_fc), max_fc)
     min_fc = -1 * max_fc
+    middle_val = 0
+
     if group_by_aa:
         x_categories = p_df['Aa'].unique().tolist()
     else:
@@ -132,8 +133,7 @@ def get_psite_plot(project_id):
                 aa = cur_p.iloc[0]['Aa']
 
             if len(cur_p) == 0:
-                plot_series += [{'x': i, 'y': 0, 'codon': codon, 'Aa': aa,
-                                 s1: 0, s2: 0, 'norm_{}'.format(s1): 0, 'norm_{}'.format(s2): 0, 'site': 'P'}]
+                plot_series += [{'x': i, 'y': 0, 'codon': codon, 'Aa': aa, 'site': 'P'}]
             else:
                 cur_p['x'] = i
                 cur_p['y'] = 0
@@ -141,8 +141,7 @@ def get_psite_plot(project_id):
                 plot_series += cur_p.to_dict('records')
 
             if len(cur_a) == 0:
-                plot_series += [{'x': i, 'y': 0, 'codon': codon, 'Aa': aa,
-                                 s1: 0, s2: 0, 'norm_{}'.format(s1): 0, 'norm_{}'.format(s2): 0, 'site': 'P'}]
+                plot_series += [{'x': i, 'y': 0, 'codon': codon, 'Aa': aa, 'site': 'A'}]
             else:
                 cur_a['x'] = i
                 cur_a['y'] = 1
@@ -150,8 +149,7 @@ def get_psite_plot(project_id):
                 plot_series += cur_a.to_dict('records')
 
             if len(cur_e) == 0:
-                plot_series += [{'x': i, 'y': 0, 'codon': codon, 'Aa': aa,
-                                 s1: 0, s2: 0, 'norm_{}'.format(s1): 0, 'norm_{}'.format(s2): 0, 'site': 'P'}]
+                plot_series += [{'x': i, 'y': 0, 'codon': codon, 'Aa': aa, 'site': 'E'}]
             else:
                 cur_e['x'] = i
                 cur_e['y'] = 2

@@ -81,15 +81,16 @@ $(document).ready(function() {
                              '<b>Codon: </b>{point.codon}<br>' +
                              '<b>AA: </b>{point.Aa}<br>' +
                              '<b>' + samples[0] + ': </b>{point.'+samples[0] + '}<br>' +
-                             '<b>' + samples[0] + '_norm: </b>{point.' + samples[0] + '_norm}<br>' +
+                             '<b>norm_' + samples[0] + ': </b>{point.norm_' + samples[0] + '}<br>' +
                              '<b>' + samples[1] + ': </b>{point.'+samples[1] + '}<br>' +
-                             '<b>' + samples[1] + '_norm: </b>{point.' + samples[1] + '_norm}<br>' +
-                             '<b>log2(' + contrast + '): </b>{point.value}',
+                             '<b>norm_' + samples[1] + ': </b>{point.norm_' + samples[1] + '}<br>' +
+                             '<b>(' + samples[0] + ' - ' + samples[1] + ') / ' + samples[1] + ': </b>{point.value}',
             },
             series: [{
                 pointPadding: 1,
                 nullColor: 'white',
-                data: PLOT_SERIES
+                data: PLOT_SERIES,
+                borderWidth: 1,
             }]
         });
     }
