@@ -50,24 +50,19 @@ def get_psite_plot(project_id):
     if not group_by_aa:
         cols = cols + ['codon']
 
-    p_df = p_df[cols].round(3)
-    a_df = a_df[cols].round(3)
-    e_df = e_df[cols].round(3)
-
     # calculating fc as (sample - control) / control
-    p_df['value'] = p_df['norm_{}'.format(s1)] - p_df['norm_{}'.format(s2)]
-    p_df['value'] = p_df['value'] / p_df['norm_{}'.format(s2)]
-
-    a_df['value'] = a_df['norm_{}'.format(s1)] - a_df['norm_{}'.format(s2)]
-    a_df['value'] = a_df['value'] / a_df['norm_{}'.format(s2)]
-
-    e_df['value'] = e_df['norm_{}'.format(s1)] - e_df['norm_{}'.format(s2)]
-    e_df['value'] = e_df['value'] / e_df['norm_{}'.format(s2)]
+    p_df['value'] = (p_df['norm_{}'.format(s1)] - p_df['norm_{}'.format(s2)]) / p_df['norm_{}'.format(s2)]
+    a_df['value'] = (a_df['norm_{}'.format(s1)] - a_df['norm_{}'.format(s2)]) / a_df['norm_{}'.format(s2)]
+    e_df['value'] = (e_df['norm_{}'.format(s1)] - e_df['norm_{}'.format(s2)]) / e_df['norm_{}'.format(s2)]
 
     p_df['value'] = p_df['value'].round(3)
     a_df['value'] = a_df['value'].round(3)
     e_df['value'] = e_df['value'].round(3)
- 
+
+    p_df[cols] = p_df[cols].round(3)
+    a_df[cols] = a_df[cols].round(3)
+    e_df[cols] = e_df[cols].round(3)
+
     min_fc = min(p_df['value'].min(), a_df['value'].min(), e_df['value'].min())
     max_fc = max(p_df['value'].max(), a_df['value'].max(), e_df['value'].max())
 
@@ -79,27 +74,27 @@ def get_psite_plot(project_id):
         x_categories = p_df['Aa'].unique().tolist()
     else:
         x_categories = [
-            'GCC', 'GCT', 'GCG', 'GCA', '',
+            'GCA', 'GCC', 'GCG', 'GCT', '',
             'AGA', 'CGC', 'CGA', 'CGG', 'CGT', 'AGG', '',
             'AAC', 'AAT', '',
-            'GAT', 'GAC', '',
+            'GAC', 'GAT', '',
             'TGC', 'TGT', '',
             'CAA', 'CAG', '',
-            'GAG', 'GAA', '',
-            'GGG', 'GGT', 'GGC', 'GGA', '',
+            'GAA', 'GAG', '',
+            'GGA', 'GGC', 'GGG', 'GGT', '',
             'CAC', 'CAT', '',
-            'ATT', 'ATC', 'ATA', '',
-            'CTA', 'CTC', 'CTG', 'TTG', 'TTA', 'CTT', '',
+            'ATA', 'ATC', 'ATT', '',
+            'CTA', 'CTC', 'CTG', 'CTT', 'TTA', 'TTG', '',
             'AAA', 'AAG', '',
             'ATG', '',
-            'TTT', 'TTC', '',
-            'CCT', 'CCG', 'CCC', 'CCA', '',
-            'TCA', 'AGT', 'TCT', 'AGC', 'TCC', 'TCG', '',
-            'TGA', 'TAA', 'TAG', '',
-            'ACA', 'ACC', 'ACT', 'ACG', '',
+            'TTC', 'TTT', '',
+            'CCA', 'CCC', 'CCG', 'CCT', '',
+            'AGC', 'AGT', 'TCA', 'TCC', 'TCG', 'TCT', '',
+            'TAA', 'TAG', 'TGA', '',
+            'ACA', 'ACC', 'ACG', 'ACT', '',
             'TGG', '',
-            'TAT', 'TAC', '',
-            'GTT', 'GTG', 'GTC', 'GTA']
+            'TAC', 'TAT', '',
+            'GTA', 'GTC', 'GTG', 'GTT']
 
     plot_series = []
     for i in range(len(x_categories)):
@@ -158,4 +153,5 @@ def get_psite_plot(project_id):
 
     group_by_codon = not group_by_aa
     return render_template('psite_plot.html', psite_series=plot_series, contrasts=contrasts, selected_contrast=contrast,
-                           x_categories=x_categories, min_fc=min_fc, max_fc=max_fc, middle_val=middle_val, group_by_codon=group_by_codon)
+                           x_categories=x_categories, min_fc=min_fc, max_fc=max_fc, middle_val=middle_val,
+                           group_by_codon=group_by_codon)
