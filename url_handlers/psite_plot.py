@@ -6,8 +6,6 @@ import json
 
 psite_plot = Blueprint('psite_plot', __name__)
 
-codons = {'codon': ['AAA', 'AAC', 'AAG', 'AAT', 'ACA', 'ACC', 'ACG', 'ACT', 'AGA', 'AGC', 'AGG', 'AGT', 'ATA', 'ATC', 'ATG', 'ATT', 'CAA', 'CAC', 'CAG', 'CAT', 'CCA', 'CCC', 'CCG', 'CCT', 'CGA', 'CGC', 'CGG', 'CGT', 'CTA', 'CTC', 'CTG', 'CTT', 'GAA', 'GAC', 'GAG', 'GAT', 'GCA', 'GCC', 'GCG', 'GCT', 'GGA', 'GGC', 'GGG', 'GGT', 'GTA', 'GTC', 'GTG', 'GTT', 'TAA', 'TAC', 'TAG', 'TAT', 'TCA', 'TCC', 'TCG', 'TCT', 'TGA', 'TGC', 'TGG', 'TGT', 'TTA', 'TTC', 'TTG', 'TTT'], 'Aa': ['Lys', 'Asn', 'Lys', 'Asn', 'Thr', 'Thr', 'Thr', 'Thr', 'Arg', 'Ser', 'Arg', 'Ser', 'Ile', 'Ile', 'Met', 'Ile', 'Gln', 'His', 'Gln', 'His', 'Pro', 'Pro', 'Pro', 'Pro', 'Arg', 'Arg', 'Arg', 'Arg', 'Leu', 'Leu', 'Leu', 'Leu', 'Glu', 'Asp', 'Glu', 'Asp', 'Ala', 'Ala', 'Ala', 'Ala', 'Gly', 'Gly', 'Gly', 'Gly', 'Val', 'Val', 'Val', 'Val', 'Stp', 'Tyr', 'Stp', 'Tyr', 'Ser', 'Ser', 'Ser', 'Ser', 'Stp', 'Cys', 'Trp', 'Cys', 'Leu', 'Phe', 'Leu', 'Phe'], 'aa': ['K', 'N', 'K', 'N', 'T', 'T', 'T', 'T', 'R', 'S', 'R', 'S', 'I', 'I', 'M', 'I', 'Q', 'H', 'Q', 'H', 'P', 'P', 'P', 'P', 'R', 'R', 'R', 'R', 'L', 'L', 'L', 'L', 'E', 'D', 'E', 'D', 'A', 'A', 'A', 'A', 'G', 'G', 'G', 'G', 'V', 'V', 'V', 'V', 'O', 'Y', 'O', 'Y', 'S', 'S', 'S', 'S', 'O', 'C', 'W', 'C', 'L', 'F', 'L', 'F'], 'AA': ['Lysine', 'Asparagine', 'Lysine', 'Asparagine', 'Threonine', 'Threonine', 'Threonine', 'Threonine', 'Arginine', 'Serine', 'Arginine', 'Serine', 'Isoleucine', 'Isoleucine', 'Methionine', 'Isoleucine', 'Glutamine', 'Histidine', 'Glutamine', 'Histidine', 'Proline', 'Proline', 'Proline', 'Proline', 'Arginine', 'Arginine', 'Arginine', 'Arginine', 'Leucine', 'Leucine', 'Leucine', 'Leucine', 'Glutamic_acid', 'Aspartic_acid', 'Glutamic_acid', 'Aspartic_acid', 'Alanine', 'Alanine', 'Alanine', 'Alanine', 'Glycine', 'Glycine', 'Glycine', 'Glycine', 'Valine', 'Valine', 'Valine', 'Valine', 'Stop', 'Tyrosine', 'Stop', 'Tyrosine', 'Serine', 'Serine', 'Serine', 'Serine', 'Stop', 'Cysteine', 'Tryptophan', 'Cysteine', 'Leucine', 'Phenylalanine', 'Leucine', 'Phenylalanine']}
-
 @psite_plot.route('/psite_plot/<project_id>', methods=['GET', 'POST'])
 @login_required
 def get_psite_plot(project_id):
@@ -31,29 +29,25 @@ def get_psite_plot(project_id):
     a_df = pd.DataFrame(json.loads(a_data))
     e_df = pd.DataFrame(json.loads(e_data))
 
-    codon_df = pd.DataFrame(codons)
-    codon_df = codon_df.sort_values(by='Aa')
-    codon_df = codon_df.drop(['AA', 'aa'], axis=1)
-    p_df = p_df.merge(codon_df, on='codon').dropna()
-    a_df = a_df.merge(codon_df, on='codon').dropna()
-    e_df = e_df.merge(codon_df, on='codon').dropna()
+    # normalization
+    norm = request.form.get('normalization', 'tpm')
 
-    # group by codon of by amino acid
+    # group by codon or by amino acid
     group_by_aa = request.form.get('group_by_codon') != 'codon'
 
     if group_by_aa:
-        p_df = p_df.groupby('Aa').sum().reset_index()
-        a_df = a_df.groupby('Aa').sum().reset_index()
-        e_df = e_df.groupby('Aa').sum().reset_index()
+        p_df = p_df.groupby('aa').sum().reset_index()
+        a_df = a_df.groupby('aa').sum().reset_index()
+        e_df = e_df.groupby('aa').sum().reset_index()
 
-    cols = ['Aa', s1, s2, 'norm_{}'.format(s1), 'norm_{}'.format(s2)]
+    cols = ['aa', s1, s2, '{}_{}'.format(norm, s1), '{}_{}'.format(norm, s2)]
     if not group_by_aa:
         cols = cols + ['codon']
 
     # calculating fc as (sample - control) / control
-    p_df['value'] = (p_df['norm_{}'.format(s1)] - p_df['norm_{}'.format(s2)]) / p_df['norm_{}'.format(s2)]
-    a_df['value'] = (a_df['norm_{}'.format(s1)] - a_df['norm_{}'.format(s2)]) / a_df['norm_{}'.format(s2)]
-    e_df['value'] = (e_df['norm_{}'.format(s1)] - e_df['norm_{}'.format(s2)]) / e_df['norm_{}'.format(s2)]
+    p_df['value'] = (p_df['{}_{}'.format(norm, s1)] - p_df['{}_{}'.format(norm, s2)]) / p_df['{}_{}'.format(norm, s2)]
+    a_df['value'] = (a_df['{}_{}'.format(norm, s1)] - a_df['{}_{}'.format(norm, s2)]) / a_df['{}_{}'.format(norm, s2)]
+    e_df['value'] = (e_df['{}_{}'.format(norm, s1)] - e_df['{}_{}'.format(norm, s2)]) / e_df['{}_{}'.format(norm, s2)]
 
     p_df['value'] = p_df['value'].round(3)
     a_df['value'] = a_df['value'].round(3)
@@ -71,7 +65,7 @@ def get_psite_plot(project_id):
     middle_val = 0
 
     if group_by_aa:
-        x_categories = p_df['Aa'].unique().tolist()
+        x_categories = p_df['aa'].unique().tolist()
     else:
         x_categories = [
             'GCA', 'GCC', 'GCG', 'GCT', '',
@@ -103,37 +97,25 @@ def get_psite_plot(project_id):
         if cat == 'Stp':
             continue
         elif cat == '':
-            plot_series += [{
-                'x': i,
-                'y': 0,
-                'value': 'null',
-            }, {
-                'x': i,
-                'y': 1,
-                'value': 'null',
-            }, {
-                'x': i,
-                'y': 2,
-                'value': 'null'
-            }]
+            plot_series += [{}, {}, {}]
         else:
             if group_by_aa:
-                cur_p = p_df.loc[p_df['Aa'] == cat]
-                cur_e = e_df.loc[e_df['Aa'] == cat]
-                cur_a = a_df.loc[a_df['Aa'] == cat]
+                cur_p = p_df.loc[p_df['aa'] == cat]
+                cur_e = e_df.loc[e_df['aa'] == cat]
+                cur_a = a_df.loc[a_df['aa'] == cat]
                 codon = ''
                 aa = cat
             else:
                 if cat == 'ATG_M':
-                    cur_p = p_df.loc[(p_df['codon'] == 'ATG') & (p_df['Aa'] == 'Met')]
-                    cur_e = e_df.loc[(e_df['codon'] == 'ATG') & (e_df['Aa'] == 'Met')]
-                    cur_a = a_df.loc[(a_df['codon'] == 'ATG') & (a_df['Aa'] == 'Met')]
+                    cur_p = p_df.loc[(p_df['codon'] == 'ATG') & (p_df['aa'] == 'Met')]
+                    cur_e = e_df.loc[(e_df['codon'] == 'ATG') & (e_df['aa'] == 'Met')]
+                    cur_a = a_df.loc[(a_df['codon'] == 'ATG') & (a_df['aa'] == 'Met')]
                     codon = 'ATG'
                     aa = 'Met'
                 elif cat == 'ATG_S':
-                    cur_p = p_df.loc[(p_df['codon'] == 'ATG') & (p_df['Aa'] == 'Str')]
-                    cur_e = e_df.loc[(e_df['codon'] == 'ATG') & (e_df['Aa'] == 'Str')]
-                    cur_a = a_df.loc[(a_df['codon'] == 'ATG') & (a_df['Aa'] == 'Str')]
+                    cur_p = p_df.loc[(p_df['codon'] == 'ATG') & (p_df['aa'] == 'Str')]
+                    cur_e = e_df.loc[(e_df['codon'] == 'ATG') & (e_df['aa'] == 'Str')]
+                    cur_a = a_df.loc[(a_df['codon'] == 'ATG') & (a_df['aa'] == 'Str')]
                     codon = 'ATG'
                     aa = 'Start'
                 else:
@@ -141,10 +123,10 @@ def get_psite_plot(project_id):
                     cur_e = e_df.loc[e_df['codon'] == cat]
                     cur_a = a_df.loc[a_df['codon'] == cat]
                     codon = cat
-                    aa = cur_p.iloc[0]['Aa']
+                    aa = cur_p.iloc[0]['aa']
 
             if len(cur_p) == 0:
-                plot_series += [{'x': i, 'y': 0, 'codon': codon, 'Aa': aa, 'site': 'P', 'value': 0}]
+                plot_series += [{ 'x': i, 'y': 0, 'codon': codon, 'aa': aa, 'site': 'P', 'value': 0}]
             else:
                 cur_p['x'] = i
                 cur_p['y'] = 0
@@ -152,7 +134,7 @@ def get_psite_plot(project_id):
                 plot_series += cur_p.to_dict('records')
 
             if len(cur_a) == 0:
-                plot_series += [{'x': i, 'y': 1, 'codon': codon, 'Aa': aa, 'site': 'A', 'value': 0}]
+                plot_series += [{'x': i, 'y': 1, 'codon': codon, 'aa': aa, 'site': 'A', 'value': 0}]
             else:
                 cur_a['x'] = i
                 cur_a['y'] = 1
@@ -160,7 +142,7 @@ def get_psite_plot(project_id):
                 plot_series += cur_a.to_dict('records')
 
             if len(cur_e) == 0:
-                plot_series += [{'x': i, 'y': 2, 'codon': codon, 'Aa': aa, 'site': 'E', 'value': 0}]
+                plot_series += [{'x': i, 'y': 2, 'codon': codon, 'aa': aa, 'site': 'E', 'value': 0}]
             else:
                 cur_e['x'] = i
                 cur_e['y'] = 2
@@ -170,4 +152,4 @@ def get_psite_plot(project_id):
     group_by_codon = not group_by_aa
     return render_template('psite_plot.html', psite_series=plot_series, contrasts=contrasts, selected_contrast=contrast,
                            x_categories=x_categories, min_fc=min_fc, max_fc=max_fc, middle_val=middle_val,
-                           group_by_codon=group_by_codon)
+                           group_by_codon=group_by_codon, norm=norm)

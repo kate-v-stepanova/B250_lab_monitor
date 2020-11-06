@@ -17,6 +17,7 @@ $(document).ready(function() {
         var min_fc = $('#psite_plot').attr('data-min');
         var max_fc = $('#psite_plot').attr('data-max');
         var middle_val = $('#psite_plot').attr('data-max');
+        var norm = $('#psite_plot').attr('data-norm');
 
         // removing attributes
         $('#psite_plot').removeAttr('data-plot-series');
@@ -79,11 +80,11 @@ $(document).ready(function() {
                 headerFormat: '',
                 pointFormat: '<b>Site: </b>{point.site}<br>' +
                              '<b>Codon: </b>{point.codon}<br>' +
-                             '<b>AA: </b>{point.Aa}<br>' +
+                             '<b>AA: </b>{point.aa}<br>' +
                              '<b>' + samples[0] + ': </b>{point.'+samples[0] + '}<br>' +
-                             '<b>norm_' + samples[0] + ': </b>{point.norm_' + samples[0] + '}<br>' +
+                             '<b>norm_' + samples[0] + ': </b>{point.' + norm + '_' + samples[0] + '}<br>' +
                              '<b>' + samples[1] + ': </b>{point.'+samples[1] + '}<br>' +
-                             '<b>norm_' + samples[1] + ': </b>{point.norm_' + samples[1] + '}<br>' +
+                             '<b>norm_' + samples[1] + ': </b>{point.' + norm + '_' + samples[1] + '}<br>' +
                              '<b>(' + samples[0] + ' - ' + samples[1] + ') / ' + samples[1] + ': </b>{point.value}',
             },
             series: [{
