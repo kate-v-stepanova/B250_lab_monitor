@@ -86,11 +86,11 @@ def get_psite_plot(project_id):
             'ATA', 'ATC', 'ATT', '',
             'CTA', 'CTC', 'CTG', 'CTT', 'TTA', 'TTG', '',
             'AAA', 'AAG', '',
-            'ATG', '',
+            'ATG_M', 'ATG_S', '',  # methionine & start codon
             'TTC', 'TTT', '',
             'CCA', 'CCC', 'CCG', 'CCT', '',
             'AGC', 'AGT', 'TCA', 'TCC', 'TCG', 'TCT', '',
-            # 'TAA', 'TAG', 'TGA', '', # skip Stop codons
+            # 'TAA', 'TAG', 'TGA', '',  # skip Stop codons
             'ACA', 'ACC', 'ACG', 'ACT', '',
             'TGG', '',
             'TAC', 'TAT', '',
@@ -102,7 +102,7 @@ def get_psite_plot(project_id):
         # skip Stop codons
         if cat == 'Stp':
             continue
-        if cat == '':
+        elif cat == '':
             plot_series += [{
                 'x': i,
                 'y': 0,
@@ -124,14 +124,27 @@ def get_psite_plot(project_id):
                 codon = ''
                 aa = cat
             else:
-                cur_p = p_df.loc[p_df['codon'] == cat]
-                cur_e = e_df.loc[e_df['codon'] == cat]
-                cur_a = a_df.loc[a_df['codon'] == cat]
-                codon = cat
-                aa = cur_p.iloc[0]['Aa']
+                if cat == 'ATG_M':
+                    cur_p = p_df.loc[(p_df['codon'] == 'ATG') & (p_df['Aa'] == 'Met')]
+                    cur_e = e_df.loc[(e_df['codon'] == 'ATG') & (e_df['Aa'] == 'Met')]
+                    cur_a = a_df.loc[(a_df['codon'] == 'ATG') & (a_df['Aa'] == 'Met')]
+                    codon = 'ATG'
+                    aa = 'Met'
+                elif cat == 'ATG_S':
+                    cur_p = p_df.loc[(p_df['codon'] == 'ATG') & (p_df['Aa'] == 'Str')]
+                    cur_e = e_df.loc[(e_df['codon'] == 'ATG') & (e_df['Aa'] == 'Str')]
+                    cur_a = a_df.loc[(a_df['codon'] == 'ATG') & (a_df['Aa'] == 'Str')]
+                    codon = 'ATG'
+                    aa = 'Start'
+                else:
+                    cur_p = p_df.loc[p_df['codon'] == cat]
+                    cur_e = e_df.loc[e_df['codon'] == cat]
+                    cur_a = a_df.loc[a_df['codon'] == cat]
+                    codon = cat
+                    aa = cur_p.iloc[0]['Aa']
 
             if len(cur_p) == 0:
-                plot_series += [{'x': i, 'y': 0, 'codon': codon, 'Aa': aa, 'site': 'P'}]
+                plot_series += [{'x': i, 'y': 0, 'codon': codon, 'Aa': aa, 'site': 'P', 'value': 0}]
             else:
                 cur_p['x'] = i
                 cur_p['y'] = 0
@@ -139,7 +152,7 @@ def get_psite_plot(project_id):
                 plot_series += cur_p.to_dict('records')
 
             if len(cur_a) == 0:
-                plot_series += [{'x': i, 'y': 0, 'codon': codon, 'Aa': aa, 'site': 'A'}]
+                plot_series += [{'x': i, 'y': 1, 'codon': codon, 'Aa': aa, 'site': 'A', 'value': 0}]
             else:
                 cur_a['x'] = i
                 cur_a['y'] = 1
@@ -147,7 +160,7 @@ def get_psite_plot(project_id):
                 plot_series += cur_a.to_dict('records')
 
             if len(cur_e) == 0:
-                plot_series += [{'x': i, 'y': 0, 'codon': codon, 'Aa': aa, 'site': 'E'}]
+                plot_series += [{'x': i, 'y': 2, 'codon': codon, 'Aa': aa, 'site': 'E', 'value': 0}]
             else:
                 cur_e['x'] = i
                 cur_e['y'] = 2
