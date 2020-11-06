@@ -90,7 +90,7 @@ def get_psite_plot(project_id):
             'TTC', 'TTT', '',
             'CCA', 'CCC', 'CCG', 'CCT', '',
             'AGC', 'AGT', 'TCA', 'TCC', 'TCG', 'TCT', '',
-            'TAA', 'TAG', 'TGA', '',
+            # 'TAA', 'TAG', 'TGA', '', # skip Stop codons
             'ACA', 'ACC', 'ACG', 'ACT', '',
             'TGG', '',
             'TAC', 'TAT', '',
@@ -99,6 +99,9 @@ def get_psite_plot(project_id):
     plot_series = []
     for i in range(len(x_categories)):
         cat = x_categories[i]
+        # skip Stop codons
+        if cat == 'Stp':
+            continue
         if cat == '':
             plot_series += [{
                 'x': i,
