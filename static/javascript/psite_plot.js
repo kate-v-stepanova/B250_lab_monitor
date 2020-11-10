@@ -1,12 +1,5 @@
 $(document).ready(function() {
 
-
-    var samples = new Choices('#selected_contrasts', {
-        removeItems: true,
-        removeItemButton: true,
-        noChoicesText: "All contrasts selected"
-    });
-
     // initializing constants and removing attributes from html elements
     var PLOT_SERIES = $('#psite_plot').attr('data-plot-series');
 
