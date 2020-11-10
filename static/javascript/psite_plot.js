@@ -1,7 +1,16 @@
 $(document).ready(function() {
+
+
+    var samples = new Choices('#selected_contrasts', {
+        removeItems: true,
+        removeItemButton: true,
+        noChoicesText: "All contrasts selected"
+    });
+
     // initializing constants and removing attributes from html elements
     var PLOT_SERIES = $('#psite_plot').attr('data-plot-series');
-    if (PLOT_SERIES != undefined) {
+
+    if (PLOT_SERIES != undefined && PLOT_SERIES.length != 0) {
         PLOT_SERIES = PLOT_SERIES.replace(/'/g, '"'); //");
         PLOT_SERIES = PLOT_SERIES.replace(/"null"/g, null);
 
@@ -11,6 +20,7 @@ $(document).ready(function() {
         var contrast = $('#contrast_select').val();
         var samples = contrast.split('__vs__');
         var x_categories = $('#psite_plot').attr('data-x_categories');
+
         x_categories = x_categories.replace(/'/g, '"'); //");
         x_categories = JSON.parse(x_categories);
 

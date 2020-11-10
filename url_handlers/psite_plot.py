@@ -23,11 +23,17 @@ def get_psite_plot(project_id):
         return render_template('psite_plot.html', error='No data for project {} found'.format(project_id))
 
     # if POST
-    contrast = request.form.get('contrast')
-    s1, s2 = contrast.split('__vs__')
     p_df = pd.DataFrame(json.loads(p_data))
     a_df = pd.DataFrame(json.loads(a_data))
     e_df = pd.DataFrame(json.loads(e_data))
+
+    # getting rid of stop and start codons
+    p_df = p_df.loc[~p_df['aa'].isin(['Stp', 'Str'])]
+    a_df = a_df.loc[~a_df['aa'].isin(['Stp', 'Str'])]
+    e_df = e_df.loc[~e_df['aa'].isin(['Stp', 'Str'])]
+
+    contrast = request.form.get('contrast')
+    s1, s2 = contrast.split('__vs__')
 
     # normalization
     norm = request.form.get('normalization', 'tpm')
@@ -80,7 +86,7 @@ def get_psite_plot(project_id):
             'ATA', 'ATC', 'ATT', '',
             'CTA', 'CTC', 'CTG', 'CTT', 'TTA', 'TTG', '',
             'AAA', 'AAG', '',
-            'ATG_M', 'ATG_S', '',  # methionine & start codon
+            'ATG_M', '', # 'ATG_S', '',  # methionine & start codon
             'TTC', 'TTT', '',
             'CCA', 'CCC', 'CCG', 'CCT', '',
             'AGC', 'AGT', 'TCA', 'TCC', 'TCG', 'TCT', '',
@@ -93,10 +99,7 @@ def get_psite_plot(project_id):
     plot_series = []
     for i in range(len(x_categories)):
         cat = x_categories[i]
-        # skip Stop codons
-        if cat == 'Stp':
-            continue
-        elif cat == '':
+        if cat == '':
             plot_series += [{}, {}, {}]
         else:
             if group_by_aa:
