@@ -1,5 +1,18 @@
 $(document).ready(function() {
 
+
+    // close error message
+    $('span.close').on('click', function() {
+        $(this).parent().parent().parent().addClass('d-none');
+    });
+
+    // initialize multiselect
+    var samples = new Choices('#selected_contrasts', {
+        removeItems: true,
+        removeItemButton: true,
+        noChoicesText: "No contrasts to select"
+    });
+
     // initializing constants and removing attributes from html elements
     var PLOT_SERIES = $('#psite_plot').attr('data-plot-series');
 
@@ -10,12 +23,17 @@ $(document).ready(function() {
         if (PLOT_SERIES.length != 0) {
             PLOT_SERIES = JSON.parse(PLOT_SERIES);
         }
-        var contrast = $('#contrast_select').val();
-        var samples = contrast.split('__vs__');
+
         var x_categories = $('#psite_plot').attr('data-x_categories');
 
         x_categories = x_categories.replace(/'/g, '"'); //");
         x_categories = JSON.parse(x_categories);
+
+        var y_categories = $('#psite_plot').attr('data-y_categories');
+        y_categories = y_categories.replace(/'/g, '"'); //");
+        y_categories = JSON.parse(y_categories);
+
+        var dataset_id = $('#psite_plot').attr('data-dataset_id');
 
         var min_fc = $('#psite_plot').attr('data-min');
         var max_fc = $('#psite_plot').attr('data-max');
@@ -46,7 +64,7 @@ $(document).ready(function() {
                 plotBorderWidth: 1
             },
             title: {
-                text: contrast
+                text: 'Dataset: ' + dataset_id,
             },
             xAxis: {
                 categories: x_categories,
@@ -55,7 +73,7 @@ $(document).ready(function() {
                 }
             },
             yAxis: {
-                categories: ['P-site', 'A-site', 'E-site'],
+                categories: y_categories,
             },
             colorAxis: {
                 min: min_fc,
@@ -78,17 +96,24 @@ $(document).ready(function() {
                 y: 50,
                 symbolHeight: 20
             },
-
             tooltip: {
-                headerFormat: '',
-                pointFormat: '<b>Site: </b>{point.site}<br>' +
-                             '<b>Codon: </b>{point.codon}<br>' +
-                             '<b>AA: </b>{point.aa}<br>' +
-                             '<b>' + samples[0] + ': </b>{point.'+samples[0] + '}<br>' +
-                             '<b>norm_' + samples[0] + ': </b>{point.' + norm + '_' + samples[0] + '}<br>' +
-                             '<b>' + samples[1] + ': </b>{point.'+samples[1] + '}<br>' +
-                             '<b>norm_' + samples[1] + ': </b>{point.' + norm + '_' + samples[1] + '}<br>' +
-                             '<b>(' + samples[0] + ' - ' + samples[1] + ') / ' + samples[1] + ': </b>{point.value}',
+                formatter: function (e) {
+                    var contrast = this.point.contrast;
+                    var s1 = contrast.split('__vs__')[0];
+                    var s2 = contrast.split('__vs__')[1];
+                    res = '<b>Contrast: </b>' + this.point.contrast + '<br>' +
+                            '<b>Site: </b>' + this.point.site + '<br>'
+                    if (this.point.codon != undefined) {
+                        res += '<b>Codon: </b>' + this.point.codon + '<br>'
+                    }
+                    res +=  '<b>AA: </b>' + this.point.aa + '<br>' +
+                            '<b>' + s1 + ': </b>' + this.point[s1] + '<br>' +
+                            '<b>' + s2 + ': </b>' + this.point[s2] + '<br>' +
+                            '<b>' + norm + '(' + s1 + '): </b>' + this.point[norm + '_' + s1] + '<br>' +
+                            '<b>' + norm + '(' + s2 + '): </b>' + this.point[norm + '_' + s2] + '<br>' +
+                            '<b>(' + s1 + ' - ' + s2 + ') / ' + s2 + ': </b>' + this.point.value;
+                    return res;
+                }
             },
             series: [{
                 pointPadding: 1,
