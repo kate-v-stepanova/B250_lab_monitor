@@ -74,6 +74,9 @@ $(document).ready(function() {
             },
             yAxis: {
                 categories: y_categories,
+                title: {
+		    enabled: false,
+		}
             },
             colorAxis: {
                 min: min_fc,
