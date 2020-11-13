@@ -125,6 +125,13 @@ def get_project_info(project_id):
         if analysis_info is not None:
             analysis_info = analysis_info.decode('utf-8')
 
+        psites = rdb.get('psites_{}'.format(project_id))
+        if psites is not None:
+            analysis_list.append({
+                'name': 'P-site plot',
+                'link': '{}psite_plot/{}'.format(request.url_root, project_id)
+            })
+
         return render_template("project_info.html", project_id=project_id, project_info=project_info,
                                 samples=samples_info, available_stats=available_stats, ucsc_links=ucsc_links,
                                analysis_list=analysis_list, analysis_info=analysis_info)
@@ -140,7 +147,6 @@ def get_project_info(project_id):
             project_info[key] = request.form.get(key)
         rdb.set('project_info_{}'.format(project_id), json.dumps(project_info))
         return json.dumps(project_info)
-
 
 
 @project_page.route("/bc_split_stats/<project_id>", methods=["POST"])
@@ -167,6 +173,7 @@ def get_bc_stats(project_id):
         return json.dumps(result)
 
     return ""
+
 
 @project_page.route("/cutadapt_stats/<project_id>", methods=["POST"])
 def get_cutadapt_stats(project_id):
@@ -218,6 +225,7 @@ def get_transcript_regions(project_id):
         return json.dumps(result)
 
     return ""
+
 
 @project_page.route("/diricore_stats/<project_id>", methods=["POST"])
 def get_diricore_stats(project_id):
