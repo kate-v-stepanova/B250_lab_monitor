@@ -164,21 +164,26 @@ def update_rack():
         tower_data = json.loads(tower_data)
         tower_data = pd.DataFrame(tower_data)
 
+    pos = data.get('pos')
+    if type(pos) == str:
+        pos = [pos]
+
     # if there is already something on that positions, then ...
     to_overwrite = to_approve.loc[(to_approve['Rack'] == data.get('Rack')) & (to_approve['tower'] == data.get('tower')) &
-                                  (to_approve['pos'].isin(data.get('pos')))]
+                                  (to_approve['pos'].isin(pos))]
     # ... then drop it and ...
     if len(to_overwrite) != 0:
         to_approve = to_approve.drop(to_overwrite.index)
     # ... and add the new data
-    for pos in (data.get('pos')):
+
+    for p in pos:
         cur_data = data
-        cur_data['pos'] = pos
-        cur_data['y'] = pos[0]
-        cur_data['x'] = int(pos[1:])
+        cur_data['pos'] = p
+        cur_data['y'] = p[0]
+        cur_data['x'] = int(p[1:])
         if tower_data is not None:
             current_pos_data = tower_data.loc[(tower_data['Rack'].astype(int) == int(data.get('Rack', 0))) & \
-                                              (tower_data['pos'] == pos)]
+                                              (tower_data['pos'] == p)]
             if len(current_pos_data) != 0:
                 cur_data['prev_cell_line'] = current_pos_data.iloc[0]['ID']
                 cur_data['prev_responsible'] = current_pos_data.iloc[0]['Responsible person']

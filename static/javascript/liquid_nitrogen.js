@@ -47,10 +47,6 @@ $(document).ready(function() {
                 // here will be processed modal inputs
             */
         } else {
-            $('#modal-2').modal();
-            /*
-                // here will be processed modal inputs
-            */
             var cell_line = cell_lines[value];
             if (cell_line != undefined) {
                 // then update fields
@@ -66,6 +62,7 @@ $(document).ready(function() {
                 // mark with bold (updated values)
                 $('#cell_line_ID').addClass('font-weight-bold');
             }
+            // responsible
         }
     }
 
@@ -157,19 +154,17 @@ $(document).ready(function() {
                 alert(response['responseJSON']['error']);
             });
         }
-    });
+    }); // }
 
-    $('#modal-ok').on('click', function(e) {
-        var resp = $('#responsible-2').val();
-        var comments = $('#comments-2').val();
+    $('#erase').on('click', function(){
+        var resp = $('#towers').attr('data-cur_user');
+        if (resp == undefined) {
+            alert('Please select responsible');
+        } else {
+            $('#responsible_name').text(resp);
+        }
         var today = get_today();
         $('#date').text(today);
-        $('#responsible_name').text(resp);
-        $('#comments').text(comments);
-        if (resp == "") {
-            $('#error').text('Please enter your name. Name is required');
-            $('#error').removeClass('d-none');
-        }
 
         // mark with bold (updated values)
         $('#responsible_name').addClass('font-weight-bold');
@@ -177,13 +172,33 @@ $(document).ready(function() {
         if (comments != "") {
             $('#comments').addClass('font-weight-bold');
         }
+    }); // )
 
-        // close modal and clear input
-        if (resp != "") {
-            $('#modal-2').modal('hide');
-            $('#comments-2').val('');
-        }
-    });
+//    $('#modal-ok').on('click', function(e) {
+//        var resp = $('#responsible-2').val();
+//        var comments = $('#comments-2').val();
+//        var today = get_today();
+//        $('#date').text(today);
+//        $('#responsible_name').text(resp);
+//        $('#comments').text(comments);
+//        if (resp == "") {
+//            $('#error').text('Please enter your name. Name is required');
+//            $('#error').removeClass('d-none');
+//        }
+//
+//        // mark with bold (updated values)
+//        $('#responsible_name').addClass('font-weight-bold');
+//        $('#date').addClass('font-weight-bold');
+//        if (comments != "") {
+//            $('#comments').addClass('font-weight-bold');
+//        }
+//
+//        // close modal and clear input
+//        if (resp != "") {
+//            $('#modal-2').modal('hide');
+//            $('#comments-2').val('');
+//        }
+//    });
 
     var chart_towers = Highcharts.chart('towers', {
 //        colors: ['#058DC7', '#50B432', '#ED561B', '#DDDF00', '#24CBE5', '#64E572',
@@ -908,7 +923,6 @@ $(document).ready(function() {
             Comments: $('#comments_search').val(),
             'Responsible person': $('#responsible_search').val(),
         };
-
         $.ajax({
             type: "POST",
             //the url where you want to sent the userName and password to

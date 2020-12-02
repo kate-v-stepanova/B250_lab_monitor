@@ -88,11 +88,14 @@
     </tr>
 </table>
 {% endif %}
-<button class="btn btn-sm btn-outline-primary" id="add_new_cell_line">+ Add new</button>
+
 
 {# SEARCH #}
 <div>
-    <div class="row mt-2 justify-content-md-center">
+    <div class="row mt-4 justify-content-md-center">
+        <div class="col">
+            <button class="btn btn-sm btn-outline-primary" id="add_new_cell_line">+ Add new cell line</button>
+        </div>
         <div class="col col-sm-4"></div>
         <div class="col col-sm-4">
             <form class="form-inline">
@@ -113,7 +116,7 @@
 </div>
 
 <div class="row h-100">
-    <div id="towers" class="col col-sm-3 mt-4"></div>
+    <div id="towers" class="col col-sm-3 mt-4" data-cur_user="{{ current_user }}"></div>
     <div id="rack" class="col col-sm-4" data-series="{{ series }}"></div>
     <div id="cell_lines" class="col col-sm-5 mt-2" data-cell_lines="{{ cell_lines }}" data-dropdown="{{ cell_lines_dropdown }}">
         <div class="row ml-2 d-none" id="rack_buttons"><p class="h5 mt-2"></p>
@@ -148,7 +151,7 @@
         <button id="discard_changes" class="btn btn-secondary btn-sm d-none" type="button">Discard</button>
     </div>
 
-    {# REQUEST cell line #}
+    {# REQUEST cell line #}{#
     <div id="confirm_request" class="modal fade" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -181,11 +184,11 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div>#}
     {# end of REQUEST #}
 
     {# ASSIGN a cell line #}
-    <div class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel"
+    <div class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby=""
          id="modal-2"> <!--aria-hidden="true">-->
       <div class="modal-dialog modal-sm">
         <div class="modal-content">
