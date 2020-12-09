@@ -30,6 +30,13 @@ $(document).ready(function() {
                     type: 'scatter',
                     zoomType: 'xy'
                 },
+                plotOptions: {
+                    scatter: {
+                        marker: {
+                            radius: 2,
+                        }
+                    }
+                },
                 subtitle: {
                     text: 'P-site signal'
                 },
@@ -83,6 +90,13 @@ $(document).ready(function() {
                     type: 'scatter',
                     zoomType: 'xy'
                 },
+                plotOptions: {
+                    scatter: {
+                        marker: {
+                            radius: 2,
+                        }
+                    }
+                },
                 subtitle: {
                     text: 'A-site signal'
                 },
@@ -135,6 +149,13 @@ $(document).ready(function() {
                 chart: {
                     type: 'scatter',
                     zoomType: 'xy'
+                },
+                plotOptions: {
+                    scatter: {
+                        marker: {
+                            radius: 2,
+                        }
+                    }
                 },
                 subtitle: {
                     text: 'E-site signal'

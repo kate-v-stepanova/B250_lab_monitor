@@ -132,6 +132,11 @@ def get_project_info(project_id):
                 'link': '{}psite_plot/{}'.format(request.url_root, project_id)
             })
 
+        psite_dotplot = rdb.smembers('aa_dotplot_{}'.format(project_id))
+        if psite_dotplot is not None:
+            analysis_list.append({'name': 'P-site dotplot',
+                                  'link': '{}psite_dotplot/{}'.format(request.url_root, project_id)})
+
         return render_template("project_info.html", project_id=project_id, project_info=project_info,
                                 samples=samples_info, available_stats=available_stats, ucsc_links=ucsc_links,
                                analysis_list=analysis_list, analysis_info=analysis_info)
