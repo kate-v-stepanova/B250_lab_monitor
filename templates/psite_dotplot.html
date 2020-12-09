@@ -1,0 +1,72 @@
+{% extends "layout.html" %}
+{% block body %}
+<script src="{{ url_for('static', filename='javascript/psite_dotplot.js') }}"></script>
+
+<!-- Include Choices CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='libraries/choices.min.css') }}">
+<!-- Include Choices JavaScript -->
+<script src="{{ url_for('static', filename='libraries/choices.min.js') }}"></script>
+
+<script src="{{ url_for('static', filename='libraries/highcharts_heatmap.js') }}"></script>
+<script src="{{ url_for('static', filename='libraries/highcharts-more.js') }}"></script>
+
+
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+{# ERROR MESSAGE #}
+{% if error %}
+<div class="alert alert-danger mt-2" role="alert" id="error_div">
+  <div class="row">
+    <div class="col col-xs-10" id="error_messages">{% for err in error.split('___') %}<p>{{ err }}</p>{% endfor %}</div>
+    <div class="col col-sm-2"><span class="close" aria-label="Close"> &times;</span></div>
+  </div>
+</div>
+{% endif %}
+
+<form action="" method="POST">
+  {# Selected Contrasts #}
+  <label for="selected_contrasts" class="mt-3">Select contrasts:</label>
+  <select multiple id="selected_contrasts" class="choices" data-type="select-multiple" name="selected_contrasts">
+    {% for contrast in contrasts %}
+      <option name="{{ contrast }}" value="{{ contrast }}"
+        {% if contrast in selected_contrasts %}selected{% endif %}>{{ contrast }}
+      </option>
+    {% endfor %}
+  </select>
+
+
+  {# Amino Acids #}
+  <label for="amino_acid" class="mt-2">Select amino acid:</label>
+  <select id="amino_acid" class="custom-select" data-type="select-multiple" name="amino_acid">
+    <option name="select" value="select">Select amino acid</option>
+    {% for aa in amino_acids %}
+      <option name="{{ aa }}" value="{{ aa }}"
+        {% if aa == selected_aa %}selected{% endif %}>{{ aa }}
+      </option>
+    {% endfor %}
+  </select>
+
+
+  {# Normalization #}
+  <label for="norm" class="mt-2">Normalization:</label>
+  <select id="norm" class="custom-select" data-type="select-multiple" name="norm">
+      <option name="tpm" value="tpm" {% if norm == 'tpm' %}selected{% endif %}>TPM</option>
+      <option name="rpkm" value="rpkm" {% if norm == 'rpkm' %}selected{% endif %}>RPKM</option>
+  </select>
+
+  <button class="btn btn-outline-info mt-4" type="submit" id="plot_button">Plot data</button>
+</form>
+
+
+{# PLOTS #}
+<div id="plot" class="mt-4" data-pseries="{{ p_series }}" data-aseries="{{ a_series }}" data-eseries="{{ e_series }}">
+  {% for contrast in selected_contrasts %}
+  <div class="row">
+    <div class="col-sm-4" id="esite_{{ contrast }}"></div>
+    <div class="col-sm-4" id="psite_{{ contrast }}"></div>
+    <div class="col-sm-4" id="asite_{{ contrast }}"></div>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

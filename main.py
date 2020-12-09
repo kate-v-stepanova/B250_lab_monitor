@@ -23,6 +23,7 @@ from url_handlers.liquid_nitrogen import liquid_nitrogen
 from url_handlers.user_details import user_details
 from url_handlers.volcano_plot import volcano_plot
 from url_handlers.psite_plot import psite_plot
+from url_handlers.psite_dotplot import psite_dotplot
 
 app = Flask(__name__)
 
@@ -40,6 +41,7 @@ app.register_blueprint(liquid_nitrogen)
 app.register_blueprint(user_details)
 app.register_blueprint(volcano_plot)
 app.register_blueprint(psite_plot)
+app.register_blueprint(psite_dotplot)
 
 app.secret_key = 'super secret key'
 app.config['SESSION_TYPE'] = 'filesystem'
@@ -67,6 +69,7 @@ def connect_db():
 #    redis_store = FlaskRedis(health_check_interval=30)
 #    redis_store.init_app(app)
     ip = "172.22.54.5" # hz
+    # ip = 'localhost' # localhost
     #redis_store = redis.StrictRedis(host="172.22.25.100", health_check_interval=30)
     redis_store = redis.StrictRedis(host=ip, health_check_interval=30)
 
