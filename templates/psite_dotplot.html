@@ -54,6 +54,21 @@
       <option name="tpm" value="tpm" {% if norm == 'tpm' %}selected{% endif %}>TPM</option>
   </select>
 
+    {# Highlight by FC #}
+    <label for="fc_highlight" class="mt-2">Enter threshold as log2(FC) - genes will be highlighted:</label>
+    <input type="number" id="fc_highlight" name="fc_highlight" class="form-control" step="0.1"
+           value="{% if not fc_highlight %}2.5{% else %}{{ fc_highlight }}{% endif %}">
+
+    {# Highlight top N genes #}
+    <label for="genes_highlight" class="mt-2">Highlight top N genes:</label>
+    <select id="genes_highlight" class="custom-select" data-type="select-multiple" name="genes_highlight">
+      <option value="do_not_highlight" {% if genes_highlight == 'do_not_highlight' %}selected{% endif %}>Do not highlight</option>
+      <option name="top1000" value="top1000" {% if genes_highlight == 'top1000' %}selected{% endif %}>Top 1000 genes</option>
+      <option name="top500" value="top500" {% if genes_highlight == 'top500' %}selected{% endif %}>Top 500 genes</option>
+      <option name="top500" value="top200" {% if genes_highlight == 'top200' %}selected{% endif %}>Top 200 genes</option>
+      <option name="top500" value="top100" {% if genes_highlight == 'top100' %}selected{% endif %}>Top 100 genes</option>
+    </select>
+
   <button class="btn btn-outline-info mt-4" type="submit" id="plot_button">Plot data</button>
 </form>
 

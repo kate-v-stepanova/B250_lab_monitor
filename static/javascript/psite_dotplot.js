@@ -54,9 +54,6 @@ $(document).ready(function() {
                         text: 'log2(' + control + ')',
                     }
                 },
-                legend: {
-                    enabled: false,
-                },
                 tooltip: {
                     formatter: function (e) {
                         res = '<b>Contrast: </b>' + c + '<br>';
@@ -69,7 +66,7 @@ $(document).ready(function() {
                         return res;
                     }
                 },
-                series: [p_series[c]],
+                series: p_series[c],
             });
         });
     }
@@ -114,9 +111,6 @@ $(document).ready(function() {
                         text: 'log2(' + control + ')',
                     }
                 },
-                legend: {
-                    enabled: false,
-                },
                 tooltip: {
                     formatter: function (e) {
                         res = '<b>Contrast: </b>' + c + '<br>';
@@ -129,7 +123,7 @@ $(document).ready(function() {
                         return res;
                     }
                 },
-                series: [a_series[c]],
+                series: a_series[c],
             });
         });
     }
@@ -174,9 +168,6 @@ $(document).ready(function() {
                         text: 'log2(' + control + ')',
                     }
                 },
-                legend: {
-                    enabled: false,
-                },
                 tooltip: {
                     formatter: function (e) {
                         res = '<b>Contrast: </b>' + c + '<br>';
@@ -189,7 +180,7 @@ $(document).ready(function() {
                         return res;
                     }
                 },
-                series: [e_series[c]],
+                series: e_series[c],
             });
 
         });
