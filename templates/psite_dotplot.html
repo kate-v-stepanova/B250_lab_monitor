@@ -74,14 +74,26 @@
 
 
 {# PLOTS #}
-<div id="plot" class="mt-4" data-pseries="{{ p_series }}" data-aseries="{{ a_series }}" data-eseries="{{ e_series }}">
-  {% for contrast in selected_contrasts %}
-  <div class="row">
-    <div class="col-sm-4" id="esite_{{ contrast }}"></div>
-    <div class="col-sm-4" id="psite_{{ contrast }}"></div>
-    <div class="col-sm-4" id="asite_{{ contrast }}"></div>
-  </div>
-  {% endfor %}
+<div id="plot" data-pseries="{{ p_series }}" data-aseries="{{ a_series }}" data-eseries="{{ e_series }}">
+    <div class="row mb-0"><div class="col-sm-4"></div>
+        <div class="col-sm-4 mt-0">
+          <select multiple id="search_gene" name="search_gene" data-type="select-multiple" class="mt-0" placeholder="Select gene(s)">
+            {% for gene in all_genes %}
+            <option name="{{ gene }}" value="{{ gene }}" {% if gene in search_genes %}selected{% endif %}>{{ gene }}</option>
+            {% endfor %}
+          </select>
+        </div>
+    <div class="col mt-2 ml-0">
+        <button id="select_genes" class="btn btn-outline-primary btn-sm">Select gene(s)</button>
+    </div>
+    </div>
+    {% for contrast in selected_contrasts %}
+    <div class="row">
+      <div class="col-sm-4 plot_container" id="esite_{{ contrast }}"></div>
+      <div class="col-sm-4 plot_container" id="psite_{{ contrast }}"></div>
+      <div class="col-sm-4 plot_container" id="asite_{{ contrast }}"></div>
+    </div>
+    {% endfor %}
 </div>
 
 {% endblock %}
