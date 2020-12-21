@@ -63,6 +63,12 @@ $(document).ready(function() {
                 $('#cell_line_ID').addClass('font-weight-bold');
             }
             // responsible
+            var resp = $('#responsible-2').val();
+            var comments = $('#comments-2').val();
+            var today = get_today();
+            $('#date').text(today);
+            $('#responsible_name').text(resp);
+            $('#comments').text(comments);
         }
     }
 
@@ -81,6 +87,8 @@ $(document).ready(function() {
         var new_media = $('#new_media').val();
         var new_biosafety = $('#new_biosafety').val();
         var new_type = $('#new_type').val();
+        var new_genotype = $('#new_genotype').val();
+        var new_clone = $('#new_clone').val();
         var show_alert = false;
         if (new_cell_line_name == '') {
             $('#new_cell_line_name').addClass('is-invalid');
@@ -111,6 +119,9 @@ $(document).ready(function() {
                 'Biosafety Level': new_biosafety,
                 'Mycoplasma checked': $('#new_mycoplasma').val(),
                 'Source': $('#new_source').val(),
+                'Clone number': new_clone,
+                'Genotype': new_genotype,
+
             }
             var url = window.location.href + "/create_cell_line";
             $.ajax({
@@ -174,31 +185,31 @@ $(document).ready(function() {
         }
     }); // )
 
-//    $('#modal-ok').on('click', function(e) {
-//        var resp = $('#responsible-2').val();
-//        var comments = $('#comments-2').val();
-//        var today = get_today();
-//        $('#date').text(today);
-//        $('#responsible_name').text(resp);
-//        $('#comments').text(comments);
-//        if (resp == "") {
-//            $('#error').text('Please enter your name. Name is required');
-//            $('#error').removeClass('d-none');
-//        }
-//
-//        // mark with bold (updated values)
-//        $('#responsible_name').addClass('font-weight-bold');
-//        $('#date').addClass('font-weight-bold');
-//        if (comments != "") {
-//            $('#comments').addClass('font-weight-bold');
-//        }
-//
-//        // close modal and clear input
-//        if (resp != "") {
-//            $('#modal-2').modal('hide');
-//            $('#comments-2').val('');
-//        }
-//    });
+    $('#modal-ok').on('click', function(e) {
+        var resp = $('#responsible-2').val();
+        var comments = $('#comments-2').val();
+        var today = get_today();
+        $('#date').text(today);
+        $('#responsible_name').text(resp);
+        $('#comments').text(comments);
+        if (resp == "") {
+            $('#error').text('Please enter your name. Name is required');
+            $('#error').removeClass('d-none');
+        }
+
+        // mark with bold (updated values)
+        $('#responsible_name').addClass('font-weight-bold');
+        $('#date').addClass('font-weight-bold');
+        if (comments != "") {
+            $('#comments').addClass('font-weight-bold');
+        }
+
+        // close modal and clear input
+        if (resp != "") {
+            $('#modal-2').modal('hide');
+            $('#comments-2').val('');
+        }
+    });
 
     var chart_towers = Highcharts.chart('towers', {
 //        colors: ['#058DC7', '#50B432', '#ED561B', '#DDDF00', '#24CBE5', '#64E572',
@@ -324,28 +335,25 @@ $(document).ready(function() {
                             // for MULTI select
                             // get selected positions
                             selected = rack_chart.getSelectedPoints();
-
-                            // check if all selected are empty
-                            var all_empty = true;
-                            for (i=0; i<selected.length; i++) {
-                                if (selected[i].ID != undefined) {
-                                    all_empty = false;
-                                }
-                                // if we deselect -> deselect all previous
-                                if (e.point.x == selected[i].x && e.point.y == selected[i].y) {
-                                    all_empty = false;
-                                }
-                            }
-                            // if not, deselect everything
-                            if (!all_empty) {
+                            var all_same = true;
+                            var deselect_current = false;
+                            if (selected.length > 0) {
+                                var all_val = selected[0].value;
                                 for (i=0; i<selected.length; i++) {
-                                    selected[i].select(false);
+                                    if (selected[i].value != all_val) {
+                                        all_same = false;
+                                    }
+                                    if (e.point.pos == selected[i].pos) {
+                                        deselect_current = true;
+                                    }
+                                }
+
+                                if (e.point.value != all_val){
+                                    all_same = false;
                                 }
                             }
 
-                             // if current pos not empty -> show content and unselect everything
-                            if (e.point.ID != undefined) {
-                                // show_cell_line_details(e); $('#cell_line').attr('data-unchanged-val', e.point.ID);
+                            if (!all_same) {
                                 for (i=0; i<selected.length; i++) {
                                     selected[i].select(false);
                                 }
@@ -355,7 +363,9 @@ $(document).ready(function() {
 
                             // update header (show all selected positions)
                             selected = rack_chart.getSelectedPoints();
-                            selected.push(e.point);
+                            if (!deselect_current) {
+                                selected.push(e.point);
+                            }
                             if (selected.length > 1) {
                                 $('#location').empty();
                                 var all_pos = [];
@@ -369,11 +379,13 @@ $(document).ready(function() {
                                     } else {
                                         pos = '<span class="badge badge-primary">' + pos + '</span>';
                                     }
-                                    all_pos.push(pos);
+                                    if (selected[i].pos != e.point.pos || !deselect_current) {
+                                        all_pos.push(pos);
+                                    }
                                 }
                                 var rack = $('#rack').find('text.highcharts-title tspan').text();
                                 var title = "<span class='rack'>" + rack + '</span> ' + all_pos.join(' ')
-                                $('#cell_lines').find('p.h5').text(title);
+                                $('#cell_lines').find('p.h5').html(title);
                                 $('#location').append(title);
                             }
                         }

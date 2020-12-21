@@ -210,16 +210,19 @@ def create_cell_line():
         df = pd.DataFrame(cell_lines)
     else:
         df = pd.DataFrame(columns=new_cell_line.keys())
-    df['tubes_available'] = df['tubes_available'].fillna(0)
+    # df['tubes_available'] = df['tubes_available'].fillna(0)
     # todo: later
     # # if name exists but id is different
     # if len(df.loc[df['Cell line'] == new_cell_line.get('Cell line')]) != 0:
     #     existing = df.loc[df['Cell line'] == new_cell_line.get('Cell line')]
     #     if new_cell_line.get('ID')
 
+    # in case we added new fields
+    for key in new_cell_line.keys():
+        if key not in df.columns:
+            df[key] = ''
     # if exists - overwrite
     if len(df.loc[df['ID'] == new_cell_line.get('ID')]) != 0:
-        for key in new_cell_line.keys():
             df.loc[df['ID'] == new_cell_line.get('ID'), key] = new_cell_line[key]
     else:
         df = df.append(new_cell_line, ignore_index=True)
@@ -408,8 +411,8 @@ def approve_decline():
         cell_lines = json.loads(cell_lines)
         cell_df = pd.DataFrame(cell_lines)
         curr_cell_line = cell_df.loc[cell_df['ID'] == data.get('cell_line_id')]
-        cell_df.loc[cell_df['ID'] == data.get('cell_line_id'), 'tubes_available'] = \
-            curr_cell_line['tubes_available'].astype(int) + 1
+        # cell_df.loc[cell_df['ID'] == data.get('cell_line_id'), 'tubes_available'] = \
+        #     curr_cell_line['tubes_available'].astype(int) + 1
         rdb.set('cell_lines', json.dumps(cell_df.to_dict('list')))
         return make_response({'status': 'success', 'info': 'Request has been declined'}, 200)
     elif action == 'cancel':
@@ -418,8 +421,8 @@ def approve_decline():
         cell_lines = json.loads(cell_lines)
         cell_df = pd.DataFrame(cell_lines)
         curr_cell_line = cell_df.loc[cell_df['ID'] == data.get('cell_line_id')]
-        cell_df.loc[cell_df['ID'] == data.get('cell_line_id'), 'tubes_available'] = \
-            curr_cell_line['tubes_available'].astype(int) + 1
+        # cell_df.loc[cell_df['ID'] == data.get('cell_line_id'), 'tubes_available'] = \
+        #     curr_cell_line['tubes_available'].astype(int) + 1
         rdb.set('cell_lines', json.dumps(cell_df.to_dict('list')))
 
         # remove from requests

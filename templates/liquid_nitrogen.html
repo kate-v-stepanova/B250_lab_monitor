@@ -132,7 +132,9 @@
                 <tr><td class="w-25">Cell line ID</td><td class="w-75" id="cell_line_ID"></td></tr>
                 <tr><td>Cell line</td><td id="cell_line"></td></tr>
                 <tr><td>Media (Freezing Medium)</td><td id="media"></td></tr>
-                <tr><td>Transferred plasmid</td><td id="plasmid"></td></tr>
+                <tr><td>Transferred plasmid / insert</td><td id="plasmid"></td></tr>
+                <tr><td>Clone number</td><td id="clone_number"></td></tr>
+                <tr><td>Genotype</td><td id="genotype"></td></tr>
                 <tr><td>Selection</td><td id="selection"></td></tr>
                 <tr><td>Type</td><td id="type"></td></tr>
                 <tr><td>Biosafety Level</td><td id="biosafety"></td></tr>
@@ -259,9 +261,21 @@
                             <input type="text" id="new_media" name="media" class="col-sm-8 form-control">
                         </div>
                         <div class="form-group row mr-2 mb-0">
-                            <label for="new_plasmid" class="col-sm-4 col-form-label">Transferred plasmid:</label>
+                            <label for="new_plasmid" class="col-sm-4 col-form-label">Transferred plasmid / insert:</label>
                             <input type="text" id="new_plasmid" name="plasmid" class="col-sm-8 form-control">
                         </div>
+                        <div class="form-group row mr-2 mb-0">
+                            <label for="new_clone" class="col-sm-4 col-form-label">Clone number:</label>
+                            <input type="text" id="new_clone" name="new_clone" class="col-sm-8 form-control">
+                        </div>
+                        <div class="form-group row mr-2 mb-0">
+                            <label for="new_genotype" class="col-sm-4 col-form-label">Genotype:</label>
+                            <select id="new_genotype" name="new_genotype" class="col-sm-8 form-control">
+                                <option value="hetero">Hetero</option>
+                                <option value="homo">Homo</option>
+                            </select>
+                        </div>
+
                         <div class="form-group row mr-2 mb-0">
                             <label for="new_selection" class="col-sm-4 col-form-label">Selection:</label>
                             <input type="text" id="new_selection" name="selection" class="col-sm-8 form-control">
