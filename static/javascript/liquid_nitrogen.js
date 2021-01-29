@@ -347,19 +347,18 @@ $(document).ready(function() {
                                         deselect_current = true;
                                     }
                                 }
-
                                 if (e.point.value != all_val){
                                     all_same = false;
                                 }
                             }
-
                             if (!all_same) {
                                 for (i=0; i<selected.length; i++) {
                                     selected[i].select(false);
                                 }
                             }
                             // anyway show content
-                            show_cell_line_details(e); $('#cell_line').attr('data-unchanged-val', e.point.ID);
+                            show_cell_line_details(e);
+                            $('#cell_line').attr('data-unchanged-val', e.point.ID);
 
                             // update header (show all selected positions)
                             selected = rack_chart.getSelectedPoints();
@@ -387,6 +386,11 @@ $(document).ready(function() {
                                 var title = "<span class='rack'>" + rack + '</span> ' + all_pos.join(' ')
                                 $('#cell_lines').find('p.h5').html(title);
                                 $('#location').append(title);
+                            } else if (selected.length == 1) {
+                                 var rack = $('#rack').find('text.highcharts-title tspan').text();
+                                 var x = e.point.x + 1;
+                                 var y = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'][e.point.y];
+                                 $('#location').text(rack + ", " + y + x);
                             }
                         }
                     }
@@ -536,6 +540,7 @@ $(document).ready(function() {
         // update header
         $('#cell_lines').find('p.h5').text(rack + ', ' + y + x);
 
+        $('#location').text(rack + ", " + y + x);
         var cell_line = e.point.ID;
         // if location is empty
         if (cell_line == undefined || cell_line == '') {
@@ -591,7 +596,6 @@ $(document).ready(function() {
             $('tr.to_approve').addClass('d-none');
         }
 
-        $('#location').text(rack + ", " + y + x);
     }
 
     $('#remove_from_rack').on('click', function(e) {
