@@ -9,10 +9,10 @@ $(document).ready(function() {
         type: 'select',
         value: $('#genome').text(),
         source: [
-            {'value': 'human', text: 'human',
-            'value': 'mouse', text: 'mouse',
-            'value': 'yeast', text: 'yeast',
-            'value': 'other', text: 'other'}
+            {'value': 'human', text: 'human'},
+            {'value': 'mouse', text: 'mouse'},
+            {'value': 'yeast', text: 'yeast'},
+            {'value': 'other', text: 'other'}
         ]
     });
     $('#protocol').editable({
