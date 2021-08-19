@@ -43,6 +43,10 @@ def get_project_info(project_id):
         if snoRNAs is not None:
             available_stats.append('snoRNAs')
 
+        alignment_stats = rdb.get('alignment_stats_{}'.format(project_id))
+        if alignment_stats is not None:
+            available_stats.append('alignment_stats')
+
         ucsc_links = []
         try:
             ucsc_link = rdb.get('ucsc_link_{}'.format(project_id))
@@ -133,7 +137,7 @@ def get_project_info(project_id):
             })
 
         psite_dotplot = rdb.smembers('aa_dotplot_{}'.format(project_id))
-        if psite_dotplot is not None:
+        if psite_dotplot:
             analysis_list.append({'name': 'P-site dotplot',
                                   'link': '{}psite_dotplot/{}'.format(request.url_root, project_id)})
 
@@ -230,6 +234,40 @@ def get_transcript_regions(project_id):
         return json.dumps(result)
 
     return ""
+
+
+@project_page.route('/alignment_stats/<project_id>', methods=['POST'])
+def get_alignment_stats(project_id):
+    from main import get_db
+    rdb = get_db()
+    data = rdb.get('alignment_stats_{}'.format(project_id))
+    if data is not None:
+        data = json.loads(data.decode('utf-8'))
+        full_df = pd.DataFrame(data)
+        full_df = full_df.fillna(0)
+        full_df['duplicated_reads'] = full_df['align_reads'] - full_df['dedup_reads']
+        samples = sorted(list(full_df['sample'].unique()))
+        result = {'samples': samples}
+        series = []
+        for stat in full_df.columns:
+            if stat in ['sample', 'bc_reads', 'align_reads']:
+                continue
+            data = []
+            for sample in samples:
+                df = full_df.loc[full_df['sample'] == sample]
+                data.append({
+                    'sample': sample,
+                    'y': df.get(stat, [0]).tolist()[0],
+                    'stat': stat,
+                    'initial_reads': df['bc_reads'].tolist()[0],
+                    'total_aligned': df['align_reads'].tolist()[0],
+                })
+            series.append({
+                'name': stat,
+                'data': data,
+            })
+        result['series'] = series
+        return json.dumps(result)
 
 
 @project_page.route("/diricore_stats/<project_id>", methods=["POST"])

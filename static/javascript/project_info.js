@@ -5,6 +5,16 @@ $(document).ready(function() {
        type:  'textarea',
     });
     $('#prepared_by').editable();
+    $('#genome').editable({
+        type: 'select',
+        value: $('#genome').text(),
+        source: [
+            {'value': 'human', text: 'human',
+            'value': 'mouse', text: 'mouse',
+            'value': 'yeast', text: 'yeast',
+            'value': 'other', text: 'other'}
+        ]
+    });
     $('#protocol').editable({
         type: 'select',
         value: $('#protocol').text(),
@@ -180,6 +190,53 @@ $(document).ready(function() {
     }
     $('#transcript_regions').on('click', function() {
         transcript_regions("normal");
+    });
+
+    $('#alignment_stats').on('click', function() {
+        var project_id = $(location).attr('href').split('/').pop();
+        var url = "/alignment_stats/" + project_id;
+
+        $.post(url, function(data) {
+            if (data.length != 0) {
+                data = JSON.parse(data);
+                series = data["series"];
+                samples = data["samples"];
+                Highcharts.chart('plot_div', {
+                    chart: {
+                        type: "bar",
+                    },
+                    title: {
+                        text: 'Alignment stats'
+                    },
+
+                    xAxis: {
+                        categories: samples
+                    },
+                    yAxis: {
+                        title: {
+                            text: "# Reads"
+                        }
+                    },
+                    plotOptions: {
+                        series: {
+                            stacking: 'normal'
+                        }
+                    },
+                    tooltip: {
+                        shared: true,
+                        headerFormat: '<b>{point.key}</b><br>Total: {point.total}<br>',
+
+                    },
+                    exporting: {
+                        filename: project_id + "_alignment_stats"
+                    },
+                    series: series,
+                });
+
+                $('#plot_div').removeClass('d-none');
+                $('#hide_plot').removeClass('d-none');
+            }
+        })
     });
 
 

@@ -19,7 +19,7 @@
     {% for project in projects %}
       <a href="/project_info/{{ project }}" class="list-group-item list-group-item-action project" id="{{ project }}">
         <div class="d-flex w-100 justify-content-between">
-          <h5 class="mb-1">{{ project_info.get(project, {}).get('project_name', "No name") }}</h5>
+          <h5 class="mb-1">{{ project_info.get(project, {}).get('project_name', project) }}</h5>
           <small>Prepared by {{ project_info.get(project, {}).get('prepared_by') }}</small>
         </div>
         <div class="d-flex w-100">
