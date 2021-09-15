@@ -82,7 +82,8 @@ $(document).ready(function() {
                 $('#repeat_email').val('');
                 $('#new_pass').val('');
                 var new_row = "<tr><td class='username'>" + email +
-                    "</td><td><button class='btn btn-sm btn-outline-secondary delete-user'>×</button></td></tr>"
+                    "</td><td><button class='btn btn-sm btn-outline-warning make-admin'>✎</button> " +
+                    "<button class='btn btn-sm btn-outline-secondary delete-user'>×</button></td></tr>"
                 $("#list_of_users tbody").prepend(new_row);
             }).fail(function(response) {
                 var error_message = response['responseJSON']['error_message'];
@@ -152,5 +153,34 @@ $(document).ready(function() {
             }
         }
 
+    });
+
+    $('.make-admin').on('click', function() {
+        var email = $(this).closest('tr').find('td.username').text();
+        $('#user_label').text(email);
+    });
+
+    $('#save_admin').on('click', function() {
+//        $('#error-3').addClass('d-none');
+        var email = $('#user_label').text();
+        var admin = $('#admin').val();
+        data = {'email': email, 'admin': admin}
+        var url = window.location.href.replace('login', 'user_details') + "/make_admin";
+        $.ajax({
+            type: "POST",
+            //the url where you want to sent the userName and password to
+            url: url,
+            dataType: 'json',
+            //json object to sent to the authentication url
+            data:  JSON.stringify(data),
+            contentType: 'application/json',
+        }).done(function(response) {
+            console.log('success');
+            $('#error-3').removeClass('d-none');
+            $('#error-3').removeClass('alert-danger');
+            $('#error-3').addClass('alert-success');
+            $('#error-text-3').empty();
+            $('#error-text-3').append('<p>User rights have been successfully updated</p>');
+        });
     });
 });

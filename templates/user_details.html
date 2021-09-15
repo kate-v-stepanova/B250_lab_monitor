@@ -34,7 +34,10 @@
             <table class="table" id="list_of_users">
               <tbody>
                 {% for user in users %}
-                  <tr><td class="username">{{ user }}</td><td><button class="btn btn-sm btn-outline-secondary delete-user">×</button></td></tr>
+                  <tr><td class="username">{{ user }}</td>
+                      <td><button class="btn btn-sm btn-outline-warning make-admin" data-toggle="modal" data-target="#userRightsModal">✎</button>
+                      <button class="btn btn-sm btn-outline-secondary delete-user">×</button></td>
+                  </tr>
                 {% endfor %}
               <tr><td></td><td></td></tr> {# to make a bottom line #}
               </tbody>
@@ -85,6 +88,46 @@
                 <button type="button" class="btn btn-primary" id="modal-submit">Submit</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal" id="modal-cancel">Cancel</button>
               </div>
+        </div>
+      </div>
+    </div>
+    {# END of create user #}
+
+    {# MAKE admin user #}
+    <!-- Modal -->
+    <div class="modal fade" id="userRightsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">User rights</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="alert alert-danger alert-dismissible fade show {% if not error_message %}d-none{% endif %} mt-2" role="alert" id="error-3">
+               <div id="error-text-3">{% if error_message %}{{ error_message }}{% endif %}</div>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form>
+              <div class="form-group row">
+                <div class="col-sm-6"><label for="admin" id="user_label">User</label></div>
+                <div class="col-sm-6">
+                  <select class="custom-select custom-select-sm" id="admin">
+                    <option value="">Select</option>
+                    <option value="admin">Admin</option>
+                    <option value="not_admin">Not admin</option>
+                  </select>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" id="save_admin">Save changes</button>
+          </div>
         </div>
       </div>
     </div>

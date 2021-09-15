@@ -13,12 +13,12 @@ user_details = Blueprint('user_details', __name__)
 def get_user_details():
     from main import get_db
     rdb = get_db()
-    app_admins = current_app.config.get('APP_ADMINS')
+    app_admins = rdb.smembers('app_admins')
+    app_admins = current_app.config.get('APP_ADMINS') + [admin.decode('utf-8') for admin in app_admins]
     if current_user.email in app_admins:
         users = rdb.hgetall('users')
         users = [] if users is None else users.keys()
         users = [user.decode('utf-8') for user in users]
-        print(users)
         return render_template('user_details.html', is_admin=True, users=users)
     return render_template('user_details.html')
 
@@ -111,6 +111,19 @@ def change_password():
     return make_response({'status': 'success'}, 200)
 
 
-
+@user_details.route('/user_details/make_admin', methods=['POST'])
+@login_required
+def make_admin():
+    from main import get_db
+    rdb = get_db()
+    data = request.get_json()
+    email = data.get('email')
+    admin = data.get('admin', '')
+    if admin == 'admin':
+        rdb.sadd('app_admins', email)
+    elif admin == 'not_admin':
+        rdb.srem('app_admins', email)
+    # else: do nothing
+    return make_response({'status': 'success'}, 200)
 
 
