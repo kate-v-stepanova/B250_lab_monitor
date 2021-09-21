@@ -1,0 +1,14 @@
+{% extends 'layout.html' %}
+{% block body %}
+<div class="card">
+  <ul class="list-group list-group-flush">
+      {% for link in ucsc_links %}
+      <div class="row">
+          {% set project_id=link.split('/')[-1].split('_')[0] %}
+          <li class="list-group-item">{{ project_id }}</li>
+        <li class="list-group-item"><a href="{{ link }}">{{ link }}</a></li>
+      </div>
+      {% endfor %}
+  </ul>
+</div>
+{% endblock %}
