@@ -1,14 +1,19 @@
 {% extends 'layout.html' %}
 {% block body %}
-<div class="card">
-  <ul class="list-group list-group-flush">
-      {% for link in ucsc_links %}
-      <div class="row">
-          {% set project_id=link.split('/')[-1].split('_')[0] %}
-          <li class="list-group-item">{{ project_id }}</li>
-        <li class="list-group-item"><a href="{{ link }}">{{ link }}</a></li>
-      </div>
-      {% endfor %}
-  </ul>
-</div>
+<table class="table">
+    <thead>
+        <tr><th>Project</th><th>UCSC link</th><th>Upload tracks to FTP</th></tr>
+    </thead>
+    <tbody>
+        {% for link in ucsc_links %}
+        {% set project_id=link.split('/')[-1].split('_')[0] %}
+        <tr>
+            <td>{{ project_id }}</td>
+            <td><a href="{{ link }}">{{ link }}</a></td>
+            <td><div class="alert alert-dark" role="alert">python $BASE_DIR/software/ucsc/3_ucsc_tracks_to_ftp.py {{ project_id }}</div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}
