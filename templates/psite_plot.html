@@ -44,6 +44,11 @@
            {% if group_by_codon %} checked {% endif %} >
     <label class="form-check-label" for="group_by_codon">Group by codon</label>
   </div>
+  <div class="form-check">
+    <input class="form-check-input" type="checkbox" value="site" id="group_by_site" name="group_by_site"
+           {% if group_by_site %} checked {% endif %} >
+    <label class="form-check-label" for="group_by_codon">Group by site</label>
+  </div>
   <button class="btn btn-outline-info mt-4" type="submit" id="plot_button">Plot data</button>
 </form>
 <div id="psite_plot" data-plot-series="{{ psite_series }}" data-x_categories="{{ x_categories }}" data-min="{{ min_fc }}"

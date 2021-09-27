@@ -5,6 +5,7 @@ import json
 
 psite_plot = Blueprint('psite_plot', __name__)
 
+
 @psite_plot.route('/psite_plot/<project_id>', methods=['GET', 'POST'])
 @login_required
 def get_psite_plot(project_id):
@@ -35,6 +36,9 @@ def get_psite_plot(project_id):
     selected = request.form.getlist('selected_contrasts')
     if len(selected) == 0:
         return render_template('psite_plot.html', error='Please select contrasts', contrasts=contrasts)
+
+    # group by site
+    group_by_site = request.form.get('group_by_site') == 'site'
 
     # normalization
     norm = request.form.get('normalization', 'tpm')
@@ -106,6 +110,9 @@ def get_psite_plot(project_id):
     min_fc = -1 * max_fc
     middle_val = 0
 
+    e_series = []
+    p_series = []
+    a_series = []
     plot_series = []
     for c in range(len(selected)):
         contrast = selected[c]
@@ -142,7 +149,11 @@ def get_psite_plot(project_id):
                         cur_e = e_df.loc[e_df['codon'] == cat]
                         cur_a = a_df.loc[a_df['codon'] == cat]
                         codon = cat
-                        aa = cur_p.iloc[0]['aa']
+                        aa = cur_p['aa'].tolist()
+                        if len(aa) != 0:
+                            aa = aa[0]
+                        else:
+                            continue
 
                 # select cols for current contrast
                 cur_p = cur_p[cols]
@@ -160,33 +171,60 @@ def get_psite_plot(project_id):
                     plot_series += [{'x': i, 'y': 0 + c * 4, 'codon': codon, 'aa': aa, 'site': 'A', 'value': 0}]
                 else:
                     cur_a['x'] = i
-                    cur_a['y'] = 0 + c * 4
                     cur_a['site'] = 'A'
-                    plot_series += cur_a.to_dict('records')
+                    if not group_by_site:
+                        cur_a['y'] = 0 + c * 4
+                        plot_series += cur_a.to_dict('records')
+                    else:
+                        cur_a['y'] = c
+                        a_series += cur_a.to_dict('records')
 
                 if len(cur_p) == 0:
-                    plot_series += [{ 'x': i, 'y': 1 + c * 4, 'codon': codon, 'aa': aa, 'site': 'P', 'value': 0}]
+                    plot_series += [{'x': i, 'y': 1 + c * 4, 'codon': codon, 'aa': aa, 'site': 'P', 'value': 0}]
                 else:
                     cur_p['x'] = i
-                    cur_p['y'] = 1 + c * 4
                     cur_p['site'] = 'P'
-                    plot_series += cur_p.to_dict('records')
+                    if not group_by_site:
+                        cur_p['y'] = 1 + c * 4
+                        plot_series += cur_p.to_dict('records')
+                    else:
+                        cur_p['y'] = len(selected) + c + 1
+                        p_series += cur_p.to_dict('records')
 
                 if len(cur_e) == 0:
                     plot_series += [{'x': i, 'y': 2 + c * 4, 'codon': codon, 'aa': aa, 'site': 'E', 'value': 0}]
                 else:
                     cur_e['x'] = i
-                    cur_e['y'] = 2 + c * 4
                     cur_e['site'] = 'E'
-                    plot_series += cur_e.to_dict('records')
+                    if not group_by_site:
+                        cur_e['y'] = 2 + c * 4
+                        plot_series += cur_e.to_dict('records')
+                    else:
+                        cur_e['y'] = len(selected) * 2 + c + 2
+                        e_series += cur_e.to_dict('records')
         if group_by_aa:
-            plot_series += [{}]
+            if not group_by_site:
+                plot_series += [{}]
+
+    if group_by_site:
+        plot_series = e_series + [{'y': len(selected) + 1}] + p_series + [{'y': len(selected) * 2 + 2}] + a_series
 
     y_categories = []
-    for contrast in selected:
-        y_categories += ['A-site ({})'.format(contrast), 'P-site ({})'.format(contrast), 'E-site ({})'.format(contrast), '']
+    if not group_by_site:
+        for contrast in selected:
+            y_categories += ['A-site ({})'.format(contrast), 'P-site ({})'.format(contrast), 'E-site ({})'.format(contrast), '']
+    else:
+        for contrast in selected:
+            y_categories += ['A-site ({})'.format(contrast)]
+        y_categories += ['']
+        for contrast in selected:
+            y_categories += ['P-site ({})'.format(contrast)]
+        y_categories += ['']
+        for contrast in selected:
+            y_categories += ['E-site ({})'.format(contrast)]
 
     group_by_codon = not group_by_aa
     return render_template('psite_plot.html', psite_series=plot_series, contrasts=contrasts, y_categories=y_categories,
                            x_categories=x_categories, min_fc=min_fc, max_fc=max_fc, middle_val=middle_val,
-                           group_by_codon=group_by_codon, norm=norm, selected_contrasts=selected, dataset_id=project_id)
+                           group_by_codon=group_by_codon, norm=norm, selected_contrasts=selected, dataset_id=project_id,
+                           group_by_site=group_by_site)
